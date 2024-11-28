@@ -17,11 +17,11 @@ class DatabaseHelper {
 
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'smart_budget.db');
+    final path = join(dbPath, 'budget_manager.db');
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 1, // Pierwsza wersja bazy
       onCreate: _onCreate,
     );
   }
@@ -54,7 +54,8 @@ class DatabaseHelper {
       CREATE TABLE transaction_types (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        description TEXT
+        description TEXT,
+        is_income INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
