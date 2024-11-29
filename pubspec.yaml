@@ -52,6 +52,9 @@ dev_dependencies:
   get_it: ^7.2.0
   mockito: ^5.4.0
   build_runner: ^2.4.0
+  bloc_test: ^9.0.3
+  equatable: ^2.0.3
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../db/database_helper.dart';
-import '../../models/transaction.dart' as t;
+import '../../models/transaction_model.dart' as t;
 
 class TransactionRepository {
   final DatabaseHelper _databaseHelper;

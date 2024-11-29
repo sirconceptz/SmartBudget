@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_budget/screens/add_transaction/add_transaction_screen.dart';
+import 'package:smart_budget/screens/add_transaction_screen.dart';
 import 'package:smart_budget/screens/main_screen.dart';
 
 void main() {
