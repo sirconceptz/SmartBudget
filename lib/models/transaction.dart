@@ -9,46 +9,42 @@ class Transaction {
   final String? description;
   final Currency currency;
 
-  Transaction({
-    this.id,
-    required this.type,
-    required this.amount,
-    this.categoryId,
-    required this.date,
-    this.description,
-    required this.currency
-  });
+  Transaction(
+      {this.id,
+      required this.type,
+      required this.amount,
+      this.categoryId,
+      required this.date,
+      this.description,
+      required this.currency});
 
-  Transaction copyWith({
-    int? id,
-    int? type,
-    double? amount,
-    int? categoryId,
-    DateTime? date,
-    String? description,
-    Currency? currency
-  }) {
+  Transaction copyWith(
+      {int? id,
+      int? type,
+      double? amount,
+      int? categoryId,
+      DateTime? date,
+      String? description,
+      Currency? currency}) {
     return Transaction(
-      id: id ?? this.id,
-      type: type ?? this.type,
-      amount: amount ?? this.amount,
-      categoryId: categoryId ?? this.categoryId,
-      date: date ?? this.date,
-      description: description ?? this.description,
-      currency: currency ?? this.currency
-    );
+        id: id ?? this.id,
+        type: type ?? this.type,
+        amount: amount ?? this.amount,
+        categoryId: categoryId ?? this.categoryId,
+        date: date ?? this.date,
+        description: description ?? this.description,
+        currency: currency ?? this.currency);
   }
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
-      id: json['id'],
-      type: json['type'],
-      amount: json['amount'].toDouble(),
-      categoryId: json['category_id'],
-      date: DateTime.parse(json['date']),
-      description: json['description'],
-      currency: json['currency']
-    );
+        id: json['id'],
+        type: json['type'],
+        amount: json['amount'].toDouble(),
+        categoryId: json['category_id'],
+        date: DateTime.parse(json['date']),
+        description: json['description'],
+        currency: json['currency']);
   }
 
   Map<String, dynamic> toJson() {

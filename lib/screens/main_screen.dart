@@ -3,9 +3,11 @@ import 'package:smart_budget/screens/transactions_screen.dart';
 
 import './category_list_screen.dart';
 import './settings_screen.dart';
-import 'home_screen.dart'; // Add your settings screen import here
+import 'home_screen.dart';
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }

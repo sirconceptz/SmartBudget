@@ -39,14 +39,13 @@ class Category {
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      icon: json['icon'],
-      isIncome: json['is_income'] == 1,
-      spentAmount: json['spent_amount'],
-      budgetLimit: json['budget_limit']
-    );
+        id: json['id'],
+        name: json['name'],
+        description: json['description'],
+        icon: json['icon'],
+        isIncome: json['is_income'] == 1,
+        spentAmount: json['spent_amount'],
+        budgetLimit: json['budget_limit']);
   }
 
   Map<String, dynamic> toJson() {

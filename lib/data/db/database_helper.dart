@@ -1,8 +1,9 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
+
   factory DatabaseHelper() => _instance;
 
   static Database? _database;
@@ -62,7 +63,5 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-
-  }
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {}
 }

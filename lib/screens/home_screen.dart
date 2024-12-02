@@ -1,6 +1,7 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fl_chart/fl_chart.dart';
+
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_state.dart';
 
@@ -41,12 +42,12 @@ class HomeScreen extends StatelessWidget {
   Widget _buildChartSection(String title, List categories) {
     final totalBudget = categories.fold<double>(
       0.0,
-          (sum, category) => sum + (category.budgetLimit ?? 0.0),
+      (sum, category) => sum + (category.budgetLimit ?? 0.0),
     );
 
     final totalSpent = categories.fold<double>(
       0.0,
-          (sum, category) => sum + (category.spentAmount ?? 0.0),
+      (sum, category) => sum + (category.spentAmount ?? 0.0),
     );
 
     return Column(
@@ -81,7 +82,7 @@ class HomeScreen extends StatelessWidget {
         ),
         Text(
           'Całkowite $title: ${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
-              '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
+          '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
           style: const TextStyle(fontSize: 16),
         ),
       ],

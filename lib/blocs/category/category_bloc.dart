@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_budget/data/repositories/category_repository.dart';
+
 import '../../models/category.dart';
 import 'category_event.dart';
 import 'category_state.dart';
@@ -43,9 +44,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       }).toList();
 
       final incomeCategories =
-      categories.where((category) => category.isIncome).toList();
+          categories.where((category) => category.isIncome).toList();
       final expenseCategories =
-      categories.where((category) => !category.isIncome).toList();
+          categories.where((category) => !category.isIncome).toList();
 
       emit(CategoriesWithSpentAmountsLoaded(
         incomeCategories: incomeCategories,

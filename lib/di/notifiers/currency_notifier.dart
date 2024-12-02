@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../utils/enums/currency.dart';
 
 class CurrencyNotifier extends ChangeNotifier {
   Currency _currency = Currency.usd; // Default currency
 
   CurrencyNotifier() {
-    _loadCurrency(); // Load the currency during initialization
+    _loadCurrency();
   }
 
   Currency get currency => _currency;

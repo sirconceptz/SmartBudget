@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_state.dart';
 import '../blocs/transaction/transaction_bloc.dart';
@@ -10,6 +11,8 @@ import '../models/transaction.dart';
 import '../utils/enums/currency.dart';
 
 class AddTransactionScreen extends StatefulWidget {
+  const AddTransactionScreen({super.key});
+
   @override
   _AddTransactionScreenState createState() => _AddTransactionScreenState();
 }
@@ -112,8 +115,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   if (state is CategoriesLoading) {
                     return CircularProgressIndicator();
                   } else if (state is CategoriesLoaded) {
-                    final categories = state.categories.where((category) =>
-                    (_type == 'Przychód' ? category.isIncome : !category.isIncome)).toList();
+                    final categories = state.categories
+                        .where((category) => (_type == 'Przychód'
+                            ? category.isIncome
+                            : !category.isIncome))
+                        .toList();
 
                     return DropdownButtonFormField<int>(
                       value: _selectedCategoryId,
@@ -130,7 +136,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       },
                       decoration: InputDecoration(labelText: 'Kategoria'),
                       validator: (value) =>
-                      value == null ? 'Wybierz kategorię' : null,
+                          value == null ? 'Wybierz kategorię' : null,
                     );
                   } else {
                     return Text('Błąd ładowania kategorii');
