@@ -2,7 +2,7 @@ class Category {
   final int? id;
   final String name;
   final String? description;
-  final String? icon;
+  final int? icon;
   final double? budgetLimit;
   final double? spentAmount;
   final bool isIncome;
@@ -21,7 +21,7 @@ class Category {
     int? id,
     String? name,
     String? description,
-    String? icon,
+    int? icon,
     double? budgetLimit,
     double? spentAmount,
     bool? isIncome,

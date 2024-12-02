@@ -20,7 +20,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
   late String _name;
   late double? _budgetLimit;
   late String? _description;
-  late String? _icon;
+  late int? _icon;
   late bool _isIncome;
 
   @override

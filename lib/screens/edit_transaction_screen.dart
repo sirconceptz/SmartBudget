@@ -100,6 +100,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
+                enableFeedback: true,
                 value: _type,
                 items: ['Przychód', 'Wydatek'].map((type) {
                   return DropdownMenuItem(
