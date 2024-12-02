@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart'; // For CurrencyNotifier
+import 'package:shared_preferences/shared_preferences.dart';
 import '../blocs/transaction_block/transaction_bloc.dart';
 import '../blocs/transaction_block/transaction_event.dart';
+import '../di/notifiers/currency_notifier.dart';
 import '../models/transaction_model.dart';
+import '../utils/enums/currency.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   @override
@@ -17,7 +21,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
 
-  void _saveTransaction() {
+  void _saveTransaction(Currency currentCurrency) async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
@@ -29,11 +33,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         _selectedTime.minute,
       );
 
+      Currency currency = await getCurrency();
       final newTransaction = Transaction(
-        type: _type == 'Przychód' ? 1 : 2, // 1 dla przychodu, 2 dla wydatku
+        type: _type == 'Przychód' ? 1 : 2, // 1 for income, 2 for expense
         amount: _amount!,
         date: transactionDateTime,
         description: _description,
+        currency: currency
       );
 
       context.read<TransactionBloc>().add(AddTransaction(newTransaction));
@@ -41,6 +47,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       Navigator.pop(context, true);
     }
   }
+
+  Future<Currency> getCurrency() async {
+  final prefs = await SharedPreferences.getInstance();
+  final currencyString = prefs.getString('selected_currency') ?? 'pln';
+  return CurrencyExtension.fromString(currencyString);
+}
 
   Future<void> _pickDate() async {
     final pickedDate = await showDatePicker(
@@ -70,6 +82,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currencyNotifier = Provider.of<CurrencyNotifier>(context);
+    final currentCurrency = currencyNotifier.currency;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Dodaj transakcję'),
@@ -97,7 +112,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ),
               TextFormField(
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Kwota'),
+                decoration: InputDecoration(
+                  labelText: 'Kwota',
+                  suffixText: currentCurrency.name, // Display the current currency
+                ),
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
                     return 'Podaj prawidłową kwotę';
@@ -140,7 +158,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _saveTransaction,
+                onPressed: () => _saveTransaction(currentCurrency),
                 child: Text('Zapisz transakcję'),
               ),
             ],

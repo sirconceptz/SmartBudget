@@ -1,3 +1,5 @@
+import '../utils/enums/currency.dart';
+
 class Transaction {
   final int? id;
   final int type;
@@ -5,6 +7,7 @@ class Transaction {
   final int? categoryId;
   final DateTime date;
   final String? description;
+  final Currency currency;
 
   Transaction({
     this.id,
@@ -13,6 +16,7 @@ class Transaction {
     this.categoryId,
     required this.date,
     this.description,
+    required this.currency
   });
 
   Transaction copyWith({
@@ -22,6 +26,7 @@ class Transaction {
     int? categoryId,
     DateTime? date,
     String? description,
+    Currency? currency
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -30,6 +35,7 @@ class Transaction {
       categoryId: categoryId ?? this.categoryId,
       date: date ?? this.date,
       description: description ?? this.description,
+      currency: currency ?? this.currency
     );
   }
 
@@ -41,6 +47,7 @@ class Transaction {
       categoryId: json['category_id'],
       date: DateTime.parse(json['date']),
       description: json['description'],
+      currency: json['currency']
     );
   }
 
@@ -52,6 +59,7 @@ class Transaction {
       'category_id': categoryId,
       'date': date.toIso8601String(),
       'description': description,
+      'currency': currency
     };
   }
 }

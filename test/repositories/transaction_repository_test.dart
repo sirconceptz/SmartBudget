@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:smart_budget/data/repositories/transaction_repository.dart';
+import 'package:smart_budget/utils/enums/currency.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:smart_budget/models/transaction_model.dart' as t;
 import 'database_helper.mocks.dart';
@@ -29,6 +30,7 @@ void main() {
         type: 1,
         amount: 100.0,
         date: DateTime.now(),
+        currency: Currency.pln
       );
 
       when(db.insert(

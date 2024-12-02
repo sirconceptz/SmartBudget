@@ -51,6 +51,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
           _selectedTime.minute,
         ),
         description: _description,
+        currency: widget.transaction.currency
       );
 
       context.read<TransactionBloc>().add(UpdateTransaction(updatedTransaction));
