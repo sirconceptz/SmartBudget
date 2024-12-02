@@ -18,3 +18,5 @@ class DeleteCategory extends CategoryEvent {
   final int id;
   DeleteCategory(this.id);
 }
+
+class LoadCategoriesWithSpentAmounts extends CategoryEvent {}

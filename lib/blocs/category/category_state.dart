@@ -13,3 +13,14 @@ class CategoryError extends CategoryState {
   final String message;
   CategoryError(this.message);
 }
+
+class CategoriesWithSpentAmountsLoaded extends CategoryState {
+  final List<Category> incomeCategories;
+  final List<Category> expenseCategories;
+
+  CategoriesWithSpentAmountsLoaded({
+    required this.incomeCategories,
+    required this.expenseCategories,
+  });
+}
+
