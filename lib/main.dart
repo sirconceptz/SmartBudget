@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_budget/screens/add_category_screen.dart';
@@ -17,6 +18,7 @@ import 'data/repositories/category_repository.dart';
 import 'data/repositories/transaction_repository.dart';
 import 'di/di.dart';
 import 'di/notifiers/currency_notifier.dart';
+import 'di/notifiers/locale_notifier.dart';
 import 'di/notifiers/theme_notifier.dart';
 import 'models/category.dart';
 import 'models/transaction.dart';
@@ -43,6 +45,9 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => CurrencyNotifier(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => LocaleNotifier(),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -55,9 +60,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final localeNotifier = Provider.of<LocaleNotifier>(context);
 
     return MaterialApp(
       title: 'Smart Budget',
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: localeNotifier.locale,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.green, brightness: Brightness.light),

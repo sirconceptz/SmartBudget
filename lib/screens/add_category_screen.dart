@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
 import '../di/notifiers/currency_notifier.dart';
 import '../models/category.dart';
+import '../widgets/icon_picker_dialog.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   const AddCategoryScreen({super.key});
@@ -17,9 +19,21 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   String _name = '';
   String? _description;
-  String? _icon;
   double? _budgetLimit;
   bool _isIncome = false;
+  IconData? _selectedIcon;
+
+  void _selectIcon() async {
+    final selectedIcon = await showDialog<IconData>(
+      context: context,
+      builder: (context) => IconPickerDialog(),
+    );
+    if (selectedIcon != null) {
+      setState(() {
+        _selectedIcon = selectedIcon;
+      });
+    }
+  }
 
   void _saveCategory() {
     if (_formKey.currentState!.validate()) {
@@ -28,7 +42,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       final newCategory = Category(
           name: _name,
           description: _description,
-          icon: _icon,
+          icon: _selectedIcon?.codePoint,
           isIncome: _isIncome,
           budgetLimit: _budgetLimit);
 
@@ -45,7 +59,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dodaj kategorię'),
+        title: Text(AppLocalizations.of(context)!.addCategory),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -54,10 +68,11 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Nazwa'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.name),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Podaj nazwę kategorii';
+                    return AppLocalizations.of(context)!.giveCategoryName;
                   }
                   return null;
                 },
@@ -66,7 +81,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 },
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Opis'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.description),
                 onSaved: (value) {
                   _description = value;
                 },
@@ -74,12 +90,32 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               TextFormField(
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Limit budżetu',
+                  labelText: AppLocalizations.of(context)!.budgetLimit,
                   suffixText: currentCurrency.name,
                 ),
                 onSaved: (value) {
                   _budgetLimit = double.tryParse(value!);
                 },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              InkWell(
+                  onTap: _selectIcon,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Wybierz ikonę',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      _selectedIcon != null
+                          ? Icon(_selectedIcon)
+                          : Icon(Icons.category),
+                    ],
+                  )),
+              const SizedBox(
+                height: 10,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

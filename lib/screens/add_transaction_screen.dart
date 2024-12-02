@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../blocs/category/category_bloc.dart';
@@ -86,7 +87,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dodaj transakcję'),
+        title: Text(AppLocalizations.of(context)!.addTransaction),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -95,6 +96,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
+                enableFeedback: true,
                 value: _type,
                 items: ['Przychód', 'Wydatek'].map((type) {
                   return DropdownMenuItem(
@@ -122,6 +124,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         .toList();
 
                     return DropdownButtonFormField<int>(
+                      enableFeedback: true,
                       value: _selectedCategoryId,
                       items: categories.map((category) {
                         return DropdownMenuItem(

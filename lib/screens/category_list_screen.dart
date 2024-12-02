@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
 import '../blocs/category/category_state.dart';
 import '../models/category.dart';
+import '../widgets/confirm_dialog.dart';
 
 class CategoryListScreen extends StatelessWidget {
   const CategoryListScreen({super.key});
@@ -44,47 +46,44 @@ class CategoryListScreen extends StatelessWidget {
                     } else if (direction == DismissDirection.endToStart) {
                       final confirm = await showDialog<bool>(
                         context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Usuń kategorię'),
-                            content: Text(
-                                'Czy na pewno chcesz usunąć tę kategorię?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: Text('Anuluj'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                child: Text('Usuń'),
-                              ),
-                            ],
-                          );
-                        },
+                        builder: (context) => ConfirmDialog(
+                          title: AppLocalizations.of(context)!.deleteCategory,
+                          content: AppLocalizations.of(context)!
+                              .deleteCategoryConfirmation,
+                          cancelText: AppLocalizations.of(context)!.cancel,
+                          confirmText: AppLocalizations.of(context)!.delete,
+                          onConfirm: () {
+                            context
+                                .read<CategoryBloc>()
+                                .add(DeleteCategory(category.id!));
+                          },
+                        ),
                       );
-                      if (confirm == true) {
-                        context
-                            .read<CategoryBloc>()
-                            .add(DeleteCategory(category.id!));
-                        return true;
-                      }
+                      return confirm == true;
                     }
                     return false;
                   },
                   child: Card(
                     color: category.isIncome ? Colors.green : Colors.red,
                     child: ListTile(
+                      leading: category.icon != null
+                          ? Icon(IconData(category.icon!,
+                              fontFamily: 'MaterialIcons'))
+                          : Icon(Icons.category),
                       title: Text(
                         category.name,
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 14),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                       subtitle: Text(
                         category.description ?? '',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 12),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
-                      trailing: Icon(Icons.category),
                     ),
                   ),
                 );

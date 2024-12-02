@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
 import '../blocs/transaction/transaction_state.dart';
 import '../models/transaction.dart';
+import '../widgets/confirm_dialog.dart';
 
 class TransactionsScreen extends StatelessWidget {
   const TransactionsScreen({super.key});
@@ -45,30 +47,21 @@ class TransactionsScreen extends StatelessWidget {
                     } else if (direction == DismissDirection.endToStart) {
                       final confirm = await showDialog<bool>(
                         context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Usuń transakcję'),
-                            content: Text(
-                                'Czy na pewno chcesz usunąć tę transakcję?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: Text('Anuluj'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                child: Text('Usuń'),
-                              ),
-                            ],
-                          );
-                        },
+                        builder: (context) => ConfirmDialog(
+                          title:
+                              AppLocalizations.of(context)!.deleteTransaction,
+                          content: AppLocalizations.of(context)!
+                              .deleteTransactionConfirmation,
+                          cancelText: AppLocalizations.of(context)!.cancel,
+                          confirmText: AppLocalizations.of(context)!.delete,
+                          onConfirm: () {
+                            context
+                                .read<TransactionBloc>()
+                                .add(DeleteTransaction(transaction.id!));
+                          },
+                        ),
                       );
-                      if (confirm == true) {
-                        context
-                            .read<TransactionBloc>()
-                            .add(DeleteTransaction(transaction.id!));
-                        return true;
-                      }
+                      return confirm == true;
                     }
                     return false;
                   },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:smart_budget/screens/transactions_screen.dart';
 
 import './category_list_screen.dart';
@@ -26,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Smart Budget'),
+        title: Text(AppLocalizations.of(context)!.appTitle),
       ),
       body: IndexedStack(
         index: _currentIndex,
@@ -39,22 +40,22 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Główny',
+            label: AppLocalizations.of(context)!.home,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
-            label: 'Transakcje',
+            label: AppLocalizations.of(context)!.transactions,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.category),
-            label: 'Kategorie',
+            label: AppLocalizations.of(context)!.categories,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Ustawienia',
+            label: AppLocalizations.of(context)!.settings,
           ),
         ],
       ),
