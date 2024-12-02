@@ -1,31 +1,30 @@
+// category_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/transaction_block/transaction_bloc.dart';
-import '../blocs/transaction_block/transaction_event.dart';
-import '../blocs/transaction_block/transaction_state.dart';
-import 'package:intl/intl.dart';
+import '../blocs/transaction_type/transaction_type_bloc.dart';
+import '../blocs/transaction_type/transaction_type_event.dart';
+import '../blocs/transaction_type/transaction_type_state.dart';
+import '../models/transaction_type_model.dart';
 
-import '../models/transaction_model.dart';
-
-class MainScreen extends StatelessWidget {
+class CategoryListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Smart Budget')),
-      body: BlocBuilder<TransactionBloc, TransactionState>(
+      // Add a drawer or a button in AppBar to navigate back to MainScreen if needed
+      appBar: AppBar(title: Text('Kategorie')),
+      body: BlocBuilder<TransactionTypeBloc, TransactionTypeState>(
         builder: (context, state) {
-          if (state is TransactionsLoading) {
+          if (state is TransactionTypesLoading) {
             return Center(child: CircularProgressIndicator());
-          } else if (state is TransactionsLoaded) {
-            final transactions = state.transactions;
-            print('Załadowane transakcje w widoku: ${transactions.length}');
+          } else if (state is TransactionTypesLoaded) {
+            final categories = state.transactionTypes;
 
             return ListView.builder(
-              itemCount: transactions.length,
+              itemCount: categories.length,
               itemBuilder: (context, index) {
-                final transaction = transactions[index];
+                final category = categories[index];
                 return Dismissible(
-                  key: ValueKey(transaction.id),
+                  key: ValueKey(category.id),
                   background: Container(
                     color: Colors.blue,
                     alignment: Alignment.centerLeft,
@@ -40,15 +39,15 @@ class MainScreen extends StatelessWidget {
                   ),
                   confirmDismiss: (direction) async {
                     if (direction == DismissDirection.startToEnd) {
-                      await goToEditTransaction(context, transaction);
+                      await goToEditCategory(context, category);
                       return false;
                     } else if (direction == DismissDirection.endToStart) {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (context) {
                           return AlertDialog(
-                            title: Text('Usuń transakcję'),
-                            content: Text('Czy na pewno chcesz usunąć tę transakcję?'),
+                            title: Text('Usuń kategorię'),
+                            content: Text('Czy na pewno chcesz usunąć tę kategorię?'),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
@@ -63,43 +62,51 @@ class MainScreen extends StatelessWidget {
                         },
                       );
                       if (confirm == true) {
-                        context.read<TransactionBloc>().add(DeleteTransaction(transaction.id!));
+                        context.read<TransactionTypeBloc>().add(DeleteTransactionType(category.id!));
                         return true;
                       }
                     }
                     return false;
                   },
                   child: ListTile(
-                    title: Text(transaction.description ?? 'No description'),
-                    subtitle: Text(DateFormat.yMMMMd('pl_PL').add_jm().format(transaction.date)),
-                    trailing: Text(transaction.amount.toStringAsFixed(2)),
+                    title: Text(category.name),
+                    subtitle: Text(category.description ?? ''),
+                    trailing: Icon(Icons.category),
                   ),
                 );
               },
             );
           } else {
-            return Center(child: Text('Error loading transactions'));
+            return Center(child: Text('Error loading categories'));
           }
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await goToAddTransaction(context);
+          await goToAddCategory(context);
         },
         child: Icon(Icons.add),
       ),
     );
   }
 
-  Future<void> goToAddTransaction(BuildContext context) async {
-    await Navigator.pushNamed(context, '/addTransaction');
+  Future<void> goToAddCategory(BuildContext context) async {
+    final result = await Navigator.pushNamed(context, '/addCategory');
+
+    if (result == true) {
+      // No need to dispatch LoadTransactionTypes; Bloc handles state updates
+    }
   }
 
-  Future<void> goToEditTransaction(BuildContext context, Transaction transaction) async {
-    await Navigator.pushNamed(
+  Future<void> goToEditCategory(BuildContext context, TransactionType category) async {
+    final result = await Navigator.pushNamed(
       context,
-      '/editTransaction',
-      arguments: transaction,
+      '/editCategory',
+      arguments: category,
     );
+
+    if (result == true) {
+      // No need to dispatch LoadTransactionTypes; Bloc handles state updates
+    }
   }
 }

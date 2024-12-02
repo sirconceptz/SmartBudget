@@ -21,7 +21,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1, // Pierwsza wersja bazy
+      version: 1,
       onCreate: _onCreate,
     );
   }
@@ -68,3 +68,4 @@ class DatabaseHelper {
     ''');
   }
 }
+

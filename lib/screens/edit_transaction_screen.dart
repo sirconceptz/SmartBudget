@@ -4,39 +4,56 @@ import '../blocs/transaction_block/transaction_bloc.dart';
 import '../blocs/transaction_block/transaction_event.dart';
 import '../models/transaction_model.dart';
 
-class AddTransactionScreen extends StatefulWidget {
+class EditTransactionScreen extends StatefulWidget {
+  final Transaction transaction;
+
+  EditTransactionScreen({required this.transaction});
+
   @override
-  _AddTransactionScreenState createState() => _AddTransactionScreenState();
+  _EditTransactionScreenState createState() => _EditTransactionScreenState();
 }
 
-class _AddTransactionScreenState extends State<AddTransactionScreen> {
+class _EditTransactionScreenState extends State<EditTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _type = 'Wydatek';
-  double? _amount;
-  String? _description;
-  DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now();
+  late String _type;
+  late double _amount;
+  late String? _description;
+  late DateTime _selectedDate;
+  late TimeOfDay _selectedTime;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicjalizacja pól na podstawie przekazanej transakcji
+    _type = widget.transaction.type == 1 ? 'Przychód' : 'Wydatek';
+    _amount = widget.transaction.amount;
+    _description = widget.transaction.description;
+    _selectedDate = widget.transaction.date;
+    _selectedTime = TimeOfDay(
+      hour: widget.transaction.date.hour,
+      minute: widget.transaction.date.minute,
+    );
+  }
 
   void _saveTransaction() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final transactionDateTime = DateTime(
-        _selectedDate.year,
-        _selectedDate.month,
-        _selectedDate.day,
-        _selectedTime.hour,
-        _selectedTime.minute,
-      );
-
-      final newTransaction = Transaction(
-        type: _type == 'Przychód' ? 1 : 2, // 1 dla przychodu, 2 dla wydatku
-        amount: _amount!,
-        date: transactionDateTime,
+      final updatedTransaction = Transaction(
+        id: widget.transaction.id,
+        type: _type == 'Przychód' ? 1 : 2,
+        amount: _amount,
+        date: DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          _selectedTime.hour,
+          _selectedTime.minute,
+        ),
         description: _description,
       );
 
-      context.read<TransactionBloc>().add(AddTransaction(newTransaction));
+      context.read<TransactionBloc>().add(UpdateTransaction(updatedTransaction));
 
       Navigator.pop(context, true);
     }
@@ -49,7 +66,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (pickedDate != null && pickedDate != _selectedDate) {
+    if (pickedDate != null) {
       setState(() {
         _selectedDate = pickedDate;
       });
@@ -72,7 +89,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dodaj transakcję'),
+        title: Text('Edytuj transakcję'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -96,6 +113,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 decoration: InputDecoration(labelText: 'Typ transakcji'),
               ),
               TextFormField(
+                initialValue: _amount.toString(),
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(labelText: 'Kwota'),
                 validator: (value) {
@@ -109,6 +127,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 },
               ),
               TextFormField(
+                initialValue: _description,
                 decoration: InputDecoration(labelText: 'Opis'),
                 onSaved: (value) {
                   _description = value;
@@ -141,7 +160,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveTransaction,
-                child: Text('Zapisz transakcję'),
+                child: Text('Zapisz zmiany'),
               ),
             ],
           ),

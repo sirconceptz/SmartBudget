@@ -4,9 +4,7 @@ import 'package:mockito/mockito.dart';
 import 'package:smart_budget/data/repositories/transaction_repository.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:smart_budget/models/transaction_model.dart' as t;
-import 'package:smart_budget/data/db/database_helper.dart';
 import 'database_helper.mocks.dart';
-import 'transaction_repository_test.mocks.dart';
 
 @GenerateMocks([TransactionRepository])
 void main() {

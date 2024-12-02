@@ -1,81 +1,60 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_budget/blocs/transaction_block/transaction_event.dart';
+import 'package:smart_budget/blocs/transaction_block/transaction_state.dart';
 
 import '../../data/repositories/transaction_repository.dart';
-import '../../models/transaction_model.dart';
-
-abstract class TransactionEvent {}
-
-class LoadTransactions extends TransactionEvent {}
-
-class AddTransaction extends TransactionEvent {
-  final Transaction transaction;
-
-  AddTransaction(this.transaction);
-}
-
-class UpdateTransaction extends TransactionEvent {
-  final Transaction transaction;
-
-  UpdateTransaction(this.transaction);
-}
-
-class DeleteTransaction extends TransactionEvent {
-  final int id;
-
-  DeleteTransaction(this.id);
-}
-
-abstract class TransactionState {}
-
-class TransactionsLoading extends TransactionState {}
-
-class TransactionsLoaded extends TransactionState {
-  final List<Transaction> transactions;
-
-  TransactionsLoaded(this.transactions);
-}
-
-class TransactionError extends TransactionState {}
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
-  final TransactionRepository repository;
+  final TransactionRepository transactionRepository;
 
-  TransactionBloc(this.repository) : super(TransactionsLoading()) {
-    on<LoadTransactions>((event, emit) async {
-      try {
-        emit(TransactionsLoading());
-        final transactions = await repository.getAllTransactions();
-        emit(TransactionsLoaded(transactions));
-      } catch (_) {
-        emit(TransactionError());
-      }
-    });
+  TransactionBloc(this.transactionRepository) : super(TransactionsLoading()) {
+    on<LoadTransactions>(_onLoadTransactions);
+    on<AddTransaction>(_onAddTransaction);
+    on<UpdateTransaction>(_onUpdateTransaction);
+    on<DeleteTransaction>(_onDeleteTransaction);
+  }
 
-    on<AddTransaction>((event, emit) async {
-      try {
-        await repository.createTransaction(event.transaction);
-        add(LoadTransactions());
-      } catch (_) {
-        emit(TransactionError());
-      }
-    });
+  Future<void> _onLoadTransactions(
+      LoadTransactions event, Emitter<TransactionState> emit) async {
+    try {
+      emit(TransactionsLoading());
+      final transactions = await transactionRepository.getAllTransactions();
+      emit(TransactionsLoaded(transactions));
+    } catch (e) {
+      emit(TransactionError('Failed to load transactions'));
+    }
+  }
 
-    on<UpdateTransaction>((event, emit) async {
-      try {
-        await repository.updateTransaction(event.transaction);
-        add(LoadTransactions());
-      } catch (_) {
-        emit(TransactionError());
-      }
-    });
+  Future<void> _onAddTransaction(
+      AddTransaction event, Emitter<TransactionState> emit) async {
+    try {
+      await transactionRepository.createTransaction(event.transaction);
+      final transactions = await transactionRepository.getAllTransactions();
+      emit(TransactionsLoaded(transactions));
+    } catch (e) {
+      emit(TransactionError('Failed to add transaction'));
+    }
+  }
 
-    on<DeleteTransaction>((event, emit) async {
-      try {
-        await repository.deleteTransaction(event.id);
-        add(LoadTransactions());
-      } catch (_) {
-        emit(TransactionError());
-      }
-    });
+  Future<void> _onUpdateTransaction(
+      UpdateTransaction event, Emitter<TransactionState> emit) async {
+    try {
+      await transactionRepository.updateTransaction(event.transaction);
+      final transactions = await transactionRepository.getAllTransactions();
+      emit(TransactionsLoaded(transactions));
+    } catch (e) {
+      emit(TransactionError('Failed to update transaction'));
+    }
+  }
+
+  Future<void> _onDeleteTransaction(
+      DeleteTransaction event, Emitter<TransactionState> emit) async {
+    try {
+      await transactionRepository.deleteTransaction(event.id);
+      final transactions = await transactionRepository.getAllTransactions();
+      emit(TransactionsLoaded(transactions));
+    } catch (e) {
+      emit(TransactionError('Failed to delete transaction'));
+    }
   }
 }
