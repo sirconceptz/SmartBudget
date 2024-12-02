@@ -1,105 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/transaction_block/transaction_bloc.dart';
-import '../blocs/transaction_block/transaction_event.dart';
-import '../blocs/transaction_block/transaction_state.dart';
-import 'package:intl/intl.dart';
+import 'package:smart_budget/screens/transactions_screen.dart';
 
-import '../models/transaction_model.dart';
+import './category_list_screen.dart';
+import './settings_screen.dart';
+import 'home_screen.dart'; // Add your settings screen import here
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
+  @override
+  _MainScreenState createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    HomeScreen(),
+    TransactionsScreen(),
+    CategoryListScreen(),
+    SettingsScreen()
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Smart Budget')),
-      body: BlocBuilder<TransactionBloc, TransactionState>(
-        builder: (context, state) {
-          if (state is TransactionsLoading) {
-            return Center(child: CircularProgressIndicator());
-          } else if (state is TransactionsLoaded) {
-            final transactions = state.transactions;
-            print('Załadowane transakcje w widoku: ${transactions.length}');
-
-            return ListView.builder(
-              itemCount: transactions.length,
-              itemBuilder: (context, index) {
-                final transaction = transactions[index];
-                return Dismissible(
-                  key: ValueKey(transaction.id),
-                  background: Container(
-                    color: Colors.blue,
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.only(left: 20),
-                    child: Icon(Icons.edit, color: Colors.white),
-                  ),
-                  secondaryBackground: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20),
-                    child: Icon(Icons.delete, color: Colors.white),
-                  ),
-                  confirmDismiss: (direction) async {
-                    if (direction == DismissDirection.startToEnd) {
-                      await goToEditTransaction(context, transaction);
-                      return false;
-                    } else if (direction == DismissDirection.endToStart) {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Usuń transakcję'),
-                            content: Text('Czy na pewno chcesz usunąć tę transakcję?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: Text('Anuluj'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                child: Text('Usuń'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                      if (confirm == true) {
-                        context.read<TransactionBloc>().add(DeleteTransaction(transaction.id!));
-                        return true;
-                      }
-                    }
-                    return false;
-                  },
-                  child: ListTile(
-                    title: Text(transaction.description ?? 'No description'),
-                    subtitle: Text(DateFormat.yMMMMd('pl_PL').add_jm().format(transaction.date)),
-                    trailing: Text(transaction.amount.toStringAsFixed(2)),
-                  ),
-                );
-              },
-            );
-          } else {
-            return Center(child: Text('Error loading transactions'));
-          }
-        },
+      appBar: AppBar(
+        title: Text('Smart Budget'),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await goToAddTransaction(context);
-        },
-        child: Icon(Icons.add),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
       ),
-    );
-  }
-
-  Future<void> goToAddTransaction(BuildContext context) async {
-    await Navigator.pushNamed(context, '/addTransaction');
-  }
-
-  Future<void> goToEditTransaction(BuildContext context, Transaction transaction) async {
-    await Navigator.pushNamed(
-      context,
-      '/editTransaction',
-      arguments: transaction,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Główny',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list),
+            label: 'Transakcje',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.category),
+            label: 'Kategorie',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Ustawienia',
+          ),
+        ],
+      ),
     );
   }
 }
