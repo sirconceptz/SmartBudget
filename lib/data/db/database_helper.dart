@@ -19,10 +19,13 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'budget_manager.db');
 
+    //await deleteDatabase(path);
+
     return await openDatabase(
       path,
       version: 1,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -34,7 +37,7 @@ class DatabaseHelper {
         icon TEXT,
         description TEXT,
         budget_limit REAL,
-        is_essential INTEGER DEFAULT 0
+        is_income INTEGER DEFAULT 0
       )
     ''');
 
@@ -46,16 +49,7 @@ class DatabaseHelper {
         category_id INTEGER,
         date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         description TEXT,
-        FOREIGN KEY (category_id) REFERENCES categories (id)
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE transaction_types (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        description TEXT,
-        is_income INTEGER NOT NULL DEFAULT 0
+        FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
       )
     ''');
 
@@ -67,5 +61,8 @@ class DatabaseHelper {
       )
     ''');
   }
-}
 
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+
+  }
+}

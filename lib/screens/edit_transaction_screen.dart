@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/transaction_block/transaction_bloc.dart';
-import '../blocs/transaction_block/transaction_event.dart';
-import '../models/transaction_model.dart';
+import '../blocs/transaction/transaction_bloc.dart';
+import '../blocs/transaction/transaction_event.dart';
+import '../models/transaction.dart';
 
 class EditTransactionScreen extends StatefulWidget {
   final Transaction transaction;

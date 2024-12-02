@@ -1,9 +1,9 @@
 // import 'package:bloc_test/bloc_test.dart';
 // import 'package:flutter_test/flutter_test.dart';
 // import 'package:mockito/mockito.dart';
-// import 'package:smart_budget/blocs/transaction_block/transaction_bloc.dart';
-// import 'package:smart_budget/blocs/transaction_block/transaction_state.dart';
-// import 'package:smart_budget/models/transaction_model.dart';
+// import 'package:smart_budget/blocs/transaction/transaction_bloc.dart';
+// import 'package:smart_budget/blocs/transaction/transaction_state.dart';
+// import 'package:smart_budget/models/transaction.dart';
 //
 // import '../repositories/transaction_repository_test.mocks.dart';
 //

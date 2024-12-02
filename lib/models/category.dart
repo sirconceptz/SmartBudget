@@ -1,35 +1,35 @@
 class Category {
   final int? id;
   final String name;
-  final String? icon;
   final String? description;
+  final String? icon;
   final double? budgetLimit;
-  final bool isEssential;
+  final bool isIncome;
 
   Category({
     this.id,
     required this.name,
-    this.icon,
     this.description,
+    this.icon,
     this.budgetLimit,
-    this.isEssential = false,
+    required this.isIncome,
   });
 
   Category copyWith({
     int? id,
     String? name,
-    String? icon,
     String? description,
+    String? icon,
     double? budgetLimit,
-    bool? isEssential,
+    bool? isIncome,
   }) {
     return Category(
       id: id ?? this.id,
       name: name ?? this.name,
-      icon: icon ?? this.icon,
       description: description ?? this.description,
+      icon: icon ?? this.icon,
       budgetLimit: budgetLimit ?? this.budgetLimit,
-      isEssential: isEssential ?? this.isEssential,
+      isIncome: isIncome ?? this.isIncome,
     );
   }
 
@@ -37,10 +37,10 @@ class Category {
     return Category(
       id: json['id'],
       name: json['name'],
-      icon: json['icon'],
       description: json['description'],
-      budgetLimit: json['budget_limit']?.toDouble(),
-      isEssential: json['is_essential'] == 1,
+      icon: json['icon'],
+      isIncome: json['is_income'] == 1,
+      budgetLimit: json['budget_limit']
     );
   }
 
@@ -48,10 +48,10 @@ class Category {
     return {
       'id': id,
       'name': name,
-      'icon': icon,
       'description': description,
-      'budget_limit': budgetLimit,
-      'is_essential': isEssential ? 1 : 0,
+      'icon': icon,
+      'is_income': isIncome ? 1 : 0,
+      'budget_limit': budgetLimit
     };
   }
 }

@@ -7,17 +7,19 @@ import 'package:smart_budget/screens/edit_transaction_screen.dart';
 import 'package:smart_budget/screens/main_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_budget/screens/settings_screen.dart';
 
-import 'blocs/transaction_block/transaction_event.dart';
-import 'blocs/transaction_type/transaction_type_bloc.dart';
-import 'blocs/transaction_type/transaction_type_event.dart';
+import 'blocs/transaction/transaction_event.dart';
+import 'blocs/category/category_bloc.dart';
+import 'blocs/category/category_event.dart';
+import 'data/repositories/category_repository.dart';
 import 'di/di.dart';
-import 'blocs/transaction_block/transaction_bloc.dart';
+import 'blocs/transaction/transaction_bloc.dart';
 import 'data/repositories/transaction_repository.dart';
 import 'di/notifiers/theme_notifier.dart';
-import 'di/notifiers/currency_notifier.dart'; // Add the missing CurrencyNotifier import
-import 'models/transaction_model.dart';
-import 'models/transaction_type_model.dart';
+import 'di/notifiers/currency_notifier.dart';
+import 'models/transaction.dart';
+import 'models/category.dart';
 
 void main() async {
   setupDependencies();
@@ -27,17 +29,14 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // BlocProviders
         BlocProvider(
           create: (context) => TransactionBloc(getIt<TransactionRepository>())
             ..add(LoadTransactions()),
         ),
         BlocProvider(
-          create: (context) =>
-          TransactionTypeBloc(getIt<TransactionRepository>())
-            ..add(LoadTransactionTypes()),
+          create: (context) => CategoryBloc(getIt<CategoryRepository>())
+            ..add(LoadCategories()),
         ),
-        // ChangeNotifierProviders
         ChangeNotifierProvider(
           create: (_) => ThemeNotifier(),
         ),
@@ -67,8 +66,15 @@ class MyApp extends StatelessWidget {
           unselectedItemColor: Colors.grey,
         ),
       ),
-      darkTheme: ThemeData.dark(),
-      themeMode: themeNotifier.themeMode, // Dynamic theme mode
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green, brightness: Brightness.dark),
+        useMaterial3: true,
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: Colors.green,
+          unselectedItemColor: Colors.grey,
+        ),
+      ),
+      themeMode: themeNotifier.themeMode,
       initialRoute: '/',
       routes: {
         '/': (context) => MainScreen(),
@@ -78,8 +84,9 @@ class MyApp extends StatelessWidget {
           transaction: ModalRoute.of(context)!.settings.arguments as Transaction,
         ),
         '/editCategory': (context) => EditCategoryScreen(
-          category: ModalRoute.of(context)!.settings.arguments as TransactionType,
+          category: ModalRoute.of(context)!.settings.arguments as Category,
         ),
+        '/settings': (context) => SettingsScreen(),
       },
     );
   }

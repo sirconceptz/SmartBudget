@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_budget/blocs/transaction_block/transaction_event.dart';
-import 'package:smart_budget/blocs/transaction_block/transaction_state.dart';
+import 'package:smart_budget/blocs/transaction/transaction_event.dart';
+import 'package:smart_budget/blocs/transaction/transaction_state.dart';
 
 import '../../data/repositories/transaction_repository.dart';
 

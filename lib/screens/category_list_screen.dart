@@ -1,22 +1,20 @@
-// category_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/transaction_type/transaction_type_bloc.dart';
-import '../blocs/transaction_type/transaction_type_event.dart';
-import '../blocs/transaction_type/transaction_type_state.dart';
-import '../models/transaction_type_model.dart';
+import '../blocs/category/category_bloc.dart';
+import '../blocs/category/category_event.dart';
+import '../blocs/category/category_state.dart';
+import '../models/category.dart';
 
 class CategoryListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Add a drawer or a button in AppBar to navigate back to MainScreen if needed
-      body: BlocBuilder<TransactionTypeBloc, TransactionTypeState>(
+      body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
-          if (state is TransactionTypesLoading) {
+          if (state is CategoriesLoading) {
             return Center(child: CircularProgressIndicator());
-          } else if (state is TransactionTypesLoaded) {
-            final categories = state.transactionTypes;
+          } else if (state is CategoriesLoaded) {
+            final categories = state.categories;
 
             return ListView.builder(
               itemCount: categories.length,
@@ -61,16 +59,19 @@ class CategoryListScreen extends StatelessWidget {
                         },
                       );
                       if (confirm == true) {
-                        context.read<TransactionTypeBloc>().add(DeleteTransactionType(category.id!));
+                        context.read<CategoryBloc>().add(DeleteCategory(category.id!));
                         return true;
                       }
                     }
                     return false;
                   },
-                  child: ListTile(
-                    title: Text(category.name),
-                    subtitle: Text(category.description ?? ''),
-                    trailing: Icon(Icons.category),
+                  child: Card(
+                    color: category.isIncome ? Colors.green : Colors.red,
+                    child: ListTile(
+                      title: Text(category.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                      subtitle: Text(category.description ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),),
+                      trailing: Icon(Icons.category),
+                    ),
                   ),
                 );
               },
@@ -81,6 +82,7 @@ class CategoryListScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'categories_fab',
         onPressed: () async {
           await goToAddCategory(context);
         },
@@ -93,7 +95,7 @@ class CategoryListScreen extends StatelessWidget {
     await Navigator.pushNamed(context, '/addCategory');
   }
 
-  Future<void> goToEditCategory(BuildContext context, TransactionType category) async {
+  Future<void> goToEditCategory(BuildContext context, Category category) async {
     final result = await Navigator.pushNamed(
       context,
       '/editCategory',

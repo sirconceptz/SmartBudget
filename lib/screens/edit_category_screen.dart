@@ -1,12 +1,13 @@
-// edit_category_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/transaction_type/transaction_type_bloc.dart';
-import '../blocs/transaction_type/transaction_type_event.dart';
-import '../models/transaction_type_model.dart';
+import '../blocs/category/category_bloc.dart';
+import '../blocs/category/category_event.dart';
+import '../di/notifiers/currency_notifier.dart';
+import '../models/category.dart';
+import 'package:provider/provider.dart';
 
 class EditCategoryScreen extends StatefulWidget {
-  final TransactionType category;
+  final Category category;
 
   EditCategoryScreen({required this.category});
 
@@ -17,6 +18,7 @@ class EditCategoryScreen extends StatefulWidget {
 class _EditCategoryScreenState extends State<EditCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   late String _name;
+  late double? _budgetLimit;
   late String? _description;
   late String? _icon;
   late bool _isIncome;
@@ -28,21 +30,23 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
     _description = widget.category.description;
     _icon = widget.category.icon;
     _isIncome = widget.category.isIncome;
+    _budgetLimit = widget.category.budgetLimit;
   }
 
   void _saveCategory() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final updatedCategory = TransactionType(
+      final updatedCategory = Category(
         id: widget.category.id,
         name: _name,
         description: _description,
         icon: _icon,
         isIncome: _isIncome,
+        budgetLimit: _budgetLimit
       );
 
-      context.read<TransactionTypeBloc>().add(UpdateTransactionType(updatedCategory));
+      context.read<CategoryBloc>().add(UpdateCategory(updatedCategory));
 
       Navigator.pop(context, true);
     }
@@ -50,6 +54,9 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currencyNotifier = Provider.of<CurrencyNotifier>(context);
+    final currentCurrency = currencyNotifier.currency;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Edytuj kategorię'),
@@ -80,15 +87,30 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   _description = value;
                 },
               ),
-              // Add an icon picker if desired
-              SwitchListTile(
-                title: Text('Przychód'),
-                value: _isIncome,
-                onChanged: (value) {
-                  setState(() {
-                    _isIncome = value;
-                  });
+              TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Limit budżetu',
+                  suffixText: currentCurrency.name,
+                ),
+                onSaved: (value) {
+                  _budgetLimit = double.tryParse(value!);
                 },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Wydatki'),
+                  Switch(
+                    value: _isIncome,
+                    onChanged: (value) {
+                      setState(() {
+                        _isIncome = value;
+                      });
+                    },
+                  ),
+                  Text('Przychody'),
+                ],
               ),
               SizedBox(height: 20),
               ElevatedButton(

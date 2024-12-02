@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/transaction_block/transaction_bloc.dart';
-import '../blocs/transaction_block/transaction_event.dart';
-import '../blocs/transaction_block/transaction_state.dart';
+import '../blocs/transaction/transaction_bloc.dart';
+import '../blocs/transaction/transaction_event.dart';
+import '../blocs/transaction/transaction_state.dart';
 import 'package:intl/intl.dart';
 
-import '../models/transaction_model.dart';
+import '../models/transaction.dart';
 
 class TransactionsScreen extends StatelessWidget {
   @override
@@ -81,6 +81,7 @@ class TransactionsScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'transactions_fab',
         onPressed: () async {
           await goToAddTransaction(context);
         },

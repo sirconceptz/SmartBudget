@@ -1,9 +1,10 @@
-// add_category_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/transaction_type/transaction_type_bloc.dart';
-import '../blocs/transaction_type/transaction_type_event.dart';
-import '../models/transaction_type_model.dart';
+import '../blocs/category/category_bloc.dart';
+import '../blocs/category/category_event.dart';
+import '../di/notifiers/currency_notifier.dart';
+import '../models/category.dart';
+import 'package:provider/provider.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   @override
@@ -15,20 +16,22 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   String _name = '';
   String? _description;
   String? _icon;
+  double? _budgetLimit;
   bool _isIncome = false;
 
   void _saveCategory() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final newCategory = TransactionType(
+      final newCategory = Category(
         name: _name,
         description: _description,
         icon: _icon,
         isIncome: _isIncome,
+        budgetLimit: _budgetLimit
       );
 
-      context.read<TransactionTypeBloc>().add(AddTransactionType(newCategory));
+      context.read<CategoryBloc>().add(AddCategory(newCategory));
 
       Navigator.pop(context, true);
     }
@@ -36,6 +39,9 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currencyNotifier = Provider.of<CurrencyNotifier>(context);
+    final currentCurrency = currencyNotifier.currency;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Dodaj kategorię'),
@@ -64,15 +70,30 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   _description = value;
                 },
               ),
-              // Add an icon picker if desired
-              SwitchListTile(
-                title: Text('Przychód'),
-                value: _isIncome,
-                onChanged: (value) {
-                  setState(() {
-                    _isIncome = value;
-                  });
+              TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Limit budżetu',
+                  suffixText: currentCurrency.name,
+                ),
+                onSaved: (value) {
+                  _budgetLimit = double.tryParse(value!);
                 },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Wydatki'),
+                  Switch(
+                    value: _isIncome,
+                    onChanged: (value) {
+                      setState(() {
+                        _isIncome = value;
+                      });
+                    },
+                  ),
+                  Text('Przychody'),
+                ],
               ),
               SizedBox(height: 20),
               ElevatedButton(

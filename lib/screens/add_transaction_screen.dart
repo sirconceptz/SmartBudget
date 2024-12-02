@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart'; // For CurrencyNotifier
-import 'package:shared_preferences/shared_preferences.dart';
-import '../blocs/transaction_block/transaction_bloc.dart';
-import '../blocs/transaction_block/transaction_event.dart';
+import 'package:provider/provider.dart';
+import '../blocs/category/category_bloc.dart';
+import '../blocs/category/category_state.dart';
+import '../blocs/transaction/transaction_bloc.dart';
+import '../blocs/transaction/transaction_event.dart';
 import '../di/notifiers/currency_notifier.dart';
-import '../models/transaction_model.dart';
+import '../models/transaction.dart';
 import '../utils/enums/currency.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   String _type = 'Wydatek';
   double? _amount;
+  int? _selectedCategoryId;
   String? _description;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
@@ -33,13 +35,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         _selectedTime.minute,
       );
 
-      Currency currency = await getCurrency();
       final newTransaction = Transaction(
-        type: _type == 'Przychód' ? 1 : 2, // 1 for income, 2 for expense
+        type: _type == 'Przychód' ? 1 : 2,
         amount: _amount!,
+        categoryId: _selectedCategoryId,
         date: transactionDateTime,
         description: _description,
-        currency: currency
+        currency: currentCurrency,
       );
 
       context.read<TransactionBloc>().add(AddTransaction(newTransaction));
@@ -47,12 +49,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       Navigator.pop(context, true);
     }
   }
-
-  Future<Currency> getCurrency() async {
-  final prefs = await SharedPreferences.getInstance();
-  final currencyString = prefs.getString('selected_currency') ?? 'pln';
-  return CurrencyExtension.fromString(currencyString);
-}
 
   Future<void> _pickDate() async {
     final pickedDate = await showDatePicker(
@@ -106,15 +102,46 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 onChanged: (value) {
                   setState(() {
                     _type = value!;
+                    _selectedCategoryId = null;
                   });
                 },
                 decoration: InputDecoration(labelText: 'Typ transakcji'),
+              ),
+              BlocBuilder<CategoryBloc, CategoryState>(
+                builder: (context, state) {
+                  if (state is CategoriesLoading) {
+                    return CircularProgressIndicator();
+                  } else if (state is CategoriesLoaded) {
+                    final categories = state.categories.where((category) =>
+                    (_type == 'Przychód' ? category.isIncome : !category.isIncome)).toList();
+
+                    return DropdownButtonFormField<int>(
+                      value: _selectedCategoryId,
+                      items: categories.map((category) {
+                        return DropdownMenuItem(
+                          value: category.id,
+                          child: Text(category.name),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategoryId = value;
+                        });
+                      },
+                      decoration: InputDecoration(labelText: 'Kategoria'),
+                      validator: (value) =>
+                      value == null ? 'Wybierz kategorię' : null,
+                    );
+                  } else {
+                    return Text('Błąd ładowania kategorii');
+                  }
+                },
               ),
               TextFormField(
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Kwota',
-                  suffixText: currentCurrency.name, // Display the current currency
+                  suffixText: currentCurrency.name,
                 ),
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
