@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
 import '../models/transaction.dart';
@@ -7,7 +8,7 @@ import '../models/transaction.dart';
 class EditTransactionScreen extends StatefulWidget {
   final Transaction transaction;
 
-  EditTransactionScreen({required this.transaction});
+  const EditTransactionScreen({super.key, required this.transaction});
 
   @override
   _EditTransactionScreenState createState() => _EditTransactionScreenState();
@@ -24,7 +25,6 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicjalizacja pól na podstawie przekazanej transakcji
     _type = widget.transaction.type == 1 ? 'Przychód' : 'Wydatek';
     _amount = widget.transaction.amount;
     _description = widget.transaction.description;
@@ -40,21 +40,22 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       _formKey.currentState!.save();
 
       final updatedTransaction = Transaction(
-        id: widget.transaction.id,
-        type: _type == 'Przychód' ? 1 : 2,
-        amount: _amount,
-        date: DateTime(
-          _selectedDate.year,
-          _selectedDate.month,
-          _selectedDate.day,
-          _selectedTime.hour,
-          _selectedTime.minute,
-        ),
-        description: _description,
-        currency: widget.transaction.currency
-      );
+          id: widget.transaction.id,
+          type: _type == 'Przychód' ? 1 : 2,
+          amount: _amount,
+          date: DateTime(
+            _selectedDate.year,
+            _selectedDate.month,
+            _selectedDate.day,
+            _selectedTime.hour,
+            _selectedTime.minute,
+          ),
+          description: _description,
+          currency: widget.transaction.currency);
 
-      context.read<TransactionBloc>().add(UpdateTransaction(updatedTransaction));
+      context
+          .read<TransactionBloc>()
+          .add(UpdateTransaction(updatedTransaction));
 
       Navigator.pop(context, true);
     }

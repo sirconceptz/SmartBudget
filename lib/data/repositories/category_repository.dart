@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
-import '../db/database_helper.dart';
+
 import '../../models/category.dart';
+import '../db/database_helper.dart';
 
 class CategoryRepository {
   final DatabaseHelper _databaseHelper;
@@ -39,5 +40,18 @@ class CategoryRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<List<Map<String, dynamic>>> getSpentAmountForCategories() async {
+    final db = await _databaseHelper.database;
+
+    final result = await db.rawQuery('''
+      SELECT categories.id AS category_id, categories.name, categories.budget_limit,
+             SUM(transactions.amount) AS spent_amount
+      FROM categories
+      LEFT JOIN transactions ON categories.id = transactions.category_id
+      GROUP BY categories.id
+    ''');
+    return result;
   }
 }

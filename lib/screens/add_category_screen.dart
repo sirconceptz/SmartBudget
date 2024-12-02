@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
 import '../di/notifiers/currency_notifier.dart';
 import '../models/category.dart';
-import 'package:provider/provider.dart';
 
 class AddCategoryScreen extends StatefulWidget {
+  const AddCategoryScreen({super.key});
+
   @override
   _AddCategoryScreenState createState() => _AddCategoryScreenState();
 }
@@ -24,12 +26,11 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       _formKey.currentState!.save();
 
       final newCategory = Category(
-        name: _name,
-        description: _description,
-        icon: _icon,
-        isIncome: _isIncome,
-        budgetLimit: _budgetLimit
-      );
+          name: _name,
+          description: _description,
+          icon: _icon,
+          isIncome: _isIncome,
+          budgetLimit: _budgetLimit);
 
       context.read<CategoryBloc>().add(AddCategory(newCategory));
 

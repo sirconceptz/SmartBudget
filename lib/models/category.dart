@@ -4,6 +4,7 @@ class Category {
   final String? description;
   final String? icon;
   final double? budgetLimit;
+  final double? spentAmount;
   final bool isIncome;
 
   Category({
@@ -12,6 +13,7 @@ class Category {
     this.description,
     this.icon,
     this.budgetLimit,
+    this.spentAmount,
     required this.isIncome,
   });
 
@@ -21,6 +23,7 @@ class Category {
     String? description,
     String? icon,
     double? budgetLimit,
+    double? spentAmount,
     bool? isIncome,
   }) {
     return Category(
@@ -29,19 +32,20 @@ class Category {
       description: description ?? this.description,
       icon: icon ?? this.icon,
       budgetLimit: budgetLimit ?? this.budgetLimit,
+      spentAmount: spentAmount ?? this.spentAmount,
       isIncome: isIncome ?? this.isIncome,
     );
   }
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      icon: json['icon'],
-      isIncome: json['is_income'] == 1,
-      budgetLimit: json['budget_limit']
-    );
+        id: json['id'],
+        name: json['name'],
+        description: json['description'],
+        icon: json['icon'],
+        isIncome: json['is_income'] == 1,
+        spentAmount: json['spent_amount'],
+        budgetLimit: json['budget_limit']);
   }
 
   Map<String, dynamic> toJson() {

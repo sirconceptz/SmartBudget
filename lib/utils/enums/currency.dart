@@ -4,12 +4,12 @@ enum Currency {
   pln(name: "Polski złoty", value: "pln");
 
   const Currency({required this.name, required this.value});
+
   final String name;
   final String value;
 }
 
 extension CurrencyExtension on Currency {
-
   static Currency fromString(String value) {
     switch (value) {
       case 'usd':

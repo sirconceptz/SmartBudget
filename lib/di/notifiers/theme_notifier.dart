@@ -23,7 +23,7 @@ class ThemeNotifier extends ChangeNotifier {
     final savedTheme = prefs.getString('theme_mode');
     if (savedTheme != null) {
       _themeMode = ThemeMode.values.firstWhere(
-            (mode) => mode.toString() == savedTheme,
+        (mode) => mode.toString() == savedTheme,
         orElse: () => ThemeMode.system,
       );
       notifyListeners();

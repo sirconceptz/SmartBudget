@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+
 import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
 import '../blocs/transaction/transaction_state.dart';
-import 'package:intl/intl.dart';
-
 import '../models/transaction.dart';
 
 class TransactionsScreen extends StatelessWidget {
+  const TransactionsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +48,8 @@ class TransactionsScreen extends StatelessWidget {
                         builder: (context) {
                           return AlertDialog(
                             title: Text('Usuń transakcję'),
-                            content: Text('Czy na pewno chcesz usunąć tę transakcję?'),
+                            content: Text(
+                                'Czy na pewno chcesz usunąć tę transakcję?'),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
@@ -61,7 +64,9 @@ class TransactionsScreen extends StatelessWidget {
                         },
                       );
                       if (confirm == true) {
-                        context.read<TransactionBloc>().add(DeleteTransaction(transaction.id!));
+                        context
+                            .read<TransactionBloc>()
+                            .add(DeleteTransaction(transaction.id!));
                         return true;
                       }
                     }
@@ -69,7 +74,9 @@ class TransactionsScreen extends StatelessWidget {
                   },
                   child: ListTile(
                     title: Text(transaction.description ?? 'No description'),
-                    subtitle: Text(DateFormat.yMMMMd('pl_PL').add_jm().format(transaction.date)),
+                    subtitle: Text(DateFormat.yMMMMd('pl_PL')
+                        .add_jm()
+                        .format(transaction.date)),
                     trailing: Text(transaction.amount.toStringAsFixed(2)),
                   ),
                 );
@@ -94,7 +101,8 @@ class TransactionsScreen extends StatelessWidget {
     await Navigator.pushNamed(context, '/addTransaction');
   }
 
-  Future<void> goToEditTransaction(BuildContext context, Transaction transaction) async {
+  Future<void> goToEditTransaction(
+      BuildContext context, Transaction transaction) async {
     await Navigator.pushNamed(
       context,
       '/editTransaction',

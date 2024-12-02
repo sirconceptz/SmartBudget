@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
 import '../blocs/category/category_state.dart';
 import '../models/category.dart';
 
 class CategoryListScreen extends StatelessWidget {
+  const CategoryListScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +47,8 @@ class CategoryListScreen extends StatelessWidget {
                         builder: (context) {
                           return AlertDialog(
                             title: Text('Usuń kategorię'),
-                            content: Text('Czy na pewno chcesz usunąć tę kategorię?'),
+                            content: Text(
+                                'Czy na pewno chcesz usunąć tę kategorię?'),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
@@ -59,7 +63,9 @@ class CategoryListScreen extends StatelessWidget {
                         },
                       );
                       if (confirm == true) {
-                        context.read<CategoryBloc>().add(DeleteCategory(category.id!));
+                        context
+                            .read<CategoryBloc>()
+                            .add(DeleteCategory(category.id!));
                         return true;
                       }
                     }
@@ -68,8 +74,16 @@ class CategoryListScreen extends StatelessWidget {
                   child: Card(
                     color: category.isIncome ? Colors.green : Colors.red,
                     child: ListTile(
-                      title: Text(category.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                      subtitle: Text(category.description ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),),
+                      title: Text(
+                        category.name,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                      subtitle: Text(
+                        category.description ?? '',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
                       trailing: Icon(Icons.category),
                     ),
                   ),
@@ -96,14 +110,10 @@ class CategoryListScreen extends StatelessWidget {
   }
 
   Future<void> goToEditCategory(BuildContext context, Category category) async {
-    final result = await Navigator.pushNamed(
+    await Navigator.pushNamed(
       context,
       '/editCategory',
       arguments: category,
     );
-
-    if (result == true) {
-      // No need to dispatch LoadTransactionTypes; Bloc handles state updates
-    }
   }
 }

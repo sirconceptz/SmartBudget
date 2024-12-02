@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
 import '../di/notifiers/currency_notifier.dart';
 import '../models/category.dart';
-import 'package:provider/provider.dart';
 
 class EditCategoryScreen extends StatefulWidget {
   final Category category;
 
-  EditCategoryScreen({required this.category});
+  const EditCategoryScreen({required this.category});
 
   @override
   _EditCategoryScreenState createState() => _EditCategoryScreenState();
@@ -38,13 +38,12 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
       _formKey.currentState!.save();
 
       final updatedCategory = Category(
-        id: widget.category.id,
-        name: _name,
-        description: _description,
-        icon: _icon,
-        isIncome: _isIncome,
-        budgetLimit: _budgetLimit
-      );
+          id: widget.category.id,
+          name: _name,
+          description: _description,
+          icon: _icon,
+          isIncome: _isIncome,
+          budgetLimit: _budgetLimit);
 
       context.read<CategoryBloc>().add(UpdateCategory(updatedCategory));
 

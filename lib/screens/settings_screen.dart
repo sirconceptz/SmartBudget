@@ -13,7 +13,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
@@ -70,25 +69,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
           SizedBox(height: 16.0),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.language),
-            title: Text('Język'),
-            subtitle: Text('Wybierz język aplikacji'),
-            onTap: null,
-          ),
-          ListTile(
-            leading: Icon(Icons.cloud_upload),
-            title: Text('Kopia zapasowa'),
-            subtitle: Text('Utwórz kopię zapasową danych'),
-            onTap: null,
-          ),
-          ListTile(
-            leading: Icon(Icons.info),
-            title: Text('O aplikacji'),
-            subtitle: Text('Informacje o aplikacji i deweloperze'),
-            onTap: null,
-          ),
+          // Divider(),
+          // ListTile(
+          //   leading: Icon(Icons.language),
+          //   title: Text('Język'),
+          //   subtitle: Text('Wybierz język aplikacji'),
+          //   onTap: null,
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.cloud_upload),
+          //   title: Text('Kopia zapasowa'),
+          //   subtitle: Text('Utwórz kopię zapasową danych'),
+          //   onTap: null,
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.info),
+          //   title: Text('O aplikacji'),
+          //   subtitle: Text('Informacje o aplikacji i deweloperze'),
+          //   onTap: null,
+          // ),
         ],
       ),
     );
