@@ -20,7 +20,8 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'budget_manager.db');
 
-    //await deleteDatabase(path);
+    // Uncomment to reset the database
+    await deleteDatabase(path);
 
     return await openDatabase(
       path,
@@ -35,7 +36,7 @@ class DatabaseHelper {
       CREATE TABLE categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        icon TEXT,
+        icon INTEGER,
         description TEXT,
         budget_limit REAL,
         is_income INTEGER DEFAULT 0
@@ -63,5 +64,7 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {}
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // Handle database upgrades if needed
+  }
 }

@@ -44,5 +44,15 @@
   "errorWhileLoadingTransactions": "Error while loading transactions",
   "chooseCategory": "Choose category",
   "editCategory": "Edit category",
-  "editTransaction": "Edit transaction"
+  "editTransaction": "Edit transaction",
+  "categoryFood": "Food",
+  "categoryFoodDescription": "Expenses related to food and dining",
+  "categoryEntertainment": "Entertainment",
+  "categoryEntertainmentDescription": "Costs for leisure and fun activities",
+  "categorySalary": "Salary",
+  "categorySalaryDescription": "Your monthly or periodic income",
+  "categoryTravel": "Travel",
+  "categoryTravelDescription": "Expenses for trips and vacations",
+  "categoryHealth": "Health",
+  "categoryHealthDescription": "Health-related expenses and services"
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class IconPickerDialog extends StatelessWidget {
   final List<IconData> availableIcons = [
@@ -10,6 +11,7 @@ class IconPickerDialog extends StatelessWidget {
     Icons.fitness_center,
     Icons.flight,
     Icons.music_note,
+    Icons.movie,
     Icons.school,
     Icons.attach_money,
   ];
@@ -17,7 +19,7 @@ class IconPickerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Wybierz ikonę'),
+      title: Text(AppLocalizations.of(context)!.chooseIcon),
       content: SizedBox(
         width: double.maxFinite,
         child: GridView.builder(

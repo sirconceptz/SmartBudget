@@ -54,4 +54,20 @@ class CategoryRepository {
     ''');
     return result;
   }
+
+  Future<void> createOrReplaceCategory(Category category) async {
+    final db = await _databaseHelper.database;
+    await db.insert(
+      'categories',
+      {
+        'id': category.id,
+        'name': category.name,
+        'icon': category.icon,
+        'description': category.description,
+        'is_income': category.isIncome ? 1 : 0,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
 }

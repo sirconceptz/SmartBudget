@@ -14,6 +14,7 @@ import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
 import 'blocs/transaction/transaction_bloc.dart';
 import 'blocs/transaction/transaction_event.dart';
+import 'data/db/database_helper.dart';
 import 'data/repositories/category_repository.dart';
 import 'data/repositories/transaction_repository.dart';
 import 'di/di.dart';
@@ -28,16 +29,18 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pl_PL', null);
 
+  final dbHelper = DatabaseHelper();
+
   runApp(
     MultiProvider(
       providers: [
         BlocProvider(
-          create: (context) => TransactionBloc(getIt<TransactionRepository>())
-            ..add(LoadTransactions()),
+          create: (context) =>
+          TransactionBloc(getIt<TransactionRepository>())..add(LoadTransactions()),
         ),
         BlocProvider(
           create: (context) =>
-              CategoryBloc(getIt<CategoryRepository>())..add(LoadCategories()),
+          CategoryBloc(getIt<CategoryRepository>())..add(LoadCategories()),
         ),
         ChangeNotifierProvider(
           create: (_) => ThemeNotifier(),
@@ -49,13 +52,17 @@ void main() async {
           create: (_) => LocaleNotifier(),
         ),
       ],
-      child: const MyApp(),
+      child: MyApp(
+        dbHelper: dbHelper,
+      ),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final DatabaseHelper dbHelper;
+
+  const MyApp({required this.dbHelper, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -88,16 +95,23 @@ class MyApp extends StatelessWidget {
       themeMode: themeNotifier.themeMode,
       initialRoute: '/',
       routes: {
-        '/': (context) => MainScreen(),
+        '/': (context) => Builder(
+          builder: (context) {
+            final localizations = AppLocalizations.of(context);
+            if (localizations != null) {
+              context.read<CategoryBloc>().add(UpdateLocalizedCategories(localizations));
+            }
+            return MainScreen();
+          },
+        ),
         '/addTransaction': (context) => AddTransactionScreen(),
         '/addCategory': (context) => AddCategoryScreen(),
         '/editTransaction': (context) => EditTransactionScreen(
-              transaction:
-                  ModalRoute.of(context)!.settings.arguments as Transaction,
-            ),
+          transaction: ModalRoute.of(context)!.settings.arguments as Transaction,
+        ),
         '/editCategory': (context) => EditCategoryScreen(
-              category: ModalRoute.of(context)!.settings.arguments as Category,
-            ),
+          category: ModalRoute.of(context)!.settings.arguments as Category,
+        ),
         '/settings': (context) => SettingsScreen(),
       },
     );

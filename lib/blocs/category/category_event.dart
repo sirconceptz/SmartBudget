@@ -1,4 +1,5 @@
 import '../../models/category.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 abstract class CategoryEvent {}
 
@@ -23,3 +24,9 @@ class DeleteCategory extends CategoryEvent {
 }
 
 class LoadCategoriesWithSpentAmounts extends CategoryEvent {}
+
+class UpdateLocalizedCategories extends CategoryEvent {
+  final AppLocalizations localizations;
+
+  UpdateLocalizedCategories(this.localizations);
+}
