@@ -69,5 +69,4 @@ class CategoryRepository {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
-
 }

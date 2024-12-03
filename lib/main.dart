@@ -16,6 +16,7 @@ import 'blocs/transaction/transaction_bloc.dart';
 import 'blocs/transaction/transaction_event.dart';
 import 'data/db/database_helper.dart';
 import 'data/repositories/category_repository.dart';
+import 'data/repositories/currency_repository.dart';
 import 'data/repositories/transaction_repository.dart';
 import 'di/di.dart';
 import 'di/notifiers/currency_notifier.dart';
@@ -35,12 +36,15 @@ void main() async {
     MultiProvider(
       providers: [
         BlocProvider(
-          create: (context) =>
-          TransactionBloc(getIt<TransactionRepository>())..add(LoadTransactions()),
+          create: (context) => TransactionBloc(
+            getIt<TransactionRepository>(),
+            getIt<CurrencyRepository>(),
+            Provider.of<CurrencyNotifier>(context, listen: false).currency,
+          )..add(LoadTransactions()),
         ),
         BlocProvider(
           create: (context) =>
-          CategoryBloc(getIt<CategoryRepository>())..add(LoadCategories()),
+              CategoryBloc(getIt<CategoryRepository>())..add(LoadCategories()),
         ),
         ChangeNotifierProvider(
           create: (_) => ThemeNotifier(),
@@ -96,22 +100,25 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => Builder(
-          builder: (context) {
-            final localizations = AppLocalizations.of(context);
-            if (localizations != null) {
-              context.read<CategoryBloc>().add(UpdateLocalizedCategories(localizations));
-            }
-            return MainScreen();
-          },
-        ),
+              builder: (context) {
+                final localizations = AppLocalizations.of(context);
+                if (localizations != null) {
+                  context
+                      .read<CategoryBloc>()
+                      .add(UpdateLocalizedCategories(localizations));
+                }
+                return MainScreen();
+              },
+            ),
         '/addTransaction': (context) => AddTransactionScreen(),
         '/addCategory': (context) => AddCategoryScreen(),
         '/editTransaction': (context) => EditTransactionScreen(
-          transaction: ModalRoute.of(context)!.settings.arguments as Transaction,
-        ),
+              transaction:
+                  ModalRoute.of(context)!.settings.arguments as Transaction,
+            ),
         '/editCategory': (context) => EditCategoryScreen(
-          category: ModalRoute.of(context)!.settings.arguments as Category,
-        ),
+              category: ModalRoute.of(context)!.settings.arguments as Category,
+            ),
         '/settings': (context) => SettingsScreen(),
       },
     );
