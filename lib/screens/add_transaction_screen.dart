@@ -98,7 +98,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               DropdownButtonFormField<String>(
                 enableFeedback: true,
                 value: _type,
-                items: [AppLocalizations.of(context)!.income, AppLocalizations.of(context)!.expense].map((type) {
+                items: [
+                  AppLocalizations.of(context)!.income,
+                  AppLocalizations.of(context)!.expense
+                ].map((type) {
                   return DropdownMenuItem(
                     value: type,
                     child: Text(type),
@@ -118,9 +121,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     return CircularProgressIndicator();
                   } else if (state is CategoriesLoaded) {
                     final categories = state.categories
-                        .where((category) => (_type == AppLocalizations.of(context)!.income
-                            ? category.isIncome
-                            : !category.isIncome))
+                        .where((category) =>
+                            (_type == AppLocalizations.of(context)!.income
+                                ? category.isIncome
+                                : !category.isIncome))
                         .toList();
 
                     return DropdownButtonFormField<int>(
@@ -137,12 +141,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           _selectedCategoryId = value;
                         });
                       },
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
-                      validator: (value) =>
-                          value == null ? AppLocalizations.of(context)!.chooseCategory : null,
+                      decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.category),
+                      validator: (value) => value == null
+                          ? AppLocalizations.of(context)!.chooseCategory
+                          : null,
                     );
                   } else {
-                    return Text(AppLocalizations.of(context)!.errorWhileLoadingCategories);
+                    return Text(AppLocalizations.of(context)!
+                        .errorWhileLoadingCategories);
                   }
                 },
               ),
@@ -163,7 +170,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 },
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.description),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.description),
                 onSaved: (value) {
                   _description = value;
                 },
@@ -174,8 +182,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${AppLocalizations.of(context)!.date}: ${_selectedDate.toLocal()}'.split(' ')[0]),
-                      Text('${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}'),
+                      Text(
+                          '${AppLocalizations.of(context)!.date}: ${_selectedDate.toLocal()}'
+                              .split(' ')[0]),
+                      Text(
+                          '${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}'),
                     ],
                   ),
                   Column(

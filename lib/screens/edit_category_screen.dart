@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
@@ -69,7 +69,8 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
             children: [
               TextFormField(
                 initialValue: _name,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.name),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.name),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return AppLocalizations.of(context)!.giveCategoryName;
@@ -82,7 +83,8 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
               ),
               TextFormField(
                 initialValue: _description,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.description),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.description),
                 onSaved: (value) {
                   _description = value;
                 },

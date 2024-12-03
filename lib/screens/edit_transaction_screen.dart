@@ -119,12 +119,14 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                     _type = value!;
                   });
                 },
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.category),
               ),
               TextFormField(
                 initialValue: _amount.toString(),
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.amount),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.amount),
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
                     return AppLocalizations.of(context)!.giveCorrectAmount;
@@ -137,7 +139,8 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
               ),
               TextFormField(
                 initialValue: _description,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.description),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.description),
                 onSaved: (value) {
                   _description = value;
                 },
@@ -148,8 +151,11 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${AppLocalizations.of(context)!.date}: ${_selectedDate.toLocal()}'.split(' ')[0]),
-                      Text('${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}'),
+                      Text(
+                          '${AppLocalizations.of(context)!.date}: ${_selectedDate.toLocal()}'
+                              .split(' ')[0]),
+                      Text(
+                          '${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}'),
                     ],
                   ),
                   Column(

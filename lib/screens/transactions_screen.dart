@@ -76,7 +76,9 @@ class TransactionsScreen extends StatelessWidget {
               },
             );
           } else {
-            return Center(child: Text(AppLocalizations.of(context)!.errorWhileLoadingTransactions));
+            return Center(
+                child: Text(AppLocalizations.of(context)!
+                    .errorWhileLoadingTransactions));
           }
         },
       ),

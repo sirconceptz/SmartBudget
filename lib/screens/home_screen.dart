@@ -24,23 +24,28 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 children: [
                   if (incomeCategories.isNotEmpty)
-                    _buildChartSection(AppLocalizations.of(context)!.incomes, incomeCategories, context),
+                    _buildChartSection(AppLocalizations.of(context)!.incomes,
+                        incomeCategories, context),
                   if (expenseCategories.isNotEmpty)
-                    _buildChartSection(AppLocalizations.of(context)!.expenses, expenseCategories, context),
+                    _buildChartSection(AppLocalizations.of(context)!.expenses,
+                        expenseCategories, context),
                 ],
               ),
             );
           } else if (state is CategoryError) {
             return Center(child: Text(state.message));
           } else {
-            return Center(child: Text('${AppLocalizations.of(context)!.noChartsToDisplay}.'));
+            return Center(
+                child: Text(
+                    '${AppLocalizations.of(context)!.noChartsToDisplay}.'));
           }
         },
       ),
     );
   }
 
-  Widget _buildChartSection(String title, List categories, BuildContext context) {
+  Widget _buildChartSection(
+      String title, List categories, BuildContext context) {
     final totalBudget = categories.fold<double>(
       0.0,
       (sum, category) => sum + (category.budgetLimit ?? 0.0),
