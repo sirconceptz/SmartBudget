@@ -44,5 +44,15 @@
   "errorWhileLoadingTransactions": "Błąd podczas ładowania transakcji",
   "chooseCategory": "Wybierz kategorię",
   "editCategory": "Edytuj kategorię",
-  "editTransaction": "Edytuj transakcję"
+  "editTransaction": "Edytuj transakcję",
+  "categoryFood": "Jedzenie",
+  "categoryFoodDescription": "Wydatki związane z jedzeniem i posiłkami",
+  "categoryEntertainment": "Rozrywka",
+  "categoryEntertainmentDescription": "Koszty związane z czasem wolnym i zabawą",
+  "categorySalary": "Wynagrodzenie",
+  "categorySalaryDescription": "Twoje miesięczne lub okresowe dochody",
+  "categoryTravel": "Podróże",
+  "categoryTravelDescription": "Wydatki na wycieczki i wakacje",
+  "categoryHealth": "Zdrowie",
+  "categoryHealthDescription": "Wydatki związane ze zdrowiem i usługami medycznymi"
 }
