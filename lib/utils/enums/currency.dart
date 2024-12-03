@@ -1,12 +1,13 @@
 enum Currency {
-  usd(name: "Dolary amerykańskie", value: "usd"),
-  eur(name: "Euro", value: "eur"),
-  pln(name: "Polski złoty", value: "pln");
+  usd(name: "Dolary amerykańskie", value: "usd", sign: "\$"),
+  eur(name: "Euro", value: "eur", sign: "€"),
+  pln(name: "Polski złoty", value: "pln", sign: "ZŁ");
 
-  const Currency({required this.name, required this.value});
+  const Currency({required this.name, required this.value, required this.sign});
 
   final String name;
   final String value;
+  final String sign;
 }
 
 extension CurrencyExtension on Currency {

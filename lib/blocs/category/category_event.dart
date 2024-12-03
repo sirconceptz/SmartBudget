@@ -1,5 +1,6 @@
-import '../../models/category.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../models/category.dart';
 
 abstract class CategoryEvent {}
 
