@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
@@ -58,7 +59,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edytuj kategorię'),
+        title: Text(AppLocalizations.of(context)!.editCategory),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -68,10 +69,10 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
             children: [
               TextFormField(
                 initialValue: _name,
-                decoration: InputDecoration(labelText: 'Nazwa'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.name),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Podaj nazwę kategorii';
+                    return AppLocalizations.of(context)!.giveCategoryName;
                   }
                   return null;
                 },
@@ -81,7 +82,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
               ),
               TextFormField(
                 initialValue: _description,
-                decoration: InputDecoration(labelText: 'Opis'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.description),
                 onSaved: (value) {
                   _description = value;
                 },
@@ -89,7 +90,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
               TextFormField(
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Limit budżetu',
+                  labelText: AppLocalizations.of(context)!.budgetLimit,
                   suffixText: currentCurrency.name,
                 ),
                 onSaved: (value) {
@@ -99,7 +100,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Wydatki'),
+                  Text(AppLocalizations.of(context)!.expenses),
                   Switch(
                     value: _isIncome,
                     onChanged: (value) {
@@ -108,13 +109,13 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                       });
                     },
                   ),
-                  Text('Przychody'),
+                  Text(AppLocalizations.of(context)!.incomes),
                 ],
               ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveCategory,
-                child: Text('Zapisz zmiany'),
+                child: Text(AppLocalizations.of(context)!.saveChanges),
               ),
             ],
           ),

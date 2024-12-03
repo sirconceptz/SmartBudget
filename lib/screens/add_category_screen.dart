@@ -106,7 +106,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Wybierz ikonę',
+                        AppLocalizations.of(context)!.chooseIcon,
                         style: TextStyle(fontSize: 16),
                       ),
                       _selectedIcon != null
@@ -120,7 +120,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Wydatki'),
+                  Text(AppLocalizations.of(context)!.expenses),
                   Switch(
                     value: _isIncome,
                     onChanged: (value) {
@@ -129,13 +129,13 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                       });
                     },
                   ),
-                  Text('Przychody'),
+                  Text(AppLocalizations.of(context)!.incomes),
                 ],
               ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveCategory,
-                child: Text('Zapisz kategorię'),
+                child: Text(AppLocalizations.of(context)!.saveCategory),
               ),
             ],
           ),
