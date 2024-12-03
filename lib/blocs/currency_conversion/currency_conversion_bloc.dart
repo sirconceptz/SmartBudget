@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_budget/data/repositories/currency_conversion_repository.dart';
+import 'package:smart_budget/data/repositories/currency_repository.dart';
 
 import 'currency_conversion_event.dart';
 import 'currency_conversion_state.dart';

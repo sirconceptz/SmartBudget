@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_budget/blocs/transaction/transaction_event.dart';
 import 'package:smart_budget/blocs/transaction/transaction_state.dart';
 
-import '../../data/repositories/currency_conversion_repository.dart';
+import '../../data/repositories/currency_repository.dart';
 import '../../data/repositories/transaction_repository.dart';
 import '../../models/currency_rate.dart';
 import '../../models/transaction.dart';

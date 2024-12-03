@@ -5,13 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_budget/config.dart';
 
 class CurrencyRepository {
-
   final String _baseUrl = AppConfig.apiUrl;
   final String _apiKey = AppConfig.apiKey;
 
   Future<Map<String, double>> fetchCurrencyRates(String baseCurrency) async {
-    final response = await http
-        .get(Uri.parse("$_baseUrl?apikey=$_apiKey&base_currency=$baseCurrency"));
+    final response = await http.get(
+        Uri.parse("$_baseUrl?apikey=$_apiKey&base_currency=$baseCurrency"));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
