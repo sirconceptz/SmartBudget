@@ -90,7 +90,9 @@ class CategoryListScreen extends StatelessWidget {
               },
             );
           } else {
-            return Center(child: Text('Error loading categories'));
+            return Center(
+                child: Text(
+                    AppLocalizations.of(context)!.errorWhileLoadingCategories));
           }
         },
       ),

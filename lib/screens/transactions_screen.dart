@@ -66,7 +66,7 @@ class TransactionsScreen extends StatelessWidget {
                     return false;
                   },
                   child: ListTile(
-                    title: Text(transaction.description ?? 'No description'),
+                    title: Text(transaction.description ?? ''),
                     subtitle: Text(DateFormat.yMMMMd('pl_PL')
                         .add_jm()
                         .format(transaction.date)),
@@ -76,7 +76,9 @@ class TransactionsScreen extends StatelessWidget {
               },
             );
           } else {
-            return Center(child: Text('Error loading transactions'));
+            return Center(
+                child: Text(AppLocalizations.of(context)!
+                    .errorWhileLoadingTransactions));
           }
         },
       ),

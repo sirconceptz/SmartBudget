@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
@@ -25,7 +26,9 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   @override
   void initState() {
     super.initState();
-    _type = widget.transaction.type == 1 ? 'Przychód' : 'Wydatek';
+    _type = widget.transaction.type == 1
+        ? AppLocalizations.of(context)!.income
+        : AppLocalizations.of(context)!.expense;
     _amount = widget.transaction.amount;
     _description = widget.transaction.description;
     _selectedDate = widget.transaction.date;
@@ -91,7 +94,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edytuj transakcję'),
+        title: Text(AppLocalizations.of(context)!.editTransaction),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -102,7 +105,10 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
               DropdownButtonFormField<String>(
                 enableFeedback: true,
                 value: _type,
-                items: ['Przychód', 'Wydatek'].map((type) {
+                items: [
+                  AppLocalizations.of(context)!.income,
+                  AppLocalizations.of(context)!.expense
+                ].map((type) {
                   return DropdownMenuItem(
                     value: type,
                     child: Text(type),
@@ -113,15 +119,17 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                     _type = value!;
                   });
                 },
-                decoration: InputDecoration(labelText: 'Typ transakcji'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.category),
               ),
               TextFormField(
                 initialValue: _amount.toString(),
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Kwota'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.amount),
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
-                    return 'Podaj prawidłową kwotę';
+                    return AppLocalizations.of(context)!.giveCorrectAmount;
                   }
                   return null;
                 },
@@ -131,7 +139,8 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
               ),
               TextFormField(
                 initialValue: _description,
-                decoration: InputDecoration(labelText: 'Opis'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.description),
                 onSaved: (value) {
                   _description = value;
                 },
@@ -142,19 +151,22 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Data: ${_selectedDate.toLocal()}'.split(' ')[0]),
-                      Text('Godzina: ${_selectedTime.format(context)}'),
+                      Text(
+                          '${AppLocalizations.of(context)!.date}: ${_selectedDate.toLocal()}'
+                              .split(' ')[0]),
+                      Text(
+                          '${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}'),
                     ],
                   ),
                   Column(
                     children: [
                       TextButton(
                         onPressed: _pickDate,
-                        child: Text('Wybierz datę'),
+                        child: Text(AppLocalizations.of(context)!.chooseDate),
                       ),
                       TextButton(
                         onPressed: _pickTime,
-                        child: Text('Wybierz godzinę'),
+                        child: Text(AppLocalizations.of(context)!.chooseTime),
                       ),
                     ],
                   ),
@@ -163,7 +175,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveTransaction,
-                child: Text('Zapisz zmiany'),
+                child: Text(AppLocalizations.of(context)!.saveChanges),
               ),
             ],
           ),

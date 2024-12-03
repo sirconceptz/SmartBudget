@@ -20,7 +20,7 @@ class AddTransactionScreen extends StatefulWidget {
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _type = 'Wydatek';
+  late String _type = AppLocalizations.of(context)!.expense;
   double? _amount;
   int? _selectedCategoryId;
   String? _description;
@@ -40,7 +40,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       );
 
       final newTransaction = Transaction(
-        type: _type == 'Przychód' ? 1 : 2,
+        type: _type == AppLocalizations.of(context)!.income ? 1 : 2,
         amount: _amount!,
         categoryId: _selectedCategoryId,
         date: transactionDateTime,
@@ -98,7 +98,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               DropdownButtonFormField<String>(
                 enableFeedback: true,
                 value: _type,
-                items: ['Przychód', 'Wydatek'].map((type) {
+                items: [
+                  AppLocalizations.of(context)!.income,
+                  AppLocalizations.of(context)!.expense
+                ].map((type) {
                   return DropdownMenuItem(
                     value: type,
                     child: Text(type),
@@ -118,9 +121,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     return CircularProgressIndicator();
                   } else if (state is CategoriesLoaded) {
                     final categories = state.categories
-                        .where((category) => (_type == 'Przychód'
-                            ? category.isIncome
-                            : !category.isIncome))
+                        .where((category) =>
+                            (_type == AppLocalizations.of(context)!.income
+                                ? category.isIncome
+                                : !category.isIncome))
                         .toList();
 
                     return DropdownButtonFormField<int>(
@@ -137,24 +141,27 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           _selectedCategoryId = value;
                         });
                       },
-                      decoration: InputDecoration(labelText: 'Kategoria'),
-                      validator: (value) =>
-                          value == null ? 'Wybierz kategorię' : null,
+                      decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.category),
+                      validator: (value) => value == null
+                          ? AppLocalizations.of(context)!.chooseCategory
+                          : null,
                     );
                   } else {
-                    return Text('Błąd ładowania kategorii');
+                    return Text(AppLocalizations.of(context)!
+                        .errorWhileLoadingCategories);
                   }
                 },
               ),
               TextFormField(
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Kwota',
+                  labelText: AppLocalizations.of(context)!.amount,
                   suffixText: currentCurrency.name,
                 ),
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
-                    return 'Podaj prawidłową kwotę';
+                    return AppLocalizations.of(context)!.giveCorrectAmount;
                   }
                   return null;
                 },
@@ -163,7 +170,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 },
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Opis'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.description),
                 onSaved: (value) {
                   _description = value;
                 },
@@ -174,19 +182,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Data: ${_selectedDate.toLocal()}'.split(' ')[0]),
-                      Text('Godzina: ${_selectedTime.format(context)}'),
+                      Text(
+                          '${AppLocalizations.of(context)!.date}: ${_selectedDate.toLocal()}'
+                              .split(' ')[0]),
+                      Text(
+                          '${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}'),
                     ],
                   ),
                   Column(
                     children: [
                       TextButton(
                         onPressed: _pickDate,
-                        child: Text('Wybierz datę'),
+                        child: Text(AppLocalizations.of(context)!.chooseDate),
                       ),
                       TextButton(
                         onPressed: _pickTime,
-                        child: Text('Wybierz godzinę'),
+                        child: Text(AppLocalizations.of(context)!.chooseTime),
                       ),
                     ],
                   ),
@@ -195,7 +206,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => _saveTransaction(currentCurrency),
-                child: Text('Zapisz transakcję'),
+                child: Text(AppLocalizations.of(context)!.saveTransaction),
               ),
             ],
           ),

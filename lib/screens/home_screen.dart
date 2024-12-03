@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_state.dart';
@@ -23,23 +24,28 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 children: [
                   if (incomeCategories.isNotEmpty)
-                    _buildChartSection('Przychody', incomeCategories),
+                    _buildChartSection(AppLocalizations.of(context)!.incomes,
+                        incomeCategories, context),
                   if (expenseCategories.isNotEmpty)
-                    _buildChartSection('Wydatki', expenseCategories),
+                    _buildChartSection(AppLocalizations.of(context)!.expenses,
+                        expenseCategories, context),
                 ],
               ),
             );
           } else if (state is CategoryError) {
             return Center(child: Text(state.message));
           } else {
-            return const Center(child: Text('Brak wykresów do wyświetlenia.'));
+            return Center(
+                child: Text(
+                    '${AppLocalizations.of(context)!.noChartsToDisplay}.'));
           }
         },
       ),
     );
   }
 
-  Widget _buildChartSection(String title, List categories) {
+  Widget _buildChartSection(
+      String title, List categories, BuildContext context) {
     final totalBudget = categories.fold<double>(
       0.0,
       (sum, category) => sum + (category.budgetLimit ?? 0.0),
@@ -81,7 +87,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         Text(
-          'Całkowite $title: ${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
+          '${AppLocalizations.of(context)!.total} $title: ${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
           '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
           style: const TextStyle(fontSize: 16),
         ),
