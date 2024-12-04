@@ -10,13 +10,24 @@ class CurrencyRepository {
 
   Future<Map<String, double>> fetchCurrencyRates(String baseCurrency) async {
     final response = await http.get(
-        Uri.parse("$_baseUrl?apikey=$_apiKey&base_currency=$baseCurrency"));
+        Uri.parse("$_baseUrl?apikey=$_apiKey&base_currency=${baseCurrency.toUpperCase()}"));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final rates = (data['data'] as Map<String, dynamic>).map((key, value) {
-        return MapEntry(
-            key, (value as Map<String, dynamic>)['value'] as double);
+        final rateValue = (value as Map<String, dynamic>)['value'];
+
+        // Obsługa przypadku, gdy wartość jest int lub double
+        double parsedRate;
+        if (rateValue is int) {
+          parsedRate = rateValue.toDouble(); // Konwersja int -> double
+        } else if (rateValue is double) {
+          parsedRate = rateValue;
+        } else {
+          throw Exception('Unexpected rate value type: $rateValue');
+        }
+
+        return MapEntry(key, parsedRate);
       });
       return rates;
     } else {
