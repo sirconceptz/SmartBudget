@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import 'package:provider/provider.dart';
 import '../blocs/category/category_bloc.dart';
-import '../blocs/category/category_event.dart';
 import '../blocs/category/category_state.dart';
+import '../di/notifiers/currency_notifier.dart';
 import '../models/category.dart';
-import '../widgets/confirm_dialog.dart';
 
 class CategoryListScreen extends StatelessWidget {
   const CategoryListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final currencyNotifier = Provider.of<CurrencyNotifier>(context);
+    final currentCurrency = currencyNotifier.currency;
+
     return Scaffold(
       body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
@@ -25,65 +27,58 @@ class CategoryListScreen extends StatelessWidget {
               itemCount: categories.length,
               itemBuilder: (context, index) {
                 final category = categories[index];
-                return Dismissible(
-                  key: ValueKey(category.id),
-                  background: Container(
-                    color: Colors.blue,
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.only(left: 20),
-                    child: Icon(Icons.edit, color: Colors.white),
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  secondaryBackground: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20),
-                    child: Icon(Icons.delete, color: Colors.white),
-                  ),
-                  confirmDismiss: (direction) async {
-                    if (direction == DismissDirection.startToEnd) {
-                      await goToEditCategory(context, category);
-                      return false;
-                    } else if (direction == DismissDirection.endToStart) {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => ConfirmDialog(
-                          title: AppLocalizations.of(context)!.deleteCategory,
-                          content: AppLocalizations.of(context)!
-                              .deleteCategoryConfirmation,
-                          cancelText: AppLocalizations.of(context)!.cancel,
-                          confirmText: AppLocalizations.of(context)!.delete,
-                          onConfirm: () {
-                            context
-                                .read<CategoryBloc>()
-                                .add(DeleteCategory(category.id!));
-                          },
-                        ),
-                      );
-                      return confirm == true;
-                    }
-                    return false;
-                  },
-                  child: Card(
-                    color: category.isIncome ? Colors.green : Colors.red,
-                    child: ListTile(
-                      leading: category.icon != null
-                          ? Icon(IconData(category.icon!,
-                              fontFamily: 'MaterialIcons'))
-                          : Icon(Icons.category),
-                      title: Text(
-                        category.name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                  elevation: 5,
+                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  color: category.isIncome
+                      ? Colors.green.withOpacity(0.8)
+                      : Colors.red.withOpacity(0.8),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      child: category.icon != null
+                          ? Icon(
+                        IconData(category.icon!,
+                            fontFamily: 'MaterialIcons'),
+                        color: category.isIncome ? Colors.green : Colors.red,
+                      )
+                          : Icon(Icons.category,
+                          color: category.isIncome ? Colors.green : Colors.red),
+                    ),
+                    title: Text(
+                      category.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.white,
                       ),
-                      subtitle: Text(
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                      Text(
                         category.description ?? '',
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                          fontSize: 14,
+                          color: Colors.white70,
                         ),
                       ),
+                      Text(
+                        category.budgetLimit != null ? category.budgetLimit!.toStringAsFixed(2) + currentCurrency.sign : "",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ),
+                      )
+                    ],),
+                    trailing: IconButton(
+                      icon: Icon(Icons.chevron_right, color: Colors.white),
+                      onPressed: () async {
+                        await goToEditCategory(context, category);
+                      },
                     ),
                   ),
                 );
@@ -91,8 +86,9 @@ class CategoryListScreen extends StatelessWidget {
             );
           } else {
             return Center(
-                child: Text(
-                    AppLocalizations.of(context)!.errorWhileLoadingCategories));
+              child: Text(AppLocalizations.of(context)!
+                  .errorWhileLoadingCategories),
+            );
           }
         },
       ),

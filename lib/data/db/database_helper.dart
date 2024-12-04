@@ -21,7 +21,7 @@ class DatabaseHelper {
     final path = join(dbPath, 'budget_manager.db');
 
     // Uncomment to reset the database
-    //await deleteDatabase(path);
+    await deleteDatabase(path);
 
     return await openDatabase(
       path,

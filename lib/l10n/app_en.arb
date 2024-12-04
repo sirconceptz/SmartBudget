@@ -54,5 +54,8 @@
   "categoryTravel": "Travel",
   "categoryTravelDescription": "Expenses for trips and vacations",
   "categoryHealth": "Health",
-  "categoryHealthDescription": "Health-related expenses and services"
+  "categoryHealthDescription": "Health-related expenses and services",
+  "financeSection": "Finances",
+  "appSection": "Application",
+  "firstDayOfMonth": "First day of the month"
 }

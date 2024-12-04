@@ -44,7 +44,7 @@ class Transaction {
         categoryId: json['category_id'],
         date: DateTime.parse(json['date']),
         description: json['description'],
-        currency: json['currency']);
+        currency: CurrencyExtension.fromString(json['currency']));
   }
 
   Map<String, dynamic> toJson() {
@@ -55,7 +55,7 @@ class Transaction {
       'category_id': categoryId,
       'date': date.toIso8601String(),
       'description': description,
-      'currency': currency
+      'currency': currency.value
     };
   }
 }
