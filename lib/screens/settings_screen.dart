@@ -37,7 +37,7 @@ class SettingsScreen extends StatelessWidget {
             items: Currency.values
                 .map((currency) => DropdownMenuItem(
                       value: currency,
-                      child: Text(currency.name),
+                      child: Text(currency.localizedName(AppLocalizations.of(context)!)),
                     ))
                 .toList(),
             onChanged: (newCurrency) {
