@@ -18,6 +18,6 @@ void setupDependencies() {
   );
 
   getIt.registerLazySingleton<CurrencyRepository>(
-        () => CurrencyRepository(),
+    () => CurrencyRepository(),
   );
 }

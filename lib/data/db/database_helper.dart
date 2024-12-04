@@ -49,17 +49,10 @@ class DatabaseHelper {
         type INTEGER NOT NULL,
         amount REAL NOT NULL,
         category_id INTEGER,
+        currency TEXT,
         date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         description TEXT,
         FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE settings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        currency TEXT NOT NULL,
-        user_id INTEGER
       )
     ''');
   }

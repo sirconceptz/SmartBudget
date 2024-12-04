@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_budget/utils/enums/currency.dart';
+import 'package:provider/provider.dart';
 
 import '../blocs/transaction/transaction_bloc.dart';
-import '../blocs/transaction/transaction_event.dart';
 import '../blocs/transaction/transaction_state.dart';
-import '../models/transaction.dart';
-import '../widgets/confirm_dialog.dart';
+import '../di/notifiers/currency_notifier.dart';
 
 class TransactionsScreen extends StatelessWidget {
   const TransactionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final currencyNotifier = Provider.of<CurrencyNotifier>(context);
+    final currentCurrency = currencyNotifier.currency;
+
     return Scaffold(
       body: BlocBuilder<TransactionBloc, TransactionState>(
         builder: (context, state) {
@@ -26,82 +29,88 @@ class TransactionsScreen extends StatelessWidget {
               itemCount: transactions.length,
               itemBuilder: (context, index) {
                 final transaction = transactions[index];
-                return Dismissible(
-                  key: ValueKey(transaction.id),
-                  background: Container(
-                    color: Colors.blue,
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.only(left: 20),
-                    child: Icon(Icons.edit, color: Colors.white),
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  secondaryBackground: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20),
-                    child: Icon(Icons.delete, color: Colors.white),
-                  ),
-                  confirmDismiss: (direction) async {
-                    if (direction == DismissDirection.startToEnd) {
-                      await goToEditTransaction(context, transaction);
-                      return false;
-                    } else if (direction == DismissDirection.endToStart) {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => ConfirmDialog(
-                          title:
-                              AppLocalizations.of(context)!.deleteTransaction,
-                          content: AppLocalizations.of(context)!
-                              .deleteTransactionConfirmation,
-                          cancelText: AppLocalizations.of(context)!.cancel,
-                          confirmText: AppLocalizations.of(context)!.delete,
-                          onConfirm: () {
-                            context
-                                .read<TransactionBloc>()
-                                .add(DeleteTransaction(transaction.id!));
-                          },
-                        ),
-                      );
-                      return confirm == true;
-                    }
-                    return false;
-                  },
+                  elevation: 5,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   child: ListTile(
-                    title: Text(transaction.description ?? ''),
-                    subtitle: Text(DateFormat.yMMMMd('pl_PL')
-                        .add_jm()
-                        .format(transaction.date)),
-                    trailing: Text(transaction.amount.toStringAsFixed(2)),
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      child: transaction.categoryIcon != null
+                          ? Icon(
+                              IconData(transaction.categoryIcon!,
+                                  fontFamily: 'MaterialIcons'),
+                              color: transaction.type == 1
+                                  ? Colors.green
+                                  : Colors.red,
+                            )
+                          : Icon(
+                              Icons.category,
+                              color: transaction.type == 1
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
+                    ),
+                    title: Text(
+                      transaction.description ?? '',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      DateFormat.yMMMMd('pl_PL')
+                          .add_jm()
+                          .format(transaction.date),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          currentCurrency
+                              .formatAmount(transaction.convertedAmount),
+                          style: TextStyle(
+                            color: transaction.type == 1
+                                ? Colors.green
+                                : Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        if (transaction.originalAmount !=
+                            transaction.convertedAmount)
+                          Text(
+                            "(${transaction.originalCurrency.formatAmount(transaction.originalAmount)})",
+                            style: TextStyle(
+                              color: transaction.type == 1
+                                  ? Colors.green
+                                  : Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 );
               },
             );
           } else {
             return Center(
-                child: Text(AppLocalizations.of(context)!
-                    .errorWhileLoadingTransactions));
+              child: Text(
+                  AppLocalizations.of(context)!.errorWhileLoadingTransactions),
+            );
           }
         },
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'transactions_fab',
         onPressed: () async {
-          await goToAddTransaction(context);
+          await Navigator.pushNamed(context, '/addTransaction');
         },
         child: Icon(Icons.add),
       ),
-    );
-  }
-
-  Future<void> goToAddTransaction(BuildContext context) async {
-    await Navigator.pushNamed(context, '/addTransaction');
-  }
-
-  Future<void> goToEditTransaction(
-      BuildContext context, Transaction transaction) async {
-    await Navigator.pushNamed(
-      context,
-      '/editTransaction',
-      arguments: transaction,
     );
   }
 }

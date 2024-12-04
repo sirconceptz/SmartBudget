@@ -16,4 +16,12 @@ class CurrencyRate {
       'rate': rate,
     };
   }
+
+  factory CurrencyRate.fromJson(Map<String, dynamic> json) {
+    return CurrencyRate(
+      name: json['name'] ?? '',
+      code: json['code'] ?? '',
+      rate: (json['rate'] as num).toDouble(),
+    );
+  }
 }

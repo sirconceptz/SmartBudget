@@ -12,6 +12,8 @@ import 'package:smart_budget/screens/settings_screen.dart';
 
 import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
+import 'blocs/currency_conversion/currency_conversion_bloc.dart';
+import 'blocs/currency_conversion/currency_conversion_event.dart';
 import 'blocs/transaction/transaction_bloc.dart';
 import 'blocs/transaction/transaction_event.dart';
 import 'data/db/database_helper.dart';
@@ -36,32 +38,40 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => ThemeNotifier(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => CurrencyNotifier(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => LocaleNotifier(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => FinanceNotifier(),
-        ),
-        BlocProvider(
-          create: (context) => TransactionBloc(
-            getIt<TransactionRepository>(),
-            getIt<CurrencyRepository>(),
-            context.read<CurrencyNotifier>().currency,
-          )..add(LoadTransactions()),
-        ),
-        BlocProvider(
-          create: (context) =>
-          CategoryBloc(getIt<CategoryRepository>())..add(LoadCategories()),
-        ),
+        ChangeNotifierProvider(create: (_) => ThemeNotifier()),
+        ChangeNotifierProvider(create: (_) => CurrencyNotifier()),
+        ChangeNotifierProvider(create: (_) => LocaleNotifier()),
+        ChangeNotifierProvider(create: (_) => FinanceNotifier()),
       ],
-      child: MyApp(
-        dbHelper: dbHelper,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) {
+              final bloc = CurrencyConversionBloc(
+                getIt<CurrencyRepository>(),
+              );
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                bloc.add(LoadCurrencyRates(
+                  context.read<CurrencyNotifier>().currency.value,
+                ));
+              });
+              return bloc;
+            },
+          ),
+          BlocProvider(
+            create: (context) => TransactionBloc(
+              getIt<TransactionRepository>(),
+              getIt<CategoryRepository>(),
+              context.read<CurrencyConversionBloc>(),
+              context.read<CurrencyNotifier>(),
+            )..add(LoadTransactions()),
+          ),
+          BlocProvider(
+            create: (context) => CategoryBloc(getIt<CategoryRepository>())
+              ..add(LoadCategories()),
+          ),
+        ],
+        child: MyApp(dbHelper: dbHelper),
       ),
     ),
   );

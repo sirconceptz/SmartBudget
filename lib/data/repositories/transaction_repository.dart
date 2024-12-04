@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
-import '../../models/transaction.dart' as t;
+import '../../models/transaction_entity.dart';
 import '../db/database_helper.dart';
 
 class TransactionRepository {
@@ -8,7 +8,7 @@ class TransactionRepository {
 
   TransactionRepository(this._databaseHelper);
 
-  Future<int> createTransaction(t.Transaction transaction) async {
+  Future<int> createTransaction(TransactionEntity transaction) async {
     final db = await _databaseHelper.database;
     return await db.insert(
       'transactions',
@@ -17,13 +17,13 @@ class TransactionRepository {
     );
   }
 
-  Future<List<t.Transaction>> getAllTransactions() async {
+  Future<List<TransactionEntity>> getAllTransactions() async {
     final db = await _databaseHelper.database;
     final result = await db.query('transactions');
-    return result.map((json) => t.Transaction.fromJson(json)).toList();
+    return result.map((json) => TransactionEntity.fromJson(json)).toList();
   }
 
-  Future<int> updateTransaction(t.Transaction transaction) async {
+  Future<int> updateTransaction(TransactionEntity transaction) async {
     final db = await _databaseHelper.database;
     return await db.update(
       'transactions',

@@ -1,57 +1,105 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_budget/blocs/currency_conversion/currency_conversion_bloc.dart';
+import 'package:smart_budget/blocs/currency_conversion/currency_conversion_state.dart';
 import 'package:smart_budget/blocs/transaction/transaction_event.dart';
 import 'package:smart_budget/blocs/transaction/transaction_state.dart';
 
-import '../../data/repositories/currency_repository.dart';
+import '../../data/mappers/transaction_mapper.dart';
+import '../../data/repositories/category_repository.dart';
 import '../../data/repositories/transaction_repository.dart';
+import '../../di/notifiers/currency_notifier.dart';
+import '../../models/category.dart';
 import '../../models/currency_rate.dart';
-import '../../models/transaction.dart';
-import '../../utils/enums/currency.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionRepository transactionRepository;
-  final CurrencyRepository currencyConversionRepository;
-  final Currency userCurrency;
+  final CategoryRepository categoryRepository;
+  final CurrencyConversionBloc currencyConversionBloc;
+  final CurrencyNotifier currencyNotifier;
 
-  TransactionBloc(this.transactionRepository, this.currencyConversionRepository,
-      this.userCurrency)
-      : super(TransactionsLoading()) {
+  StreamSubscription? _currencyRatesSubscription;
+  VoidCallback? _currencyChangeListener;
+
+  TransactionBloc(
+      this.transactionRepository,
+      this.categoryRepository,
+      this.currencyConversionBloc,
+      this.currencyNotifier,
+      ) : super(TransactionsLoading()) {
     on<LoadTransactions>(_onLoadTransactions);
     on<AddTransaction>(_onAddTransaction);
     on<UpdateTransaction>(_onUpdateTransaction);
     on<DeleteTransaction>(_onDeleteTransaction);
+
+    // Nasłuchiwanie zmian kursów walut
+    _currencyRatesSubscription = currencyConversionBloc.stream.listen((state) {
+      if (state is CurrencyRatesLoaded) {
+        add(LoadTransactions());
+      }
+    });
+
+    // Nasłuchiwanie zmian waluty użytkownika
+    _currencyChangeListener = () {
+      add(LoadTransactions());
+    };
+    currencyNotifier.addListener(_currencyChangeListener!);
   }
 
   Future<void> _onLoadTransactions(
       LoadTransactions event, Emitter<TransactionState> emit) async {
     try {
       emit(TransactionsLoading());
-      final prefs = await SharedPreferences.getInstance();
-      final savedCurrency = prefs.getString('selected_currency') ?? 'usd';
-      Currency baseCurrency = CurrencyExtension.fromString(savedCurrency);
+
       final transactions = await transactionRepository.getAllTransactions();
-      final rates = await currencyConversionRepository
-          .fetchCurrencyRates(baseCurrency.value);
+      final categories = await categoryRepository.getAllCategories();
+      final rates = await currencyConversionBloc.repository.fetchCurrencyRates();
+      final userCurrency = currencyNotifier.currency;
 
-      final rateList = rates.entries
-          .map((entry) =>
-              CurrencyRate(name: entry.key, code: entry.key, rate: entry.value))
-          .toList();
+      final convertedTransactions = transactions.map((transaction) {
+        final category = categories.firstWhere(
+              (cat) => cat.id == transaction.categoryId,
+          orElse: () => Category(
+            id: null,
+            name: 'Unknown',
+            isIncome: false,
+          ),
+        );
 
-      final convertedTransactions =
-          _convertTransactionsToUserCurrency(transactions, rateList);
+        final baseToUsdRate = rates.firstWhere(
+              (rate) => rate.code.toUpperCase() == transaction.currency.value.toUpperCase(),
+          orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
+        ).rate;
+
+        final usdToUserCurrencyRate = rates.firstWhere(
+              (rate) => rate.code.toUpperCase() == userCurrency.value.toUpperCase(),
+          orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
+        ).rate;
+
+        final conversionRate = usdToUserCurrencyRate / baseToUsdRate;
+
+        return TransactionMapper.mapFromEntity(
+          transaction,
+          conversionRate,
+          category.icon,
+        );
+      }).toList();
 
       emit(TransactionsLoaded(convertedTransactions));
-    } catch (e) {
-      emit(TransactionError('Failed to load transactions'));
+    } catch (e, stackTrace) {
+      print('Error loading transactions: $e');
+      print(stackTrace);
+      emit(TransactionError('Failed to load transactions: $e'));
     }
   }
 
   Future<void> _onAddTransaction(
       AddTransaction event, Emitter<TransactionState> emit) async {
     try {
-      await transactionRepository.createTransaction(event.transaction);
+      final transaction = TransactionMapper.toEntity(event.transaction);
+      await transactionRepository.createTransaction(transaction);
       add(LoadTransactions());
     } catch (e) {
       emit(TransactionError('Failed to add transaction'));
@@ -61,7 +109,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   Future<void> _onUpdateTransaction(
       UpdateTransaction event, Emitter<TransactionState> emit) async {
     try {
-      await transactionRepository.updateTransaction(event.transaction);
+      final transaction = TransactionMapper.toEntity(event.transaction);
+      await transactionRepository.updateTransaction(transaction);
       add(LoadTransactions());
     } catch (e) {
       emit(TransactionError('Failed to update transaction'));
@@ -78,24 +127,12 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     }
   }
 
-  List<Transaction> _convertTransactionsToUserCurrency(
-      List<Transaction> transactions, List<CurrencyRate> rates) {
-    final rateMap = {for (var rate in rates) rate.code: rate};
-
-    return transactions.map((transaction) {
-      if (transaction.currency == userCurrency) {
-        return transaction;
-      }
-
-      final targetRate = rateMap[userCurrency.value]?.rate ?? 1.0;
-      final sourceRate = rateMap[transaction.currency.value]?.rate ?? 1.0;
-
-      final convertedAmount = transaction.amount * (targetRate / sourceRate);
-
-      return transaction.copyWith(
-        amount: convertedAmount,
-        currency: userCurrency,
-      );
-    }).toList();
+  @override
+  Future<void> close() {
+    _currencyRatesSubscription?.cancel();
+    if (_currencyChangeListener != null) {
+      currencyNotifier.removeListener(_currencyChangeListener!);
+    }
+    return super.close();
   }
 }
