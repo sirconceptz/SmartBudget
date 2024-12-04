@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../blocs/category/category_bloc.dart';
+import '../blocs/category/category_state.dart';
 import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
+import '../models/category.dart';
 import '../models/transaction.dart';
 
 class EditTransactionScreen extends StatefulWidget {
@@ -22,6 +25,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   late String? _description;
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
+  Category? _selectedCategory;
 
   @override
   void initState() {
@@ -55,6 +59,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
             _selectedTime.minute,
           ),
           description: _description,
+          category: _selectedCategory!,
           originalCurrency: widget.transaction.originalCurrency);
 
       context
@@ -118,10 +123,48 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                 onChanged: (value) {
                   setState(() {
                     _type = value!;
+                    _selectedCategory = null;
                   });
                 },
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.category),
+                decoration: InputDecoration(labelText: 'Typ transakcji'),
+              ),
+              BlocBuilder<CategoryBloc, CategoryState>(
+                builder: (context, state) {
+                  if (state is CategoriesLoading) {
+                    return CircularProgressIndicator();
+                  } else if (state is CategoriesLoaded) {
+                    final categories = state.categories
+                        .where((category) =>
+                    (_type == AppLocalizations.of(context)!.income
+                        ? category.isIncome
+                        : !category.isIncome))
+                        .toList();
+
+                    return DropdownButtonFormField<Category>(
+                      enableFeedback: true,
+                      value: _selectedCategory,
+                      items: categories.map((category) {
+                        return DropdownMenuItem(
+                          value: category,
+                          child: Text(category.name),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategory = value!;
+                        });
+                      },
+                      decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.category),
+                      validator: (value) => value == null
+                          ? AppLocalizations.of(context)!.chooseCategory
+                          : null,
+                    );
+                  } else {
+                    return Text(AppLocalizations.of(context)!
+                        .errorWhileLoadingCategories);
+                  }
+                },
               ),
               TextFormField(
                 initialValue: _amount.toString(),
