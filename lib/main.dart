@@ -20,6 +20,7 @@ import 'data/repositories/currency_repository.dart';
 import 'data/repositories/transaction_repository.dart';
 import 'di/di.dart';
 import 'di/notifiers/currency_notifier.dart';
+import 'di/notifiers/finance_notifier.dart';
 import 'di/notifiers/locale_notifier.dart';
 import 'di/notifiers/theme_notifier.dart';
 import 'models/category.dart';
@@ -35,17 +36,6 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        BlocProvider(
-          create: (context) => TransactionBloc(
-            getIt<TransactionRepository>(),
-            getIt<CurrencyRepository>(),
-            Provider.of<CurrencyNotifier>(context, listen: false).currency,
-          )..add(LoadTransactions()),
-        ),
-        BlocProvider(
-          create: (context) =>
-              CategoryBloc(getIt<CategoryRepository>())..add(LoadCategories()),
-        ),
         ChangeNotifierProvider(
           create: (_) => ThemeNotifier(),
         ),
@@ -54,6 +44,20 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => LocaleNotifier(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FinanceNotifier(),
+        ),
+        BlocProvider(
+          create: (context) => TransactionBloc(
+            getIt<TransactionRepository>(),
+            getIt<CurrencyRepository>(),
+            context.read<CurrencyNotifier>().currency,
+          )..add(LoadTransactions()),
+        ),
+        BlocProvider(
+          create: (context) =>
+          CategoryBloc(getIt<CategoryRepository>())..add(LoadCategories()),
         ),
       ],
       child: MyApp(

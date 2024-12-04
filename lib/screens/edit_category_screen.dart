@@ -39,15 +39,45 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
       _formKey.currentState!.save();
 
       final updatedCategory = Category(
-          id: widget.category.id,
-          name: _name,
-          description: _description,
-          icon: _icon,
-          isIncome: _isIncome,
-          budgetLimit: _budgetLimit);
+        id: widget.category.id,
+        name: _name,
+        description: _description,
+        icon: _icon,
+        isIncome: _isIncome,
+        budgetLimit: _budgetLimit,
+      );
 
       context.read<CategoryBloc>().add(UpdateCategory(updatedCategory));
 
+      Navigator.pop(context, true);
+    }
+  }
+
+  void _deleteCategory() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.deleteCategory),
+        content: Text(AppLocalizations.of(context)!.deleteCategoryConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context
+                  .read<CategoryBloc>()
+                  .add(DeleteCategory(widget.category.id!));
+              Navigator.pop(context, true);
+            },
+            child: Text(AppLocalizations.of(context)!.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
       Navigator.pop(context, true);
     }
   }
@@ -61,16 +91,19 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.editCategory),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               TextFormField(
                 initialValue: _name,
                 decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.name),
+                  labelText: AppLocalizations.of(context)!.name,
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return AppLocalizations.of(context)!.giveCategoryName;
@@ -81,24 +114,31 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   _name = value!;
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
                 initialValue: _description,
                 decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.description),
+                  labelText: AppLocalizations.of(context)!.description,
+                  border: OutlineInputBorder(),
+                ),
                 onSaved: (value) {
                   _description = value;
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
+                initialValue: _budgetLimit?.toString(),
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.budgetLimit,
+                  border: OutlineInputBorder(),
                   suffixText: currentCurrency.name,
                 ),
                 onSaved: (value) {
                   _budgetLimit = double.tryParse(value!);
                 },
               ),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -114,10 +154,23 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   Text(AppLocalizations.of(context)!.incomes),
                 ],
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _saveCategory,
-                child: Text(AppLocalizations.of(context)!.saveChanges),
+              SizedBox(height: 24),
+              Center(
+                child: Column(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _saveCategory,
+                      icon: Icon(Icons.save),
+                      label: Text(AppLocalizations.of(context)!.saveChanges),
+                    ),
+                    SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: _deleteCategory,
+                      icon: Icon(Icons.delete),
+                      label: Text(AppLocalizations.of(context)!.deleteCategory),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

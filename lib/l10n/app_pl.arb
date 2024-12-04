@@ -54,5 +54,8 @@
   "categoryTravel": "Podróże",
   "categoryTravelDescription": "Wydatki na wycieczki i wakacje",
   "categoryHealth": "Zdrowie",
-  "categoryHealthDescription": "Wydatki związane ze zdrowiem i usługami medycznymi"
+  "categoryHealthDescription": "Wydatki związane ze zdrowiem i usługami medycznymi",
+  "financeSection": "Finanse",
+  "appSection": "Aplikacja",
+  "firstDayOfMonth": "Pierwszy dzień miesiąca"
 }

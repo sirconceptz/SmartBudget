@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../di/notifiers/currency_notifier.dart';
 import '../di/notifiers/locale_notifier.dart';
 import '../di/notifiers/theme_notifier.dart';
+import '../di/notifiers/finance_notifier.dart';
 import '../utils/enums/currency.dart';
 import '../widgets/setting_row.dart';
 
@@ -16,20 +17,28 @@ class SettingsScreen extends StatelessWidget {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
     final currencyNotifier = Provider.of<CurrencyNotifier>(context);
     final localeNotifier = Provider.of<LocaleNotifier>(context);
+    final financeNotifier = Provider.of<FinanceNotifier>(context);
 
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              AppLocalizations.of(context)!.appSection,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
           SettingRow<Currency>(
             icon: Icons.attach_money,
             title: AppLocalizations.of(context)!.chooseCurrency,
             value: currencyNotifier.currency,
             items: Currency.values
                 .map((currency) => DropdownMenuItem(
-                      value: currency,
-                      child: Text(currency.name.toUpperCase()),
-                    ))
+              value: currency,
+              child: Text(currency.name.toUpperCase()),
+            ))
                 .toList(),
             onChanged: (newCurrency) {
               if (newCurrency != null) {
@@ -80,6 +89,31 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (newLocale) {
               if (newLocale != null) {
                 localeNotifier.setLocale(newLocale);
+              }
+            },
+          ),
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              AppLocalizations.of(context)!.financeSection,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          SettingRow<int>(
+            icon: Icons.calendar_today,
+            title: AppLocalizations.of(context)!.firstDayOfMonth,
+            value: financeNotifier.firstDayOfMonth,
+            items: List.generate(
+              28,
+                  (index) => DropdownMenuItem(
+                value: index + 1,
+                child: Text((index + 1).toString()),
+              ),
+            ),
+            onChanged: (newDay) {
+              if (newDay != null) {
+                financeNotifier.setFirstDayOfMonth(newDay);
               }
             },
           ),

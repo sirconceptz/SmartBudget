@@ -1,5 +1,5 @@
 enum Currency {
-  usd(name: "Dolary amerykańskie", value: "usd", sign: "\$"),
+  usd(name: "Dolar amerykański", value: "usd", sign: "\$"),
   eur(name: "Euro", value: "eur", sign: "€"),
   pln(name: "Polski złoty", value: "pln", sign: "ZŁ");
 

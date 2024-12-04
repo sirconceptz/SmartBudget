@@ -23,6 +23,7 @@ dependencies:
   equatable: ^2.0.7
   flutter_dotenv: ^5.2.1
   http: ^1.2.2
+  flutter_launcher_icons: ^0.10.0
 
 dev_dependencies:
   flutter_test:
@@ -36,5 +37,10 @@ flutter:
   generate: true
   uses-material-design: true
 
+flutter_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/icons/app_icon.png"
   assets:
     - lib/l10n/
