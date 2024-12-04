@@ -8,6 +8,7 @@ import '../blocs/category/category_state.dart';
 import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
 import '../di/notifiers/currency_notifier.dart';
+import '../models/category.dart';
 import '../models/transaction.dart';
 import '../utils/enums/currency.dart';
 
@@ -22,7 +23,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   late String _type = AppLocalizations.of(context)!.expense;
   double? _amount;
-  int? _selectedCategoryId;
+  Category? _selectedCategory;
   String? _description;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
@@ -43,7 +44,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         type: _type == AppLocalizations.of(context)!.income ? 1 : 2,
         originalAmount: _amount!,
         convertedAmount: _amount!,
-        categoryId: _selectedCategoryId,
+        category: _selectedCategory!,
         date: transactionDateTime,
         description: _description,
         originalCurrency: currentCurrency,
@@ -111,7 +112,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 onChanged: (value) {
                   setState(() {
                     _type = value!;
-                    _selectedCategoryId = null;
+                    _selectedCategory = null;
                   });
                 },
                 decoration: InputDecoration(labelText: 'Typ transakcji'),
@@ -128,18 +129,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 : !category.isIncome))
                         .toList();
 
-                    return DropdownButtonFormField<int>(
+                    return DropdownButtonFormField<Category>(
                       enableFeedback: true,
-                      value: _selectedCategoryId,
+                      value: _selectedCategory,
                       items: categories.map((category) {
                         return DropdownMenuItem(
-                          value: category.id,
+                          value: category,
                           child: Text(category.name),
                         );
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          _selectedCategoryId = value;
+                          _selectedCategory = value!;
                         });
                       },
                       decoration: InputDecoration(

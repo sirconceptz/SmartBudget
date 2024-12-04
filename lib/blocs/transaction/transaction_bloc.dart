@@ -83,7 +83,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         return TransactionMapper.mapFromEntity(
           transaction,
           conversionRate,
-          category.icon,
+          category,
         );
       }).toList();
 
