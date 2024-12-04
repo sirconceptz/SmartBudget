@@ -57,5 +57,16 @@
   "categoryHealthDescription": "Health-related expenses and services",
   "financeSection": "Finances",
   "appSection": "Application",
-  "firstDayOfMonth": "First day of the month"
+  "firstDayOfMonth": "First day of the month",
+  "currency_usd": "US Dollar",
+  "currency_eur": "Euro",
+  "currency_pln": "Polish Zloty",
+  "currency_jpy": "Japanese Yen",
+  "currency_gbp": "British Pound",
+  "currency_aud": "Australian Dollar",
+  "currency_cad": "Canadian Dollar",
+  "currency_chf": "Swiss Franc",
+  "currency_cny": "Chinese Yuan",
+  "currency_hkd": "Hong Kong Dollar",
+  "currency_nzd": "New Zealand Dollar"
 }

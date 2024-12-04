@@ -57,5 +57,16 @@
   "categoryHealthDescription": "Wydatki związane ze zdrowiem i usługami medycznymi",
   "financeSection": "Finanse",
   "appSection": "Aplikacja",
-  "firstDayOfMonth": "Pierwszy dzień miesiąca"
+  "firstDayOfMonth": "Pierwszy dzień miesiąca",
+  "currency_usd": "Dolar amerykański",
+  "currency_eur": "Euro",
+  "currency_pln": "Polski złoty",
+  "currency_jpy": "Jen japoński",
+  "currency_gbp": "Funt szterling",
+  "currency_aud": "Dolar australijski",
+  "currency_cad": "Dolar kanadyjski",
+  "currency_chf": "Frank szwajcarski",
+  "currency_cny": "Juan chiński",
+  "currency_hkd": "Dolar hongkoński",
+  "currency_nzd": "Dolar nowozelandzki"
 }
