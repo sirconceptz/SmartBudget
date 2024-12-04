@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_state.dart';
 import '../di/notifiers/currency_notifier.dart';
@@ -32,7 +33,8 @@ class CategoryListScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   elevation: 5,
-                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   color: category.isIncome
                       ? Colors.green.withOpacity(0.8)
                       : Colors.red.withOpacity(0.8),
@@ -41,12 +43,15 @@ class CategoryListScreen extends StatelessWidget {
                       backgroundColor: Colors.white,
                       child: category.icon != null
                           ? Icon(
-                        IconData(category.icon!,
-                            fontFamily: 'MaterialIcons'),
-                        color: category.isIncome ? Colors.green : Colors.red,
-                      )
+                              IconData(category.icon!,
+                                  fontFamily: 'MaterialIcons'),
+                              color:
+                                  category.isIncome ? Colors.green : Colors.red,
+                            )
                           : Icon(Icons.category,
-                          color: category.isIncome ? Colors.green : Colors.red),
+                              color: category.isIncome
+                                  ? Colors.green
+                                  : Colors.red),
                     ),
                     title: Text(
                       category.name,
@@ -59,21 +64,25 @@ class CategoryListScreen extends StatelessWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                      Text(
-                        category.description ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white70,
+                        Text(
+                          category.description ?? '',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white70,
+                          ),
                         ),
-                      ),
-                      Text(
-                        category.budgetLimit != null ? category.budgetLimit!.toStringAsFixed(2) + currentCurrency.sign : "",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white70,
-                        ),
-                      )
-                    ],),
+                        Text(
+                          category.budgetLimit != null
+                              ? category.budgetLimit!.toStringAsFixed(2) +
+                                  currentCurrency.sign
+                              : "",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white70,
+                          ),
+                        )
+                      ],
+                    ),
                     trailing: IconButton(
                       icon: Icon(Icons.chevron_right, color: Colors.white),
                       onPressed: () async {
@@ -86,8 +95,8 @@ class CategoryListScreen extends StatelessWidget {
             );
           } else {
             return Center(
-              child: Text(AppLocalizations.of(context)!
-                  .errorWhileLoadingCategories),
+              child: Text(
+                  AppLocalizations.of(context)!.errorWhileLoadingCategories),
             );
           }
         },

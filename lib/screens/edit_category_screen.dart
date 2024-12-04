@@ -10,7 +10,7 @@ import '../models/category.dart';
 class EditCategoryScreen extends StatefulWidget {
   final Category category;
 
-  const EditCategoryScreen({required this.category});
+  const EditCategoryScreen({super.key, required this.category});
 
   @override
   _EditCategoryScreenState createState() => _EditCategoryScreenState();

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:smart_budget/models/currency_rate.dart';
 
 abstract class CurrencyConversionState extends Equatable {
   @override
@@ -8,7 +9,7 @@ abstract class CurrencyConversionState extends Equatable {
 class CurrencyRatesLoading extends CurrencyConversionState {}
 
 class CurrencyRatesLoaded extends CurrencyConversionState {
-  final Map<String, double> rates;
+  final List<CurrencyRate> rates;
 
   CurrencyRatesLoaded(this.rates);
 

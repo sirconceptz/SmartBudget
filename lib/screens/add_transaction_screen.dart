@@ -41,11 +41,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
       final newTransaction = Transaction(
         type: _type == AppLocalizations.of(context)!.income ? 1 : 2,
-        amount: _amount!,
+        originalAmount: _amount!,
+        convertedAmount: _amount!,
         categoryId: _selectedCategoryId,
         date: transactionDateTime,
         description: _description,
-        currency: currentCurrency,
+        originalCurrency: currentCurrency,
       );
 
       context.read<TransactionBloc>().add(AddTransaction(newTransaction));

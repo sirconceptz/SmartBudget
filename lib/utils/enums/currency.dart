@@ -1,13 +1,18 @@
 enum Currency {
-  usd(name: "Dolar amerykański", value: "usd", sign: "\$"),
-  eur(name: "Euro", value: "eur", sign: "€"),
-  pln(name: "Polski złoty", value: "pln", sign: "ZŁ");
+  usd(name: "Dolar amerykański", value: "usd", sign: "\$", isLeftSigned: true),
+  eur(name: "Euro", value: "eur", sign: "€", isLeftSigned: false),
+  pln(name: "Polski złoty", value: "pln", sign: "ZŁ", isLeftSigned: false);
 
-  const Currency({required this.name, required this.value, required this.sign});
+  const Currency(
+      {required this.name,
+      required this.value,
+      required this.sign,
+      required this.isLeftSigned});
 
   final String name;
   final String value;
   final String sign;
+  final bool isLeftSigned;
 }
 
 extension CurrencyExtension on Currency {
@@ -22,5 +27,10 @@ extension CurrencyExtension on Currency {
       default:
         throw Exception('Invalid currency value');
     }
+  }
+
+  String formatAmount(double amount) {
+    final formattedAmount = amount.toStringAsFixed(2);
+    return isLeftSigned ? '$sign$formattedAmount' : '$formattedAmount $sign';
   }
 }

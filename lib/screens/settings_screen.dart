@@ -3,9 +3,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../di/notifiers/currency_notifier.dart';
+import '../di/notifiers/finance_notifier.dart';
 import '../di/notifiers/locale_notifier.dart';
 import '../di/notifiers/theme_notifier.dart';
-import '../di/notifiers/finance_notifier.dart';
 import '../utils/enums/currency.dart';
 import '../widgets/setting_row.dart';
 
@@ -36,9 +36,9 @@ class SettingsScreen extends StatelessWidget {
             value: currencyNotifier.currency,
             items: Currency.values
                 .map((currency) => DropdownMenuItem(
-              value: currency,
-              child: Text(currency.name.toUpperCase()),
-            ))
+                      value: currency,
+                      child: Text(currency.name),
+                    ))
                 .toList(),
             onChanged: (newCurrency) {
               if (newCurrency != null) {
@@ -106,7 +106,7 @@ class SettingsScreen extends StatelessWidget {
             value: financeNotifier.firstDayOfMonth,
             items: List.generate(
               28,
-                  (index) => DropdownMenuItem(
+              (index) => DropdownMenuItem(
                 value: index + 1,
                 child: Text((index + 1).toString()),
               ),

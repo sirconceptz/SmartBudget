@@ -7,6 +7,7 @@ class IconPickerDialog extends StatelessWidget {
     Icons.fastfood,
     Icons.house,
     Icons.car_rental,
+    Icons.baby_changing_station,
     Icons.health_and_safety,
     Icons.fitness_center,
     Icons.flight,
@@ -15,6 +16,8 @@ class IconPickerDialog extends StatelessWidget {
     Icons.school,
     Icons.attach_money,
   ];
+
+  IconPickerDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

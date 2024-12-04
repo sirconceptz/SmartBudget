@@ -29,7 +29,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
     _type = widget.transaction.type == 1
         ? AppLocalizations.of(context)!.income
         : AppLocalizations.of(context)!.expense;
-    _amount = widget.transaction.amount;
+    _amount = widget.transaction.originalAmount;
     _description = widget.transaction.description;
     _selectedDate = widget.transaction.date;
     _selectedTime = TimeOfDay(
@@ -45,7 +45,8 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       final updatedTransaction = Transaction(
           id: widget.transaction.id,
           type: _type == 'Przychód' ? 1 : 2,
-          amount: _amount,
+          originalAmount: _amount,
+          convertedAmount: _amount,
           date: DateTime(
             _selectedDate.year,
             _selectedDate.month,
@@ -54,7 +55,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
             _selectedTime.minute,
           ),
           description: _description,
-          currency: widget.transaction.currency);
+          originalCurrency: widget.transaction.originalCurrency);
 
       context
           .read<TransactionBloc>()
