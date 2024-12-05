@@ -72,5 +72,9 @@
   "currency": "Currency",
   "backupSection": "Backup",
   "exportBackup": "Export Backup",
-  "importBackup": "Import Backup"
+  "importBackup": "Import Backup",
+  "exportBackupStatement": "Backup exported to file.",
+  "importBackupStatement": "Backup imported successfully.",
+  "exportBackupError": "Problem with exporting backup.",
+  "importBackupError": "Problem with importing backup."
 }

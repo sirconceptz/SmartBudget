@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_budget/config.dart';
 import 'package:smart_budget/models/currency_rate.dart';
+import 'package:smart_budget/utils/my_logger.dart';
 
 class CurrencyRepository {
   final String _baseUrl = AppConfig.apiUrl;
@@ -43,10 +44,12 @@ class CurrencyRepository {
 
         return rates;
       } else {
+        MyLogger.write("Currency - FETCH", 'Failed to fetch currency rates: ${response.reasonPhrase}');
         throw Exception(
             'Failed to fetch currency rates: ${response.reasonPhrase}');
       }
     } catch (e) {
+      MyLogger.write("Currency - FETCH", 'Error fetching currency rates: $e');
       throw Exception('Error fetching currency rates: $e');
     }
   }

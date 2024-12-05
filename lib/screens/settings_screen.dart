@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_budget/blocs/category/category_bloc.dart';
 import 'package:smart_budget/blocs/category/category_event.dart';
+import 'package:smart_budget/utils/my_logger.dart';
 
 import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
@@ -12,6 +13,7 @@ import '../di/notifiers/finance_notifier.dart';
 import '../di/notifiers/locale_notifier.dart';
 import '../di/notifiers/theme_notifier.dart';
 import '../utils/enums/currency.dart';
+import '../utils/toast.dart';
 import '../widgets/setting_row.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -123,6 +125,7 @@ class SettingsScreen extends StatelessWidget {
               }
             },
           ),
+          const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Column(
@@ -132,27 +135,64 @@ class SettingsScreen extends StatelessWidget {
                   AppLocalizations.of(context)!.backupSection,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                ListTile(
-                  leading: Icon(Icons.download),
-                  title: Text(AppLocalizations.of(context)!.exportBackup),
+                const SizedBox(height: 16.0),
+                InkWell(
+                  child: Row(
+                    children: [
+                      Icon(Icons.download),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.exportBackup,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
                   onTap: () async {
-                    final path = await DatabaseHelper().exportDatabase();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Backup exported to $path')),
-                    );
+                    try {
+                      await DatabaseHelper().exportDatabase();
+                      Toast.show(context,
+                          AppLocalizations.of(context)!.exportBackupStatement);
+                    } catch (E) {
+                      MyLogger.write("BACKUP - EXPORT", E.toString());
+                      Toast.show(context,
+                          AppLocalizations.of(context)!.exportBackupError);
+                    }
                   },
                 ),
-                ListTile(
-                  leading: Icon(Icons.upload),
-                  title: Text(AppLocalizations.of(context)!.importBackup),
+                const SizedBox(height: 16.0),
+                InkWell(
+                  child: Row(
+                    children: [
+                      Icon(Icons.upload),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context)!.importBackup,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
                   onTap: () async {
-                    final filePath = 'backup.json';
-                    await DatabaseHelper().importDatabase(filePath);
-                    context.read<TransactionBloc>().add(LoadTransactions());
-                    context.read<CategoryBloc>().add(LoadCategoriesWithSpentAmounts());
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Backup imported successfully')),
-                    );
+                    try {
+                      await DatabaseHelper().importDatabase();
+                      context.read<TransactionBloc>().add(LoadTransactions());
+                      context
+                          .read<CategoryBloc>()
+                          .add(LoadCategoriesWithSpentAmounts());
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(AppLocalizations.of(context)!
+                                .importBackupStatement)),
+                      );
+                    } catch (E) {
+                      MyLogger.write("BACKUP - IMPORT", E.toString());
+                      Toast.show(context,
+                          AppLocalizations.of(context)!.importBackupError);
+                    }
                   },
                 ),
               ],

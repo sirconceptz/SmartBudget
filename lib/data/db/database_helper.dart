@@ -86,7 +86,7 @@ class DatabaseHelper {
     return file.path;
   }
 
-  Future<void> importDatabase(String filePath) async {
+  Future<void> importDatabase() async {
     final db = await database;
 
     final directory = await getApplicationDocumentsDirectory();
