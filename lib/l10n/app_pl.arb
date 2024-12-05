@@ -72,5 +72,9 @@
   "currency": "Waluta",
   "backupSection": "Kopia zapasowa",
   "exportBackup": "Eksport kopii zapasowej",
-  "importBackup": "Import kopii zapasowej"
+  "importBackup": "Import kopii zapasowej",
+  "exportBackupStatement": "Kopia zapasowa została utworzona pomyślnie",
+  "importBackupStatement": "Kopia zapasowa została zaimportowana pomyślnie",
+  "exportBackupError": "Problem z eksportem kopii zapasowej",
+  "importBackupError": "Problem z importem kopii zapasowej"
 }
