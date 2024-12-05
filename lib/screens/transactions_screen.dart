@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_budget/models/transaction.dart';
 import 'package:smart_budget/utils/enums/currency.dart';
 import 'package:provider/provider.dart';
 
@@ -90,6 +91,12 @@ class TransactionsScreen extends StatelessWidget {
                               fontSize: 18,
                             ),
                           ),
+                        IconButton(
+                          icon: Icon(Icons.chevron_right, color: Colors.white),
+                          onPressed: () async {
+                            await goToEditTransaction(context, transaction);
+                          },
+                        )
                       ],
                     ),
                   ),
@@ -111,6 +118,14 @@ class TransactionsScreen extends StatelessWidget {
         },
         child: Icon(Icons.add),
       ),
+    );
+  }
+
+  Future<void> goToEditTransaction(BuildContext context, Transaction transaction) async {
+    await Navigator.pushNamed(
+      context,
+      '/editTransaction',
+      arguments: transaction,
     );
   }
 }

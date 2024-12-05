@@ -30,8 +30,6 @@ class CurrencyConversionBloc
           currentTime.difference(lastUpdated).inHours < 24) {
         final cachedRates = await _getCachedCurrencyRates();
         if (cachedRates != null) {
-          print('Currency rates loaded from cache: $cachedRates');
-
           emit(CurrencyRatesLoaded(cachedRates));
           return;
         }
@@ -40,7 +38,6 @@ class CurrencyConversionBloc
       final rates = await repository.fetchCurrencyRates();
       await _cacheCurrencyRates(rates);
       await _setLastUpdatedTimestamp(currentTime);
-      print('Currency rates loaded from API: $rates');
 
       emit(CurrencyRatesLoaded(rates));
     } catch (error) {
@@ -68,7 +65,7 @@ class CurrencyConversionBloc
     final ratesJson = prefs.getString('cached_currency_rates');
     if (ratesJson != null) {
       final List<dynamic> decodedJson =
-          jsonDecode(ratesJson); // Dekodowanie listy JSON
+          jsonDecode(ratesJson);
       return decodedJson.map((json) => CurrencyRate.fromJson(json)).toList();
     }
     return null;

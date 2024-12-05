@@ -10,9 +10,13 @@ import 'package:smart_budget/blocs/transaction/transaction_state.dart';
 import '../../data/mappers/transaction_mapper.dart';
 import '../../data/repositories/category_repository.dart';
 import '../../data/repositories/transaction_repository.dart';
+import '../../di/di.dart';
 import '../../di/notifiers/currency_notifier.dart';
 import '../../models/category.dart';
 import '../../models/currency_rate.dart';
+import '../category/category_bloc.dart';
+import '../category/category_event.dart';
+import 'package:provider/provider.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionRepository transactionRepository;
@@ -34,14 +38,12 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<UpdateTransaction>(_onUpdateTransaction);
     on<DeleteTransaction>(_onDeleteTransaction);
 
-    // Nasłuchiwanie zmian kursów walut
     _currencyRatesSubscription = currencyConversionBloc.stream.listen((state) {
       if (state is CurrencyRatesLoaded) {
         add(LoadTransactions());
       }
     });
 
-    // Nasłuchiwanie zmian waluty użytkownika
     _currencyChangeListener = () {
       add(LoadTransactions());
     };
@@ -88,6 +90,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       }).toList();
 
       emit(TransactionsLoaded(convertedTransactions));
+      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts());
     } catch (e, stackTrace) {
       print('Error loading transactions: $e');
       print(stackTrace);
@@ -112,6 +115,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       final transaction = TransactionMapper.toEntity(event.transaction);
       await transactionRepository.updateTransaction(transaction);
       add(LoadTransactions());
+      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts());
     } catch (e) {
       emit(TransactionError('Failed to update transaction'));
     }
@@ -122,6 +126,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     try {
       await transactionRepository.deleteTransaction(event.id);
       add(LoadTransactions());
+      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts());
     } catch (e) {
       emit(TransactionError('Failed to delete transaction'));
     }

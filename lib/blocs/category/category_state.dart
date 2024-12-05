@@ -4,12 +4,6 @@ abstract class CategoryState {}
 
 class CategoriesLoading extends CategoryState {}
 
-class CategoriesLoaded extends CategoryState {
-  final List<Category> categories;
-
-  CategoriesLoaded(this.categories);
-}
-
 class CategoryError extends CategoryState {
   final String message;
 
@@ -19,9 +13,11 @@ class CategoryError extends CategoryState {
 class CategoriesWithSpentAmountsLoaded extends CategoryState {
   final List<Category> incomeCategories;
   final List<Category> expenseCategories;
+  final List<Category> allCategories;
 
   CategoriesWithSpentAmountsLoaded({
     required this.incomeCategories,
     required this.expenseCategories,
+    required this.allCategories
   });
 }

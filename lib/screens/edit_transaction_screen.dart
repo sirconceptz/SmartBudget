@@ -53,7 +53,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
         id: widget.transaction.id,
         type: _type == AppLocalizations.of(context)!.income ? 1 : 2,
         originalAmount: _amount,
-        convertedAmount: _amount, // Możesz dodać logikę przeliczenia waluty
+        convertedAmount: _amount,
         date: DateTime(
           _selectedDate.year,
           _selectedDate.month,
@@ -132,8 +132,8 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                 builder: (context, state) {
                   if (state is CategoriesLoading) {
                     return CircularProgressIndicator();
-                  } else if (state is CategoriesLoaded) {
-                    final categories = state.categories
+                  } else if (state is CategoriesWithSpentAmountsLoaded) {
+                    final categories = state.allCategories
                         .where((category) =>
                     (_type == AppLocalizations.of(context)!.income
                         ? category.isIncome

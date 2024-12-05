@@ -14,7 +14,7 @@ class CurrencyRepository {
     try {
       final response = await http.get(
         Uri.parse(
-            "$_baseUrl?apikey=$_apiKey&base_currency=USD&currencies=EUR,JPY,GBP,AUD,CAD,CHF,CNY,HKD,NZD"),
+            "$_baseUrl?apikey=$_apiKey&base_currency=USD&currencies=EUR,JPY,GBP,AUD,CAD,CHF,CNY,HKD,NZD,PLN"),
       );
 
       if (response.statusCode == 200) {

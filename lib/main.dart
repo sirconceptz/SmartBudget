@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_budget/screens/add_category_screen.dart';
 import 'package:smart_budget/screens/add_transaction_screen.dart';
 import 'package:smart_budget/screens/edit_category_screen.dart';
@@ -68,7 +69,7 @@ void main() async {
           ),
           BlocProvider(
             create: (context) => CategoryBloc(getIt<CategoryRepository>())
-              ..add(LoadCategories()),
+              ..add(LoadCategoriesWithSpentAmounts()),
           ),
         ],
         child: MyApp(dbHelper: dbHelper),
@@ -117,9 +118,7 @@ class MyApp extends StatelessWidget {
               builder: (context) {
                 final localizations = AppLocalizations.of(context);
                 if (localizations != null) {
-                  context
-                      .read<CategoryBloc>()
-                      .add(UpdateLocalizedCategories(localizations));
+                  updateLocalizedCategoriesIfNeeded(context, localizations);
                 }
                 return MainScreen();
               },
@@ -137,4 +136,16 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+
+  Future<void> updateLocalizedCategoriesIfNeeded(
+      BuildContext context, AppLocalizations localizations) async {
+    final prefs = await SharedPreferences.getInstance();
+    final isUpdated = prefs.getBool('localizedCategoriesUpdated') ?? false;
+
+    if (!isUpdated) {
+      context.read<CategoryBloc>().add(UpdateLocalizedCategories(localizations));
+      await prefs.setBool('localizedCategoriesUpdated', true);
+    }
+  }
+
 }

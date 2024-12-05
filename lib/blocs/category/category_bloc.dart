@@ -10,7 +10,6 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CategoryRepository categoryRepository;
 
   CategoryBloc(this.categoryRepository) : super(CategoriesLoading()) {
-    on<LoadCategories>(_onLoadCategories);
     on<AddCategory>(_onAddCategory);
     on<UpdateCategory>(_onUpdateCategory);
     on<DeleteCategory>(_onDeleteCategory);
@@ -18,21 +17,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<UpdateLocalizedCategories>(_onUpdateLocalizedCategories);
   }
 
-  Future<void> _onLoadCategories(
-      LoadCategories event, Emitter<CategoryState> emit) async {
-    try {
-      emit(CategoriesLoading());
-      final categories = await categoryRepository.getAllCategories();
-      emit(CategoriesLoaded(categories));
-    } catch (e) {
-      emit(CategoryError('Failed to load categories'));
-    }
-  }
-
   Future<void> _onLoadCategoriesWithSpentAmounts(
       LoadCategoriesWithSpentAmounts event, Emitter<CategoryState> emit) async {
     try {
       emit(CategoriesLoading());
+      final allCategories = await categoryRepository.getAllCategories();
       final spentData = await categoryRepository.getSpentAmountForCategories();
 
       final categories = spentData.map<Category>((data) {
@@ -53,6 +42,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(CategoriesWithSpentAmountsLoaded(
         incomeCategories: incomeCategories,
         expenseCategories: expenseCategories,
+        allCategories: allCategories
       ));
     } catch (e) {
       emit(CategoryError('Failed to load categories with spent amounts'));
@@ -63,7 +53,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       AddCategory event, Emitter<CategoryState> emit) async {
     try {
       await categoryRepository.createCategory(event.category);
-      add(LoadCategories());
+      add(LoadCategoriesWithSpentAmounts());
     } catch (e) {
       emit(CategoryError('Failed to add category'));
     }
@@ -73,7 +63,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       UpdateCategory event, Emitter<CategoryState> emit) async {
     try {
       await categoryRepository.updateCategory(event.category);
-      add(LoadCategories());
+      add(LoadCategoriesWithSpentAmounts());
     } catch (e) {
       emit(CategoryError('Failed to update category'));
     }
@@ -83,7 +73,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       DeleteCategory event, Emitter<CategoryState> emit) async {
     try {
       await categoryRepository.deleteCategory(event.id);
-      add(LoadCategories());
+      add(LoadCategoriesWithSpentAmounts());
     } catch (e) {
       emit(CategoryError('Failed to delete category'));
     }
@@ -143,7 +133,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         await categoryRepository.createOrReplaceCategory(category);
       }
 
-      add(LoadCategories());
+      add(LoadCategoriesWithSpentAmounts());
     } catch (e) {
       emit(CategoryError('Failed to update localized categories'));
     }

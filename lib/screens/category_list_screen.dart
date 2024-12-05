@@ -21,8 +21,8 @@ class CategoryListScreen extends StatelessWidget {
         builder: (context, state) {
           if (state is CategoriesLoading) {
             return Center(child: CircularProgressIndicator());
-          } else if (state is CategoriesLoaded) {
-            final categories = state.categories;
+          } else if (state is CategoriesWithSpentAmountsLoaded) {
+            final categories = state.allCategories;
 
             return ListView.builder(
               itemCount: categories.length,
