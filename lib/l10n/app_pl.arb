@@ -69,5 +69,8 @@
   "currency_cny": "Juan chiński",
   "currency_hkd": "Dolar hongkoński",
   "currency_nzd": "Dolar nowozelandzki",
-  "currency": "Waluta"
+  "currency": "Waluta",
+  "backupSection": "Kopia zapasowa",
+  "exportBackup": "Eksport kopii zapasowej",
+  "importBackup": "Import kopii zapasowej"
 }

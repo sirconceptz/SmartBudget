@@ -16,7 +16,6 @@ import '../../models/category.dart';
 import '../../models/currency_rate.dart';
 import '../category/category_bloc.dart';
 import '../category/category_event.dart';
-import 'package:provider/provider.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionRepository transactionRepository;
@@ -28,11 +27,11 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   VoidCallback? _currencyChangeListener;
 
   TransactionBloc(
-      this.transactionRepository,
-      this.categoryRepository,
-      this.currencyConversionBloc,
-      this.currencyNotifier,
-      ) : super(TransactionsLoading()) {
+    this.transactionRepository,
+    this.categoryRepository,
+    this.currencyConversionBloc,
+    this.currencyNotifier,
+  ) : super(TransactionsLoading()) {
     on<LoadTransactions>(_onLoadTransactions);
     on<AddTransaction>(_onAddTransaction);
     on<UpdateTransaction>(_onUpdateTransaction);
@@ -57,12 +56,13 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
       final transactions = await transactionRepository.getAllTransactions();
       final categories = await categoryRepository.getAllCategories();
-      final rates = await currencyConversionBloc.repository.fetchCurrencyRates();
+      final rates =
+          await currencyConversionBloc.repository.fetchCurrencyRates();
       final userCurrency = currencyNotifier.currency;
 
       final convertedTransactions = transactions.map((transaction) {
         final category = categories.firstWhere(
-              (cat) => cat.id == transaction.categoryId,
+          (cat) => cat.id == transaction.categoryId,
           orElse: () => Category(
             id: null,
             name: 'Unknown',
@@ -70,15 +70,22 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           ),
         );
 
-        final baseToUsdRate = rates.firstWhere(
-              (rate) => rate.code.toUpperCase() == transaction.currency.value.toUpperCase(),
-          orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
-        ).rate;
+        final baseToUsdRate = rates
+            .firstWhere(
+              (rate) =>
+                  rate.code.toUpperCase() ==
+                  transaction.currency.value.toUpperCase(),
+              orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
+            )
+            .rate;
 
-        final usdToUserCurrencyRate = rates.firstWhere(
-              (rate) => rate.code.toUpperCase() == userCurrency.value.toUpperCase(),
-          orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
-        ).rate;
+        final usdToUserCurrencyRate = rates
+            .firstWhere(
+              (rate) =>
+                  rate.code.toUpperCase() == userCurrency.value.toUpperCase(),
+              orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
+            )
+            .rate;
 
         final conversionRate = usdToUserCurrencyRate / baseToUsdRate;
 

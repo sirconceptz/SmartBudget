@@ -40,10 +40,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           categories.where((category) => !category.isIncome).toList();
 
       emit(CategoriesWithSpentAmountsLoaded(
-        incomeCategories: incomeCategories,
-        expenseCategories: expenseCategories,
-        allCategories: allCategories
-      ));
+          incomeCategories: incomeCategories,
+          expenseCategories: expenseCategories,
+          allCategories: allCategories));
     } catch (e) {
       emit(CategoryError('Failed to load categories with spent amounts'));
     }

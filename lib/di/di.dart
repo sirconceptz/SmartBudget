@@ -22,5 +22,6 @@ void setupDependencies() {
     () => CurrencyRepository(),
   );
 
-  getIt.registerSingleton<CategoryBloc>(CategoryBloc(getIt<CategoryRepository>()));
+  getIt.registerSingleton<CategoryBloc>(
+      CategoryBloc(getIt<CategoryRepository>()));
 }
