@@ -47,7 +47,7 @@ class CategoryRepository {
 
     final result = await db.rawQuery('''
       SELECT categories.id AS category_id, categories.name, categories.budget_limit,
-             SUM(transactions.amount) AS spent_amount
+             SUM(transactions.amount) AS spent_amount, categories.is_income
       FROM categories
       LEFT JOIN transactions ON categories.id = transactions.category_id
       GROUP BY categories.id
@@ -64,6 +64,7 @@ class CategoryRepository {
         'name': category.name,
         'icon': category.icon,
         'description': category.description,
+        'budget_limit': category.budgetLimit,
         'is_income': category.isIncome ? 1 : 0,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,

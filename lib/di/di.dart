@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 
+import '../blocs/category/category_bloc.dart';
 import '../data/db/database_helper.dart';
 import '../data/repositories/category_repository.dart';
 import '../data/repositories/currency_repository.dart';
@@ -20,4 +21,6 @@ void setupDependencies() {
   getIt.registerLazySingleton<CurrencyRepository>(
     () => CurrencyRepository(),
   );
+
+  getIt.registerSingleton<CategoryBloc>(CategoryBloc(getIt<CategoryRepository>()));
 }

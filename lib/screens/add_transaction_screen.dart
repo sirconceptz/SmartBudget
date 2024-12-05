@@ -128,8 +128,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 builder: (context, state) {
                   if (state is CategoriesLoading) {
                     return CircularProgressIndicator();
-                  } else if (state is CategoriesLoaded) {
-                    final categories = state.categories
+                  } else if (state is CategoriesWithSpentAmountsLoaded) {
+                    final categories = state.allCategories
                         .where((category) =>
                             (_type == AppLocalizations.of(context)!.income
                                 ? category.isIncome

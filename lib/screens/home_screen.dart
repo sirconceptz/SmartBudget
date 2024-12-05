@@ -77,7 +77,7 @@ class HomeScreen extends StatelessWidget {
                 return PieChartSectionData(
                   value: category.spentAmount ?? 0,
                   title: '${percentage.toStringAsFixed(1)}%',
-                  color: category.isEssential ? Colors.red : Colors.blue,
+                  color: Colors.red,
                   radius: 100,
                 );
               }).toList(),

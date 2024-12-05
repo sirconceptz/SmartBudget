@@ -14,8 +14,10 @@ class LocaleNotifier extends ChangeNotifier {
 
   void setLocale(Locale locale) async {
     _locale = locale;
-    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('localizedCategoriesUpdated', false);
     await _saveLocale(locale);
+    notifyListeners();
   }
 
   Future<void> _loadLocale() async {
