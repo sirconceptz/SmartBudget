@@ -69,5 +69,8 @@
   "currency_cny": "Chinese Yuan",
   "currency_hkd": "Hong Kong Dollar",
   "currency_nzd": "New Zealand Dollar",
-  "currency": "Currency"
+  "currency": "Currency",
+  "backupSection": "Backup",
+  "exportBackup": "Export Backup",
+  "importBackup": "Import Backup"
 }

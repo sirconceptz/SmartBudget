@@ -143,9 +143,10 @@ class MyApp extends StatelessWidget {
     final isUpdated = prefs.getBool('localizedCategoriesUpdated') ?? false;
 
     if (!isUpdated) {
-      context.read<CategoryBloc>().add(UpdateLocalizedCategories(localizations));
+      context
+          .read<CategoryBloc>()
+          .add(UpdateLocalizedCategories(localizations));
       await prefs.setBool('localizedCategoriesUpdated', true);
     }
   }
-
 }

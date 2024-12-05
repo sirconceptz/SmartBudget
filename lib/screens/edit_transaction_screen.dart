@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -32,9 +33,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   @override
   void initState() {
     super.initState();
-    _type = widget.transaction.type == 1
-        ? AppLocalizations.of(context)!.income
-        : AppLocalizations.of(context)!.expense;
+
     _amount = widget.transaction.originalAmount;
     _description = widget.transaction.description;
     _selectedDate = widget.transaction.date;
@@ -43,6 +42,17 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       minute: widget.transaction.date.minute,
     );
     _selectedCurrency = widget.transaction.originalCurrency;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    setState(() {
+      _type = widget.transaction.type == 1
+          ? AppLocalizations.of(context)!.income
+          : AppLocalizations.of(context)!.expense;
+    });
   }
 
   void _saveTransaction() {
@@ -66,7 +76,39 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
         originalCurrency: _selectedCurrency,
       );
 
-      context.read<TransactionBloc>().add(UpdateTransaction(updatedTransaction));
+      context
+          .read<TransactionBloc>()
+          .add(UpdateTransaction(updatedTransaction));
+      Navigator.pop(context, true);
+    }
+  }
+
+  void _deleteTransaction() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.deleteTransaction),
+        content:
+            Text(AppLocalizations.of(context)!.deleteTransactionConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context
+                  .read<TransactionBloc>()
+                  .add(DeleteTransaction(widget.transaction.id!));
+              Navigator.pop(context, true);
+            },
+            child: Text(AppLocalizations.of(context)!.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
       Navigator.pop(context, true);
     }
   }
@@ -135,13 +177,18 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                   } else if (state is CategoriesWithSpentAmountsLoaded) {
                     final categories = state.allCategories
                         .where((category) =>
-                    (_type == AppLocalizations.of(context)!.income
-                        ? category.isIncome
-                        : !category.isIncome))
+                            _type == AppLocalizations.of(context)!.income
+                                ? category.isIncome
+                                : !category.isIncome)
                         .toList();
 
+                    final selectedCategory = categories.firstWhereOrNull(
+                      (category) =>
+                          category.id == widget.transaction.category.id,
+                    );
+
                     return DropdownButtonFormField<Category>(
-                      value: _selectedCategory,
+                      value: selectedCategory,
                       items: categories.map((category) {
                         return DropdownMenuItem(
                           value: category,
@@ -154,7 +201,8 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                         });
                       },
                       decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.category),
+                        labelText: AppLocalizations.of(context)!.category,
+                      ),
                       validator: (value) => value == null
                           ? AppLocalizations.of(context)!.chooseCategory
                           : null,
@@ -187,7 +235,8 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                 items: Currency.values.map((currency) {
                   return DropdownMenuItem(
                     value: currency,
-                    child: Text(currency.localizedName(AppLocalizations.of(context)!)),
+                    child: Text(
+                        currency.localizedName(AppLocalizations.of(context)!)),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -239,6 +288,12 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
               ElevatedButton(
                 onPressed: _saveTransaction,
                 child: Text(AppLocalizations.of(context)!.saveChanges),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _deleteTransaction,
+                icon: Icon(Icons.delete),
+                label: Text(AppLocalizations.of(context)!.deleteTransaction),
               ),
             ],
           ),

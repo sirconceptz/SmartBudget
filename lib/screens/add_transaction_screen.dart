@@ -32,7 +32,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedCurrency = Provider.of<CurrencyNotifier>(context, listen: false).currency;
+    _selectedCurrency =
+        Provider.of<CurrencyNotifier>(context, listen: false).currency;
   }
 
   void _saveTransaction() async {
@@ -190,7 +191,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 items: Currency.values.map((currency) {
                   return DropdownMenuItem(
                     value: currency,
-                    child: Text(currency.localizedName(AppLocalizations.of(context)!)),
+                    child: Text(
+                        currency.localizedName(AppLocalizations.of(context)!)),
                   );
                 }).toList(),
                 onChanged: (value) {

@@ -64,8 +64,7 @@ class CurrencyConversionBloc
     final prefs = await SharedPreferences.getInstance();
     final ratesJson = prefs.getString('cached_currency_rates');
     if (ratesJson != null) {
-      final List<dynamic> decodedJson =
-          jsonDecode(ratesJson);
+      final List<dynamic> decodedJson = jsonDecode(ratesJson);
       return decodedJson.map((json) => CurrencyRate.fromJson(json)).toList();
     }
     return null;

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_budget/blocs/category/category_bloc.dart';
+import 'package:smart_budget/blocs/category/category_event.dart';
 
+import '../blocs/transaction/transaction_bloc.dart';
+import '../blocs/transaction/transaction_event.dart';
+import '../data/db/database_helper.dart';
 import '../di/notifiers/currency_notifier.dart';
 import '../di/notifiers/finance_notifier.dart';
 import '../di/notifiers/locale_notifier.dart';
@@ -37,7 +42,8 @@ class SettingsScreen extends StatelessWidget {
             items: Currency.values
                 .map((currency) => DropdownMenuItem(
                       value: currency,
-                      child: Text(currency.localizedName(AppLocalizations.of(context)!)),
+                      child: Text(currency
+                          .localizedName(AppLocalizations.of(context)!)),
                     ))
                 .toList(),
             onChanged: (newCurrency) {
@@ -116,6 +122,41 @@ class SettingsScreen extends StatelessWidget {
                 financeNotifier.setFirstDayOfMonth(newDay);
               }
             },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.backupSection,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                ListTile(
+                  leading: Icon(Icons.download),
+                  title: Text(AppLocalizations.of(context)!.exportBackup),
+                  onTap: () async {
+                    final path = await DatabaseHelper().exportDatabase();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Backup exported to $path')),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.upload),
+                  title: Text(AppLocalizations.of(context)!.importBackup),
+                  onTap: () async {
+                    final filePath = 'backup.json';
+                    await DatabaseHelper().importDatabase(filePath);
+                    context.read<TransactionBloc>().add(LoadTransactions());
+                    context.read<CategoryBloc>().add(LoadCategoriesWithSpentAmounts());
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Backup imported successfully')),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),

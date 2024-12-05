@@ -15,9 +15,8 @@ class CategoriesWithSpentAmountsLoaded extends CategoryState {
   final List<Category> expenseCategories;
   final List<Category> allCategories;
 
-  CategoriesWithSpentAmountsLoaded({
-    required this.incomeCategories,
-    required this.expenseCategories,
-    required this.allCategories
-  });
+  CategoriesWithSpentAmountsLoaded(
+      {required this.incomeCategories,
+      required this.expenseCategories,
+      required this.allCategories});
 }
