@@ -27,8 +27,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   String? _description;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
+  Currency? _selectedCurrency;
 
-  void _saveTransaction(Currency currentCurrency) async {
+  @override
+  void initState() {
+    super.initState();
+    _selectedCurrency = Provider.of<CurrencyNotifier>(context, listen: false).currency;
+  }
+
+  void _saveTransaction() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
@@ -47,7 +54,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         category: _selectedCategory!,
         date: transactionDateTime,
         description: _description,
-        originalCurrency: currentCurrency,
+        originalCurrency: _selectedCurrency!,
       );
 
       context.read<TransactionBloc>().add(AddTransaction(newTransaction));
@@ -178,6 +185,23 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   _description = value;
                 },
               ),
+              DropdownButtonFormField<Currency>(
+                value: _selectedCurrency,
+                items: Currency.values.map((currency) {
+                  return DropdownMenuItem(
+                    value: currency,
+                    child: Text(currency.localizedName(AppLocalizations.of(context)!)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCurrency = value!;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.currency,
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -207,7 +231,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => _saveTransaction(currentCurrency),
+                onPressed: () => _saveTransaction(),
                 child: Text(AppLocalizations.of(context)!.saveTransaction),
               ),
             ],
