@@ -68,5 +68,6 @@
   "currency_chf": "Swiss Franc",
   "currency_cny": "Chinese Yuan",
   "currency_hkd": "Hong Kong Dollar",
-  "currency_nzd": "New Zealand Dollar"
+  "currency_nzd": "New Zealand Dollar",
+  "currency": "Currency"
 }

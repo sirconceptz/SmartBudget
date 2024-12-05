@@ -8,6 +8,7 @@ import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
 import '../models/category.dart';
 import '../models/transaction.dart';
+import '../utils/enums/currency.dart';
 
 class EditTransactionScreen extends StatefulWidget {
   final Transaction transaction;
@@ -26,6 +27,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
   Category? _selectedCategory;
+  late Currency _selectedCurrency;
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       hour: widget.transaction.date.hour,
       minute: widget.transaction.date.minute,
     );
+    _selectedCurrency = widget.transaction.originalCurrency;
   }
 
   void _saveTransaction() {
@@ -47,25 +50,23 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       _formKey.currentState!.save();
 
       final updatedTransaction = Transaction(
-          id: widget.transaction.id,
-          type: _type == 'Przychód' ? 1 : 2,
-          originalAmount: _amount,
-          convertedAmount: _amount,
-          date: DateTime(
-            _selectedDate.year,
-            _selectedDate.month,
-            _selectedDate.day,
-            _selectedTime.hour,
-            _selectedTime.minute,
-          ),
-          description: _description,
-          category: _selectedCategory!,
-          originalCurrency: widget.transaction.originalCurrency);
+        id: widget.transaction.id,
+        type: _type == AppLocalizations.of(context)!.income ? 1 : 2,
+        originalAmount: _amount,
+        convertedAmount: _amount, // Możesz dodać logikę przeliczenia waluty
+        date: DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          _selectedTime.hour,
+          _selectedTime.minute,
+        ),
+        description: _description,
+        category: _selectedCategory!,
+        originalCurrency: _selectedCurrency,
+      );
 
-      context
-          .read<TransactionBloc>()
-          .add(UpdateTransaction(updatedTransaction));
-
+      context.read<TransactionBloc>().add(UpdateTransaction(updatedTransaction));
       Navigator.pop(context, true);
     }
   }
@@ -109,7 +110,6 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
-                enableFeedback: true,
                 value: _type,
                 items: [
                   AppLocalizations.of(context)!.income,
@@ -141,7 +141,6 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                         .toList();
 
                     return DropdownButtonFormField<Category>(
-                      enableFeedback: true,
                       value: _selectedCategory,
                       items: categories.map((category) {
                         return DropdownMenuItem(
@@ -170,7 +169,9 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                 initialValue: _amount.toString(),
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.amount),
+                  labelText: AppLocalizations.of(context)!.amount,
+                  suffixText: _selectedCurrency.sign,
+                ),
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
                     return AppLocalizations.of(context)!.giveCorrectAmount;
@@ -181,10 +182,28 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                   _amount = double.parse(value!);
                 },
               ),
+              DropdownButtonFormField<Currency>(
+                value: _selectedCurrency,
+                items: Currency.values.map((currency) {
+                  return DropdownMenuItem(
+                    value: currency,
+                    child: Text(currency.localizedName(AppLocalizations.of(context)!)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCurrency = value!;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.currency,
+                ),
+              ),
               TextFormField(
                 initialValue: _description,
                 decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.description),
+                  labelText: AppLocalizations.of(context)!.description,
+                ),
                 onSaved: (value) {
                   _description = value;
                 },

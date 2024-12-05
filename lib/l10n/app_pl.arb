@@ -68,5 +68,6 @@
   "currency_chf": "Frank szwajcarski",
   "currency_cny": "Juan chiński",
   "currency_hkd": "Dolar hongkoński",
-  "currency_nzd": "Dolar nowozelandzki"
+  "currency_nzd": "Dolar nowozelandzki",
+  "currency": "Waluta"
 }
