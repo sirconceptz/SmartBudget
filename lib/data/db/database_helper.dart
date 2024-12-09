@@ -8,9 +8,15 @@ import 'package:sqflite/sqflite.dart';
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
-  factory DatabaseHelper() => _instance;
+  factory DatabaseHelper({DatabaseFactory? factory}) {
+    if (factory != null) {
+      _databaseFactory = factory;
+    }
+    return _instance;
+  }
 
   static Database? _database;
+  static DatabaseFactory _databaseFactory = databaseFactory;
 
   DatabaseHelper._internal();
 
@@ -21,17 +27,16 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    final dbPath = await getDatabasesPath();
+    final dbPath = await _databaseFactory.getDatabasesPath();
     final path = join(dbPath, 'budget_manager.db');
 
-    // Uncomment to reset the database
-    //await deleteDatabase(path);
-
-    return await openDatabase(
+    return await _databaseFactory.openDatabase(
       path,
-      version: 1,
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
+      options: OpenDatabaseOptions(
+        version: 1,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      ),
     );
   }
 
@@ -68,7 +73,6 @@ class DatabaseHelper {
   Future<String> exportDatabase() async {
     final db = await database;
 
-    // Pobranie danych
     final categories = await db.query('categories');
     final transactions = await db.query('transactions');
 

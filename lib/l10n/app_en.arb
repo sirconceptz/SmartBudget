@@ -79,5 +79,7 @@
   "exportBackupStatement": "Backup exported to file.",
   "importBackupStatement": "Backup imported successfully.",
   "exportBackupError": "Problem with exporting backup.",
-  "importBackupError": "Problem with importing backup."
+  "importBackupError": "Problem with importing backup.",
+  "sendApplicationLog": "Send application logs",
+  "noDataToSend": "No data to send"
 }
