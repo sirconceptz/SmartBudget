@@ -60,16 +60,17 @@ void main() async {
             },
           ),
           BlocProvider(
+            create: (context) => CategoryBloc(getIt<CategoryRepository>())
+              ..add(LoadCategoriesWithSpentAmounts()),
+          ),
+          BlocProvider(
             create: (context) => TransactionBloc(
               getIt<TransactionRepository>(),
+              BlocProvider.of<CategoryBloc>(context),
               getIt<CategoryRepository>(),
               context.read<CurrencyConversionBloc>(),
               context.read<CurrencyNotifier>(),
             )..add(LoadTransactions()),
-          ),
-          BlocProvider(
-            create: (context) => CategoryBloc(getIt<CategoryRepository>())
-              ..add(LoadCategoriesWithSpentAmounts()),
           ),
         ],
         child: MyApp(dbHelper: dbHelper),

@@ -21,27 +21,17 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       LoadCategoriesWithSpentAmounts event, Emitter<CategoryState> emit) async {
     try {
       emit(CategoriesLoading());
-      final spentData = await categoryRepository.getSpentAmountForCategories();
-
-      final categories = spentData.map<Category>((data) {
-        return Category(
-          id: data['category_id'] as int,
-          name: data['name'] as String,
-          budgetLimit: data['budget_limit'] as double?,
-          spentAmount: data['spent_amount'] as double? ?? 0.0,
-          isIncome: data['is_income'] == 1,
-        );
-      }).toList();
+      final categories = await categoryRepository.getCategoriesWithTransactions();
 
       final incomeCategories =
-          categories.where((category) => category.isIncome).toList();
+      categories.where((category) => category.isIncome).toList();
       final expenseCategories =
-          categories.where((category) => !category.isIncome).toList();
+      categories.where((category) => !category.isIncome).toList();
 
       emit(CategoriesWithSpentAmountsLoaded(
           incomeCategories: incomeCategories,
           expenseCategories: expenseCategories,
-          allCategories: incomeCategories+expenseCategories));
+          allCategories: incomeCategories + expenseCategories));
     } catch (e) {
       emit(CategoryError('Failed to load categories with spent amounts'));
     }

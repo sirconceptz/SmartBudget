@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../../models/category.dart';
+import '../../models/transaction_entity.dart';
 import '../db/database_helper.dart';
 
 class CategoryRepository {
@@ -71,4 +72,27 @@ class CategoryRepository {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+  Future<List<Category>> getCategoriesWithTransactions() async {
+    final db = await _databaseHelper.database;
+
+    final categoriesResult = await db.query('categories');
+
+    final categories = await Future.wait(categoriesResult.map((categoryJson) async {
+      final transactionsResult = await db.query(
+        'transactions',
+        where: 'category_id = ?',
+        whereArgs: [categoryJson['id']],
+      );
+
+      final transactions = transactionsResult
+          .map((transactionJson) => TransactionEntity.fromJson(transactionJson))
+          .toList();
+
+      return Category.fromJson(categoryJson)..transactions = transactions;
+    }).toList());
+
+    return categories;
+  }
+
 }

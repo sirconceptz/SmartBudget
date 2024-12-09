@@ -22,13 +22,15 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final CategoryRepository categoryRepository;
   final CurrencyConversionBloc currencyConversionBloc;
   final CurrencyNotifier currencyNotifier;
+  final CategoryBloc categoryBloc;
 
   StreamSubscription? _currencyRatesSubscription;
   VoidCallback? _currencyChangeListener;
 
   TransactionBloc(
     this.transactionRepository,
-    this.categoryRepository,
+      this.categoryBloc,
+      this.categoryRepository,
     this.currencyConversionBloc,
     this.currencyNotifier,
   ) : super(TransactionsLoading()) {
@@ -111,6 +113,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       final transaction = TransactionMapper.toEntity(event.transaction);
       await transactionRepository.createTransaction(transaction);
       add(LoadTransactions());
+      categoryBloc.add(LoadCategoriesWithSpentAmounts());
+
     } catch (e) {
       emit(TransactionError('Failed to add transaction'));
     }

@@ -1,17 +1,66 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_state.dart';
+import '../di/notifiers/finance_notifier.dart';
+import '../models/category.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+class _HomeScreenState extends State<HomeScreen> {
+
+  late DateTime selectedMonth;
+  late int firstDayOfMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+    firstDayOfMonth = Provider.of<FinanceNotifier>(context, listen: false).firstDayOfMonth;
+  }
+
+  List<DateTime> _getPreviousMonths(int count) {
+    final now = DateTime.now();
+    return List.generate(
+      count,
+          (index) => DateTime(now.year, now.month - index),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final months = _getPreviousMonths(12);
+
     return Scaffold(
+      appBar: AppBar(
+        title: DropdownButton<DateTime>(
+          value: selectedMonth,
+          icon: const Icon(Icons.arrow_drop_down),
+          items: months.map((month) {
+            final formattedMonth = DateFormat.yMMMM('pl_PL').format(month);
+            return DropdownMenuItem<DateTime>(
+              value: month,
+              child: Text(formattedMonth),
+            );
+          }).toList(),
+          onChanged: (newMonth) {
+            if (newMonth != null) {
+              setState(() {
+                selectedMonth = newMonth;
+              });
+            }
+          },
+        ),
+      ),
       body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
           if (state is CategoriesLoading) {
@@ -20,15 +69,25 @@ class HomeScreen extends StatelessWidget {
             final incomeCategories = state.incomeCategories;
             final expenseCategories = state.expenseCategories;
 
+            final dateRange = getMonthRange(selectedMonth, firstDayOfMonth);
+
             return SingleChildScrollView(
               child: Column(
                 children: [
                   if (incomeCategories.isNotEmpty)
-                    _buildChartSection(AppLocalizations.of(context)!.incomes,
-                        incomeCategories, context),
+                    _buildChartSection(
+                      AppLocalizations.of(context)!.incomes,
+                      incomeCategories,
+                      context,
+                      dateRange,
+                    ),
                   if (expenseCategories.isNotEmpty)
-                    _buildChartSection(AppLocalizations.of(context)!.expenses,
-                        expenseCategories, context),
+                    _buildChartSection(
+                      AppLocalizations.of(context)!.expenses,
+                      expenseCategories,
+                      context,
+                      dateRange,
+                    ),
                 ],
               ),
             );
@@ -36,22 +95,54 @@ class HomeScreen extends StatelessWidget {
             return Center(child: Text(state.message));
           } else {
             return Center(
-                child: Text(
-                    '${AppLocalizations.of(context)!.noChartsToDisplay}.'));
+              child: Text(
+                '${AppLocalizations.of(context)!.noChartsToDisplay}.',
+              ),
+            );
           }
         },
       ),
     );
   }
 
-  Widget _buildChartSection(
-      String title, List categories, BuildContext context) {
-    final totalBudget = categories.fold<double>(
+  DateTimeRange getMonthRange(DateTime selectedMonth, int firstDayOfMonth) {
+    final start = DateTime(selectedMonth.year, selectedMonth.month, firstDayOfMonth);
+    final nextMonth = DateTime(selectedMonth.year, selectedMonth.month + 1);
+    final end = DateTime(nextMonth.year, nextMonth.month, firstDayOfMonth - 1, 23, 59, 59);
+
+    return DateTimeRange(start: start, end: end);
+  }
+
+  Widget _buildChartSection(String title, List<Category> categories, BuildContext context,
+      DateTimeRange dateRange) {
+    final filteredCategories = categories.where((category) {
+      return category.transactions.any((transaction) {
+        final transactionDate = transaction.date;
+        return transactionDate.isAfter(dateRange.start) &&
+            transactionDate.isBefore(dateRange.end);
+      });
+    }).toList();
+
+    for (var category in filteredCategories) {
+      category.spentAmount = category.transactions.fold<double>(
+        0.0,
+            (sum, transaction) {
+          final transactionDate = transaction.date;
+          if (transactionDate.isAfter(dateRange.start) &&
+              transactionDate.isBefore(dateRange.end)) {
+            return sum + transaction.amount;
+          }
+          return sum;
+        },
+      );
+    }
+
+    final totalBudget = filteredCategories.fold<double>(
       0.0,
           (sum, category) => sum + (category.budgetLimit ?? 0.0),
     );
 
-    final totalSpent = categories.fold<double>(
+    final totalSpent = filteredCategories.fold<double>(
       0.0,
           (sum, category) => sum + (category.spentAmount ?? 0.0),
     );
@@ -66,12 +157,12 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         _buildChartTitle(AppLocalizations.of(context)!.budgetDistribution),
-        _buildBudgetPieChart(categories, totalBudget),
-        _buildLegend(categories, isBudget: true),
+        _buildBudgetPieChart(filteredCategories, totalBudget),
+        _buildLegend(filteredCategories, isBudget: true),
         const SizedBox(height: 16),
         _buildChartTitle(AppLocalizations.of(context)!.budgetUsage),
-        _buildUsagePieChart(categories),
-        _buildLegend(categories, isBudget: false),
+        _buildUsagePieChart(filteredCategories),
+        _buildLegend(filteredCategories, isBudget: false),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
