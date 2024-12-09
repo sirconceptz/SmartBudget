@@ -79,5 +79,7 @@
   "exportBackupStatement": "Kopia zapasowa została utworzona pomyślnie",
   "importBackupStatement": "Kopia zapasowa została zaimportowana pomyślnie",
   "exportBackupError": "Problem z eksportem kopii zapasowej",
-  "importBackupError": "Problem z importem kopii zapasowej"
+  "importBackupError": "Problem z importem kopii zapasowej",
+  "sendApplicationLog": "Wyślij logi z aplikacji",
+  "noDataToSend": "Brak danych do wysłania"
 }
