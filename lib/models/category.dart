@@ -1,11 +1,14 @@
+import 'package:smart_budget/models/transaction_entity.dart';
+
 class Category {
   final int? id;
   final String name;
   final String? description;
   final int? icon;
   final double? budgetLimit;
-  final double? spentAmount;
+  double? spentAmount;
   final bool isIncome;
+  List<TransactionEntity> transactions;
 
   Category({
     this.id,
@@ -15,6 +18,7 @@ class Category {
     this.budgetLimit,
     this.spentAmount,
     required this.isIncome,
+    this.transactions = const [],
   });
 
   Category copyWith({
@@ -55,7 +59,7 @@ class Category {
       'description': description,
       'icon': icon,
       'is_income': isIncome ? 1 : 0,
-      'budget_limit': budgetLimit
+      'budget_limit': budgetLimit,
     };
   }
 }
