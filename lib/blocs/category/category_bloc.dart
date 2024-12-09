@@ -21,7 +21,6 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       LoadCategoriesWithSpentAmounts event, Emitter<CategoryState> emit) async {
     try {
       emit(CategoriesLoading());
-      final allCategories = await categoryRepository.getAllCategories();
       final spentData = await categoryRepository.getSpentAmountForCategories();
 
       final categories = spentData.map<Category>((data) {
@@ -42,7 +41,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(CategoriesWithSpentAmountsLoaded(
           incomeCategories: incomeCategories,
           expenseCategories: expenseCategories,
-          allCategories: allCategories));
+          allCategories: incomeCategories+expenseCategories));
     } catch (e) {
       emit(CategoryError('Failed to load categories with spent amounts'));
     }
