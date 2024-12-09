@@ -19,7 +19,7 @@ class CategoryRepository {
 
   Future<List<Category>> getAllCategories() async {
     final db = await _databaseHelper.database;
-    final result = await db.query('categories');
+    final result = await db.query('categories', orderBy: 'name');
     return result.map((json) => Category.fromJson(json)).toList();
   }
 
@@ -51,6 +51,7 @@ class CategoryRepository {
       FROM categories
       LEFT JOIN transactions ON categories.id = transactions.category_id
       GROUP BY categories.id
+      ORDER BY categories.name
     ''');
     return result;
   }
