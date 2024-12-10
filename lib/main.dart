@@ -62,10 +62,7 @@ void main() async {
               getIt<CategoryRepository>(),
               context.read<CurrencyConversionBloc>(),
               context.read<CurrencyNotifier>(),
-            )..add(LoadCategoriesWithSpentAmounts(DateTimeRange(
-                start: DateTime.now().subtract(Duration(days: 30)),
-                end: DateTime.now(),
-              ))),
+            ),
           ),
           BlocProvider(
             create: (context) => TransactionBloc(
@@ -74,7 +71,7 @@ void main() async {
               getIt<CategoryRepository>(),
               context.read<CurrencyConversionBloc>(),
               context.read<CurrencyNotifier>(),
-            )..add(LoadTransactions()),
+            ),
           ),
         ],
         child: MyApp(dbHelper: dbHelper),
