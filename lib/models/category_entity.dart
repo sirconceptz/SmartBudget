@@ -21,16 +21,15 @@ class CategoryEntity {
     required this.currency,
   });
 
-  CategoryEntity copyWith({
-    int? id,
-    String? name,
-    String? description,
-    int? icon,
-    double? budgetLimit,
-    double? spentAmount,
-    bool? isIncome,
-    Currency? currency
-  }) {
+  CategoryEntity copyWith(
+      {int? id,
+      String? name,
+      String? description,
+      int? icon,
+      double? budgetLimit,
+      double? spentAmount,
+      bool? isIncome,
+      Currency? currency}) {
     return CategoryEntity(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -39,8 +38,7 @@ class CategoryEntity {
         budgetLimit: budgetLimit ?? this.budgetLimit,
         spentAmount: spentAmount ?? this.spentAmount,
         isIncome: isIncome ?? this.isIncome,
-        currency: currency ?? this.currency
-    );
+        currency: currency ?? this.currency);
   }
 
   factory CategoryEntity.fromJson(Map<String, dynamic> json) {

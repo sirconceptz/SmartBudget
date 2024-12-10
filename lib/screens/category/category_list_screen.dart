@@ -4,10 +4,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_budget/utils/enums/currency.dart';
 
-import '../blocs/category/category_bloc.dart';
-import '../blocs/category/category_state.dart';
-import '../di/notifiers/currency_notifier.dart';
-import '../models/category.dart';
+import '../../blocs/category/category_bloc.dart';
+import '../../blocs/category/category_state.dart';
+import '../../di/notifiers/currency_notifier.dart';
+import '../../models/category.dart';
 
 class CategoryListScreen extends StatelessWidget {
   const CategoryListScreen({super.key});
@@ -73,8 +73,7 @@ class CategoryListScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "${category.budgetLimit != null ? "${AppLocalizations.of(context)!.budgetLimit}:" : ""} ${currentCurrency
-                              .formatAmount(category.convertedBudgetLimit) ?? ""}",
+                          "${category.budgetLimit != null ? "${AppLocalizations.of(context)!.budgetLimit}:" : ""} ${currentCurrency.formatAmount(category.convertedBudgetLimit) ?? ""}",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,

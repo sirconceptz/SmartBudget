@@ -6,6 +6,5 @@ abstract class CurrencyConversionEvent extends Equatable {
 }
 
 class LoadCurrencyRates extends CurrencyConversionEvent {
-
   LoadCurrencyRates();
 }

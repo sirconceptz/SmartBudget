@@ -1,13 +1,14 @@
 import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_budget/blocs/category/category_bloc.dart';
 import 'package:smart_budget/blocs/category/category_event.dart';
 import 'package:smart_budget/utils/my_logger.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
 
 import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
@@ -142,7 +143,8 @@ class SettingsScreen extends StatelessWidget {
                 sendLogs(context, uri);
               } else {
                 if (context.mounted) {
-                  Toast.show(context, AppLocalizations.of(context)!.noDataToSend);
+                  Toast.show(
+                      context, AppLocalizations.of(context)!.noDataToSend);
                 }
               }
             },
@@ -247,7 +249,7 @@ class SettingsScreen extends StatelessWidget {
     final String version = packageInfo.version;
     final Email message = Email(
         body:
-        'Błąd w aplikacji Smart Budget $version\nModel $model\nWersja systemu: $systemVersion\n',
+            'Błąd w aplikacji Smart Budget $version\nModel $model\nWersja systemu: $systemVersion\n',
         subject: 'Błąd w Smart Budget - wersja $version',
         recipients: ['mateusz.hermanowicz@icloud.com'],
         attachmentPaths: [path]);

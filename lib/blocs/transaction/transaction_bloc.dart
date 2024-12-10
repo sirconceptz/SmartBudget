@@ -29,8 +29,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
   TransactionBloc(
     this.transactionRepository,
-      this.categoryBloc,
-      this.categoryRepository,
+    this.categoryBloc,
+    this.categoryRepository,
     this.currencyConversionBloc,
     this.currencyNotifier,
   ) : super(TransactionsLoading()) {
@@ -73,7 +73,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
       final convertedTransactions = transactions.map((transaction) {
         final category = categories.firstWhere(
-              (cat) => cat.id == transaction.categoryId,
+          (cat) => cat.id == transaction.categoryId,
           orElse: () => Category(
             id: null,
             name: 'Unknown',
@@ -123,7 +123,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         end: DateTime.now(),
       );
       getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
-
     } catch (e) {
       emit(TransactionError('Failed to add transaction'));
     }

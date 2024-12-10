@@ -27,9 +27,9 @@ class CurrencyConversionBloc
   }
 
   Future<void> _onLoadCurrencyRates(
-      LoadCurrencyRates event,
-      Emitter<CurrencyConversionState> emit,
-      ) async {
+    LoadCurrencyRates event,
+    Emitter<CurrencyConversionState> emit,
+  ) async {
     try {
       emit(CurrencyRatesLoading());
 

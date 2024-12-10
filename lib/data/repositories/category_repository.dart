@@ -40,7 +40,7 @@ class CategoryRepository {
     await db.insert(
       'categories',
       CategoryMapper.toEntity(category).toJson(),
-    conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
@@ -49,7 +49,8 @@ class CategoryRepository {
 
     final categoriesResult = await db.query('categories');
 
-    final categories = await Future.wait(categoriesResult.map((categoryJson) async {
+    final categories =
+        await Future.wait(categoriesResult.map((categoryJson) async {
       final transactionsResult = await db.query(
         'transactions',
         where: 'category_id = ?',

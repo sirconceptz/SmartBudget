@@ -66,8 +66,7 @@ class Category {
         currency: CurrencyExtension.fromString(json['currency']));
   }
 
-  static Category convertMoney(
-      Category category, double rateToUserCurrency) {
+  static Category convertMoney(Category category, double rateToUserCurrency) {
     return Category(
       id: category.id,
       name: category.name,
