@@ -184,7 +184,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
                     final selectedCategory = categories.firstWhereOrNull(
                       (category) =>
-                          category.id == widget.transaction.category.id,
+                          category.id == widget.transaction.category!.id,
                     );
 
                     return DropdownButtonFormField<Category>(

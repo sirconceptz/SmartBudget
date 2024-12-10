@@ -40,9 +40,9 @@ class TransactionsScreen extends StatelessWidget {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.white,
-                      child: transaction.category.icon != null
+                      child: transaction.category!.icon != null
                           ? Icon(
-                              IconData(transaction.category.icon!,
+                              IconData(transaction.category!.icon!,
                                   fontFamily: 'MaterialIcons'),
                               color: transaction.type == 1
                                   ? Colors.green

@@ -73,7 +73,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
       final convertedTransactions = transactions.map((transaction) {
         final category = categories.firstWhere(
-          (cat) => cat.id == transaction.categoryId,
+          (cat) => cat.id == transaction.category!.id,
           orElse: () => Category(
             id: null,
             name: 'Unknown',
@@ -84,14 +84,14 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         );
 
         final baseToUsdRate =
-            ratesMap[transaction.currency.value.toUpperCase()] ?? defaultRate;
+            ratesMap[transaction.originalCurrency.value.toUpperCase()] ?? defaultRate;
         final usdToUserCurrencyRate =
             ratesMap[userCurrency.value.toUpperCase()] ?? defaultRate;
 
         final conversionRate = usdToUserCurrencyRate / baseToUsdRate;
 
-        return TransactionMapper.mapFromEntity(
-          transaction,
+        return TransactionMapper.mapFromEntityAndConvert(
+          TransactionMapper.toEntity(transaction),
           conversionRate,
           category,
         );
@@ -115,8 +115,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   Future<void> _onAddTransaction(
       AddTransaction event, Emitter<TransactionState> emit) async {
     try {
-      final transaction = TransactionMapper.toEntity(event.transaction);
-      await transactionRepository.createTransaction(transaction);
+      await transactionRepository.createTransaction(event.transaction);
       add(LoadTransactions());
       final dateRange = DateTimeRange(
         start: DateTime.now().subtract(Duration(days: 30)),
@@ -131,8 +130,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   Future<void> _onUpdateTransaction(
       UpdateTransaction event, Emitter<TransactionState> emit) async {
     try {
-      final transaction = TransactionMapper.toEntity(event.transaction);
-      await transactionRepository.updateTransaction(transaction);
+      await transactionRepository.updateTransaction(event.transaction);
       add(LoadTransactions());
       final dateRange = DateTimeRange(
         start: DateTime.now().subtract(Duration(days: 30)),

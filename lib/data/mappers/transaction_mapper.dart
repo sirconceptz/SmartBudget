@@ -3,7 +3,7 @@ import '../../models/transaction.dart';
 import '../../models/transaction_entity.dart';
 
 class TransactionMapper {
-  static Transaction mapFromEntity(
+  static Transaction mapFromEntityAndConvert(
       TransactionEntity entity, double rateToUserCurrency, Category category) {
     return Transaction(
       id: entity.id,
@@ -11,6 +11,20 @@ class TransactionMapper {
       originalAmount: entity.amount,
       convertedAmount: entity.amount * rateToUserCurrency,
       category: category,
+      date: entity.date,
+      description: entity.description,
+      originalCurrency: entity.currency,
+    );
+  }
+
+  static Transaction mapFromEntity(
+      TransactionEntity entity) {
+    return Transaction(
+      id: entity.id,
+      type: entity.type,
+      originalAmount: entity.amount,
+      convertedAmount: entity.amount,
+      category: null,
       date: entity.date,
       description: entity.description,
       originalCurrency: entity.currency,
@@ -25,6 +39,6 @@ class TransactionMapper {
         date: transaction.date,
         description: transaction.description,
         currency: transaction.originalCurrency,
-        categoryId: transaction.category.id);
+        categoryId: transaction.category!.id);
   }
 }
