@@ -1,8 +1,14 @@
+import 'package:flutter/material.dart';
+
 import '../../models/transaction.dart';
 
 abstract class TransactionEvent {}
 
-class LoadTransactions extends TransactionEvent {}
+class LoadTransactions extends TransactionEvent {
+  final DateTimeRange? dateRange;
+
+  LoadTransactions({this.dateRange});
+}
 
 class AddTransaction extends TransactionEvent {
   final Transaction transaction;

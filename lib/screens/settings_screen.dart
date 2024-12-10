@@ -201,9 +201,14 @@ class SettingsScreen extends StatelessWidget {
                     try {
                       await DatabaseHelper().importDatabase();
                       context.read<TransactionBloc>().add(LoadTransactions());
+
+                      final dateRange = DateTimeRange(
+                        start: DateTime.now().subtract(Duration(days: 30)),
+                        end: DateTime.now(),
+                      );
                       context
                           .read<CategoryBloc>()
-                          .add(LoadCategoriesWithSpentAmounts());
+                          .add(LoadCategoriesWithSpentAmounts(dateRange));
                       ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

@@ -30,6 +30,8 @@ class DatabaseHelper {
     final dbPath = await _databaseFactory.getDatabasesPath();
     final path = join(dbPath, 'budget_manager.db');
 
+    //await _databaseFactory.deleteDatabase(path);
+
     return await _databaseFactory.openDatabase(
       path,
       options: OpenDatabaseOptions(
@@ -48,6 +50,7 @@ class DatabaseHelper {
         icon INTEGER,
         description TEXT,
         budget_limit REAL,
+        currency TEXT,
         is_income INTEGER DEFAULT 0
       )
     ''');
@@ -114,5 +117,10 @@ class DatabaseHelper {
             'transactions', Map<String, dynamic>.from(transaction));
       }
     });
+  }
+
+  Future<List<Map<String, dynamic>>> query(String table) async {
+    final db = await database;
+    return db.query(table);
   }
 }

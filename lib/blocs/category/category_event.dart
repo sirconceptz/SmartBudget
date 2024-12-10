@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/category.dart';
@@ -24,7 +25,11 @@ class DeleteCategory extends CategoryEvent {
   DeleteCategory(this.id);
 }
 
-class LoadCategoriesWithSpentAmounts extends CategoryEvent {}
+class LoadCategoriesWithSpentAmounts extends CategoryEvent {
+  final DateTimeRange dateRange;
+
+  LoadCategoriesWithSpentAmounts(this.dateRange);
+}
 
 class UpdateLocalizedCategories extends CategoryEvent {
   final AppLocalizations localizations;

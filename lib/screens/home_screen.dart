@@ -6,9 +6,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../blocs/category/category_bloc.dart';
+import '../blocs/category/category_event.dart';
 import '../blocs/category/category_state.dart';
+import '../di/notifiers/currency_notifier.dart';
 import '../di/notifiers/finance_notifier.dart';
 import '../models/category.dart';
+import '../utils/enums/currency.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,24 +19,33 @@ class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
-class _HomeScreenState extends State<HomeScreen> {
 
+class _HomeScreenState extends State<HomeScreen> {
   late DateTime selectedMonth;
   late int firstDayOfMonth;
+  late Currency currency;
 
   @override
   void initState() {
     super.initState();
     selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
-    firstDayOfMonth = Provider.of<FinanceNotifier>(context, listen: false).firstDayOfMonth;
+    firstDayOfMonth =
+        Provider.of<FinanceNotifier>(context, listen: false).firstDayOfMonth;
+    currency = Provider.of<CurrencyNotifier>(context, listen: false).currency;
+    _loadCategoriesForSelectedMonth();
   }
 
   List<DateTime> _getPreviousMonths(int count) {
     final now = DateTime.now();
     return List.generate(
       count,
-          (index) => DateTime(now.year, now.month - index),
+      (index) => DateTime(now.year, now.month - index),
     );
+  }
+
+  void _loadCategoriesForSelectedMonth() {
+    final dateRange = getMonthRange(selectedMonth, firstDayOfMonth);
+    context.read<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
   }
 
   @override
@@ -57,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
               setState(() {
                 selectedMonth = newMonth;
               });
+              _loadCategoriesForSelectedMonth(); // Reload data for new month
             }
           },
         ),
@@ -69,8 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
             final incomeCategories = state.incomeCategories;
             final expenseCategories = state.expenseCategories;
 
-            final dateRange = getMonthRange(selectedMonth, firstDayOfMonth);
-
             return SingleChildScrollView(
               child: Column(
                 children: [
@@ -79,14 +90,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       AppLocalizations.of(context)!.incomes,
                       incomeCategories,
                       context,
-                      dateRange,
                     ),
                   if (expenseCategories.isNotEmpty)
                     _buildChartSection(
                       AppLocalizations.of(context)!.expenses,
                       expenseCategories,
                       context,
-                      dateRange,
+                    ),
+                  if (incomeCategories.isEmpty && expenseCategories.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        AppLocalizations.of(context)!.noChartsToDisplay,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
                     ),
                 ],
               ),
@@ -96,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
           } else {
             return Center(
               child: Text(
-                '${AppLocalizations.of(context)!.noChartsToDisplay}.',
+                AppLocalizations.of(context)!.noChartsToDisplay,
               ),
             );
           }
@@ -106,45 +124,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   DateTimeRange getMonthRange(DateTime selectedMonth, int firstDayOfMonth) {
-    final start = DateTime(selectedMonth.year, selectedMonth.month, firstDayOfMonth);
+    final start =
+        DateTime(selectedMonth.year, selectedMonth.month, firstDayOfMonth);
     final nextMonth = DateTime(selectedMonth.year, selectedMonth.month + 1);
-    final end = DateTime(nextMonth.year, nextMonth.month, firstDayOfMonth - 1, 23, 59, 59);
+    final end = DateTime(
+        nextMonth.year, nextMonth.month, firstDayOfMonth - 1, 23, 59, 59);
 
     return DateTimeRange(start: start, end: end);
   }
 
-  Widget _buildChartSection(String title, List<Category> categories, BuildContext context,
-      DateTimeRange dateRange) {
-    final filteredCategories = categories.where((category) {
-      return category.transactions.any((transaction) {
-        final transactionDate = transaction.date;
-        return transactionDate.isAfter(dateRange.start) &&
-            transactionDate.isBefore(dateRange.end);
-      });
-    }).toList();
-
-    for (var category in filteredCategories) {
-      category.spentAmount = category.transactions.fold<double>(
-        0.0,
-            (sum, transaction) {
-          final transactionDate = transaction.date;
-          if (transactionDate.isAfter(dateRange.start) &&
-              transactionDate.isBefore(dateRange.end)) {
-            return sum + transaction.amount;
-          }
-          return sum;
-        },
+  Widget _buildChartSection(
+      String title, List<Category> categories, BuildContext context) {
+    if (categories.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          AppLocalizations.of(context)!.noChartsToDisplay,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
       );
     }
 
-    final totalBudget = filteredCategories.fold<double>(
+    final totalBudget = categories.fold<double>(
       0.0,
-          (sum, category) => sum + (category.budgetLimit ?? 0.0),
+      (sum, category) => sum + (category.budgetLimit ?? 0),
     );
 
-    final totalSpent = filteredCategories.fold<double>(
+    final totalSpent = categories.fold<double>(
       0.0,
-          (sum, category) => sum + (category.spentAmount ?? 0.0),
+      (sum, category) => sum + (category.spentAmount ?? 0),
     );
 
     return Column(
@@ -157,17 +165,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         _buildChartTitle(AppLocalizations.of(context)!.budgetDistribution),
-        _buildBudgetPieChart(filteredCategories, totalBudget),
-        _buildLegend(filteredCategories, isBudget: true),
+        _buildBudgetPieChart(categories, totalBudget),
+        _buildLegend(categories, isBudget: true),
         const SizedBox(height: 16),
         _buildChartTitle(AppLocalizations.of(context)!.budgetUsage),
-        _buildUsagePieChart(filteredCategories),
-        _buildLegend(filteredCategories, isBudget: false),
+        _buildUsagePieChart(categories),
+        _buildLegend(categories, isBudget: false),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
             '${AppLocalizations.of(context)!.total} $title: ${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
-                '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
+            '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
             style: const TextStyle(fontSize: 16),
           ),
         ),
@@ -187,18 +195,22 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  Widget _buildBudgetPieChart(List categories, double totalBudget) {
+
+  Widget _buildBudgetPieChart(List<Category> categories, double totalBudget) {
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
         PieChartData(
           sections: categories.map((category) {
-            final budgetShare = (category.budgetLimit ?? 0) / (totalBudget == 0 ? 1 : totalBudget) * 100;
+            final budgetShare = (category.budgetLimit ?? 0) /
+                (totalBudget == 0 ? 1 : totalBudget) *
+                100;
 
             return PieChartSectionData(
-              value: category.budgetLimit ?? 0,
-              title: '',
-              color: Colors.primaries[categories.indexOf(category) % Colors.primaries.length],
+              value: budgetShare,
+              title: "${category.name}\n${budgetShare.toStringAsFixed(2)}%",
+              color: Colors.primaries[
+                  categories.indexOf(category) % Colors.primaries.length],
               radius: 100,
             );
           }).toList(),
@@ -209,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildUsagePieChart(List categories) {
+  Widget _buildUsagePieChart(List<Category> categories) {
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
@@ -221,8 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
             return PieChartSectionData(
               value: usagePercentage,
-              title: '',
-              color: Colors.primaries[categories.indexOf(category) % Colors.primaries.length],
+              title: "${category.name}\n${usagePercentage.toStringAsFixed(2)}%",
+              color: Colors.primaries[
+                  categories.indexOf(category) % Colors.primaries.length],
               radius: 100,
             );
           }).toList(),
@@ -233,18 +246,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildLegend(List categories, {required bool isBudget}) {
+  Widget _buildLegend(List<Category> categories, {required bool isBudget}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: categories.map((category) {
-          final color = Colors.primaries[categories.indexOf(category) %
-              Colors.primaries.length];
+          final color = Colors.primaries[
+              categories.indexOf(category) % Colors.primaries.length];
           final value = isBudget
-              ? '${(category.budgetLimit ?? 0).toStringAsFixed(2)}'
-              : '${((category.spentAmount ?? 0) / (category.budgetLimit ?? 1) *
-              100).toStringAsFixed(1)}%';
+              ? '${currency.isLeftSigned ? currency.sign : ""}${(category.budgetLimit ?? 0).toStringAsFixed(2)}${!currency.isLeftSigned ? currency.sign : ""}'
+              : '${((category.spentAmount ?? 0) / (category.budgetLimit ?? 1) * 100).toStringAsFixed(1)}%';
 
           return Row(
             children: [

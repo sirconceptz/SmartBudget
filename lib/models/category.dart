@@ -1,13 +1,18 @@
 import 'package:smart_budget/models/transaction_entity.dart';
 
+import '../utils/enums/currency.dart';
+
 class Category {
   final int? id;
   final String name;
   final String? description;
   final int? icon;
-  final double? budgetLimit;
+  double? budgetLimit;
+  double? convertedBudgetLimit;
   double? spentAmount;
+  double? convertedSpentAmount;
   final bool isIncome;
+  final Currency currency;
   List<TransactionEntity> transactions;
 
   Category({
@@ -17,7 +22,10 @@ class Category {
     this.icon,
     this.budgetLimit,
     this.spentAmount,
+    this.convertedBudgetLimit,
+    this.convertedSpentAmount,
     required this.isIncome,
+    required this.currency,
     this.transactions = const [],
   });
 
@@ -27,18 +35,23 @@ class Category {
     String? description,
     int? icon,
     double? budgetLimit,
+    double? convertedBudgetLimit,
     double? spentAmount,
+    double? convertedSpentAmount,
+    Currency? currency,
     bool? isIncome,
   }) {
     return Category(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      icon: icon ?? this.icon,
-      budgetLimit: budgetLimit ?? this.budgetLimit,
-      spentAmount: spentAmount ?? this.spentAmount,
-      isIncome: isIncome ?? this.isIncome,
-    );
+        id: id ?? this.id,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        icon: icon ?? this.icon,
+        budgetLimit: budgetLimit ?? this.budgetLimit,
+        spentAmount: spentAmount ?? this.spentAmount,
+        convertedSpentAmount: convertedSpentAmount ?? this.convertedSpentAmount,
+        convertedBudgetLimit: convertedBudgetLimit ?? this.convertedBudgetLimit,
+        isIncome: isIncome ?? this.isIncome,
+        currency: currency ?? this.currency);
   }
 
   factory Category.fromJson(Map<String, dynamic> json) {
@@ -49,17 +62,25 @@ class Category {
         icon: json['icon'],
         isIncome: json['is_income'] == 1,
         spentAmount: json['spent_amount'],
-        budgetLimit: json['budget_limit']);
+        budgetLimit: json['budget_limit'],
+        currency: CurrencyExtension.fromString(json['currency']));
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'icon': icon,
-      'is_income': isIncome ? 1 : 0,
-      'budget_limit': budgetLimit,
-    };
+  static Category convertMoney(
+      Category category, double rateToUserCurrency) {
+    return Category(
+      id: category.id,
+      name: category.name,
+      icon: category.icon,
+      spentAmount: category.spentAmount != null
+          ? category.spentAmount! * rateToUserCurrency
+          : null,
+      isIncome: category.isIncome,
+      budgetLimit: category.budgetLimit,
+      convertedBudgetLimit: category.spentAmount != null
+          ? category.spentAmount! * rateToUserCurrency
+          : null,
+      currency: category.currency,
+    );
   }
 }

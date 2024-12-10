@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,8 +24,17 @@ class LocaleNotifier extends ChangeNotifier {
 
   Future<void> _loadLocale() async {
     final prefs = await SharedPreferences.getInstance();
-    final localeCode = prefs.getString(_localeKey) ?? 'en';
-    _locale = Locale(localeCode);
+
+    // Pobierz zapisany język, jeśli istnieje
+    final localeCode = prefs.getString(_localeKey);
+
+    if (localeCode == null) {
+      final systemLocale = PlatformDispatcher.instance.locale;
+      _locale = Locale(systemLocale.languageCode);
+    } else {
+      _locale = Locale(localeCode);
+    }
+
     notifyListeners();
   }
 

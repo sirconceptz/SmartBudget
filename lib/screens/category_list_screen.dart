@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_budget/utils/enums/currency.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_state.dart';
@@ -72,15 +73,23 @@ class CategoryListScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          category.budgetLimit != null
-                              ? category.budgetLimit!.toStringAsFixed(2) +
-                                  currentCurrency.sign
-                              : "",
+                          currentCurrency
+                              .formatAmount(category.convertedBudgetLimit) ?? "",
                           style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white70,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
                           ),
-                        )
+                        ),
+                        const SizedBox(width: 4),
+                        if (category.budgetLimit !=
+                            category.convertedBudgetLimit)
+                          Text(
+                            "(${category.currency.formatAmount(category.budgetLimit)})",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
                       ],
                     ),
                     trailing: IconButton(

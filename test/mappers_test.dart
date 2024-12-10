@@ -20,6 +20,7 @@ void main() {
       id: 2,
       name: 'Test Category',
       isIncome: false,
+      currency: Currency.usd,
     );
 
     final conversionRate = 1.2;

@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:smart_budget/blocs/category/category_bloc.dart';
 import 'package:smart_budget/blocs/currency_conversion/currency_conversion_bloc.dart';
 import 'package:smart_budget/blocs/transaction/transaction_bloc.dart';
 import 'package:smart_budget/blocs/transaction/transaction_event.dart';
@@ -15,21 +17,31 @@ class MockCategoryRepository extends Mock implements CategoryRepository {}
 class MockCurrencyConversionBloc extends Mock implements CurrencyConversionBloc {}
 class MockCurrencyNotifier extends Mock implements CurrencyNotifier {}
 
+@GenerateMocks([TransactionRepository])
 void main() {
   late TransactionBloc bloc;
   late MockTransactionRepository transactionRepository;
   late MockCategoryRepository categoryRepository;
   late MockCurrencyConversionBloc currencyConversionBloc;
   late MockCurrencyNotifier currencyNotifier;
+  late MockCategoryRepository mockCategoryRepository;
+  late CategoryBloc categoryBloc;
 
   setUp(() {
-    transactionRepository = MockTransactionRepository();
+    mockCategoryRepository = MockCategoryRepository();
+  transactionRepository = MockTransactionRepository();
     categoryRepository = MockCategoryRepository();
     currencyConversionBloc = MockCurrencyConversionBloc();
     currencyNotifier = MockCurrencyNotifier();
+    categoryBloc = CategoryBloc(
+      mockCategoryRepository,
+      MockCurrencyConversionBloc(),
+      MockCurrencyNotifier(),
+    );
 
     bloc = TransactionBloc(
       transactionRepository,
+      categoryBloc,
       categoryRepository,
       currencyConversionBloc,
       currencyNotifier,

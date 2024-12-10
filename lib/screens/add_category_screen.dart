@@ -37,6 +37,9 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   void _saveCategory() {
     if (_formKey.currentState!.validate()) {
+      final currencyNotifier = Provider.of<CurrencyNotifier>(context);
+      final currentCurrency = currencyNotifier.currency;
+
       _formKey.currentState!.save();
 
       final newCategory = Category(
@@ -44,7 +47,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           description: _description,
           icon: _selectedIcon?.codePoint,
           isIncome: _isIncome,
-          budgetLimit: _budgetLimit);
+          budgetLimit: _budgetLimit,
+          currency: currentCurrency);
 
       context.read<CategoryBloc>().add(AddCategory(newCategory));
 
