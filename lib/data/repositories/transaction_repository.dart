@@ -1,6 +1,8 @@
+import 'package:smart_budget/data/mappers/transaction_mapper.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../models/transaction_entity.dart';
+import '../../models/transaction.dart' as t;
 import '../db/database_helper.dart';
 
 class TransactionRepository {
@@ -8,26 +10,29 @@ class TransactionRepository {
 
   TransactionRepository(this._databaseHelper);
 
-  Future<int> createTransaction(TransactionEntity transaction) async {
+  Future<int> createTransaction(t.Transaction transaction) async {
     final db = await _databaseHelper.database;
     return await db.insert(
       'transactions',
-      transaction.toJson(),
+      TransactionMapper.toEntity(transaction).toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  Future<List<TransactionEntity>> getAllTransactions() async {
+  Future<List<t.Transaction>> getAllTransactions() async {
     final db = await _databaseHelper.database;
     final result = await db.query('transactions');
-    return result.map((json) => TransactionEntity.fromJson(json)).toList();
+    return result
+        .map((json) => TransactionMapper.mapFromEntity(TransactionEntity.fromJson(json)))
+        .toList();
   }
 
-  Future<int> updateTransaction(TransactionEntity transaction) async {
+
+  Future<int> updateTransaction(t.Transaction transaction) async {
     final db = await _databaseHelper.database;
     return await db.update(
       'transactions',
-      transaction.toJson(),
+      TransactionMapper.toEntity(transaction).toJson(),
       where: 'id = ?',
       whereArgs: [transaction.id],
     );

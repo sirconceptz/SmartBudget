@@ -26,7 +26,7 @@ void main() {
 
     final conversionRate = 1.2;
 
-    final model = TransactionMapper.mapFromEntity(entity, conversionRate, category);
+    final model = TransactionMapper.mapFromEntityAndConvert(entity, conversionRate, category);
 
     expect(model.id, 1);
     expect(model.convertedAmount, 120.0);

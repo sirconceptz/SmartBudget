@@ -9,7 +9,7 @@ class Transaction {
   final DateTime date;
   final String? description;
   final Currency originalCurrency;
-  final Category category;
+  final Category? category;
 
   Transaction({
     this.id,
