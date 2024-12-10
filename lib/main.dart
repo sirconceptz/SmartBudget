@@ -52,9 +52,7 @@ void main() async {
                 getIt<CurrencyRepository>(),
               );
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                bloc.add(LoadCurrencyRates(
-                  context.read<CurrencyNotifier>().currency.value,
-                ));
+                bloc.add(LoadCurrencyRates());
               });
               return bloc;
             },

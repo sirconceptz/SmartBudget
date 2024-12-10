@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_budget/data/repositories/category_repository.dart';
 
 import '../../models/category.dart';
-import '../../models/currency_rate.dart';
 import '../../di/notifiers/currency_notifier.dart';
 import '../../blocs/currency_conversion/currency_conversion_bloc.dart';
+import '../currency_conversion/currency_conversion_state.dart';
 import 'category_event.dart';
 import 'category_state.dart';
 
@@ -31,26 +31,35 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     try {
       emit(CategoriesLoading());
 
-      final categoryEntities = await categoryRepository.getCategoriesWithTransactions();
+      final categoryEntities =
+      await categoryRepository.getCategoriesWithTransactions();
 
-      final rates = await currencyConversionBloc.repository.fetchCurrencyRates();
+      final state = currencyConversionBloc.state;
+      if (state is! CurrencyRatesLoaded) {
+        throw Exception("Currency rates not loaded");
+      }
+
+      final rates = state.rates;
       final userCurrency = currencyNotifier.currency;
 
+      final ratesMap = {
+        for (var rate in rates) rate.code.toUpperCase(): rate.rate
+      };
+
+      const defaultRate = 1.0;
+
       final convertedCategories = categoryEntities.map((entity) {
-        final baseToUserRate = rates.firstWhere(
-              (rate) => rate.code.toUpperCase() == entity.currency.value.toUpperCase(),
-          orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
-        ).rate /
-            rates.firstWhere(
-                  (rate) => rate.code.toUpperCase() == userCurrency.value.toUpperCase(),
-              orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
-            ).rate;
+        final baseToUserRate = (ratesMap[entity.currency.value.toUpperCase()] ??
+            defaultRate) /
+            (ratesMap[userCurrency.value.toUpperCase()] ?? defaultRate);
 
         return Category.convertMoney(entity, baseToUserRate);
       }).toList();
 
-      final incomeCategories = convertedCategories.where((c) => c.isIncome).toList();
-      final expenseCategories = convertedCategories.where((c) => !c.isIncome).toList();
+      final incomeCategories =
+      convertedCategories.where((c) => c.isIncome).toList();
+      final expenseCategories =
+      convertedCategories.where((c) => !c.isIncome).toList();
 
       emit(CategoriesWithSpentAmountsLoaded(
         incomeCategories: incomeCategories,
@@ -58,7 +67,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         allCategories: incomeCategories + expenseCategories,
       ));
     } catch (e) {
-      emit(CategoryError('Failed to load categories with spent amounts'));
+      emit(CategoryError('Failed to load categories with spent amounts: $e'));
     }
   }
 
@@ -146,7 +155,6 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           'is_income': 0,
         },
       ];
-      List<Category> categoryList = [];
       for (final categoryData in predefinedCategories) {
         final category = Category(
           id: categoryData['id'] as int,
@@ -156,9 +164,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           isIncome: categoryData['is_income'] == 1,
           currency: currencyNotifier.currency
         );
-        categoryList.add(category);
+        await categoryRepository.createOrReplaceCategory(category);
       }
-      await categoryRepository.initCoreCategories(categoryList);
       final dateRange = DateTimeRange(
         start: DateTime.now().subtract(Duration(days: 30)),
         end: DateTime.now(),

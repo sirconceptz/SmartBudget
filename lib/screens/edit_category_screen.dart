@@ -21,7 +21,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   late String _name;
   late double? _budgetLimit;
-  late String? _description;
+  late String _description;
   late int? _icon;
   late bool _isIncome;
 
@@ -123,7 +123,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   border: OutlineInputBorder(),
                 ),
                 onSaved: (value) {
-                  _description = value;
+                  _description = value!;
                 },
               ),
               SizedBox(height: 16),

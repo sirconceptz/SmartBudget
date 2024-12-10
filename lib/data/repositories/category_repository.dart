@@ -44,19 +44,6 @@ class CategoryRepository {
     );
   }
 
-  Future<void> initCoreCategories(List<Category> categories) async {
-    final db = await _databaseHelper.database;
-    await db.transaction((txn) async {
-      for(var category in categories) {
-        await db.insert(
-          'categories',
-          CategoryMapper.toEntity(category).toJson(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-    });
-  }
-
   Future<List<Category>> getCategoriesWithTransactions() async {
     final db = await _databaseHelper.database;
 

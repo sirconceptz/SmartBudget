@@ -3,7 +3,7 @@ import '../utils/enums/currency.dart';
 class CategoryEntity {
   final int? id;
   final String name;
-  final String? description;
+  final String description;
   final int? icon;
   double? budgetLimit;
   double? spentAmount;
@@ -13,7 +13,7 @@ class CategoryEntity {
   CategoryEntity({
     this.id,
     required this.name,
-    this.description,
+    required this.description,
     this.icon,
     this.budgetLimit,
     this.spentAmount,

@@ -5,7 +5,7 @@ import '../utils/enums/currency.dart';
 class Category {
   final int? id;
   final String name;
-  final String? description;
+  final String description;
   final int? icon;
   double? budgetLimit;
   double? convertedBudgetLimit;
@@ -18,7 +18,7 @@ class Category {
   Category({
     this.id,
     required this.name,
-    this.description,
+    required this.description,
     this.icon,
     this.budgetLimit,
     this.spentAmount,
@@ -71,14 +71,15 @@ class Category {
     return Category(
       id: category.id,
       name: category.name,
+      description: category.description,
       icon: category.icon,
       spentAmount: category.spentAmount != null
           ? category.spentAmount! * rateToUserCurrency
           : null,
       isIncome: category.isIncome,
       budgetLimit: category.budgetLimit,
-      convertedBudgetLimit: category.spentAmount != null
-          ? category.spentAmount! * rateToUserCurrency
+      convertedBudgetLimit: category.budgetLimit != null
+          ? category.budgetLimit! * rateToUserCurrency
           : null,
       currency: category.currency,
     );

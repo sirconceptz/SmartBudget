@@ -18,7 +18,7 @@ class AddCategoryScreen extends StatefulWidget {
 class _AddCategoryScreenState extends State<AddCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   String _name = '';
-  String? _description;
+  String _description = '';
   double? _budgetLimit;
   bool _isIncome = false;
   IconData? _selectedIcon;
@@ -88,7 +88,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.description),
                 onSaved: (value) {
-                  _description = value;
+                  _description = value!;
                 },
               ),
               TextFormField(

@@ -44,6 +44,7 @@ void main() {
         Category(
           id: 1,
           name: 'Food',
+          description: 'Food',
           icon: Icons.fastfood.codePoint,
           isIncome: false,
           spentAmount: 100.0,
