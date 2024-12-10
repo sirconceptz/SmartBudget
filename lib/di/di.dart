@@ -14,15 +14,15 @@ void setupDependencies() {
   getIt.registerSingleton<DatabaseHelper>(DatabaseHelper());
 
   getIt.registerFactory<TransactionRepository>(
-        () => TransactionRepository(getIt<DatabaseHelper>()),
+    () => TransactionRepository(getIt<DatabaseHelper>()),
   );
 
   getIt.registerLazySingleton<CategoryRepository>(
-        () => CategoryRepository(getIt<DatabaseHelper>()),
+    () => CategoryRepository(getIt<DatabaseHelper>()),
   );
 
   getIt.registerLazySingleton<CurrencyRepository>(
-        () => CurrencyRepository(),
+    () => CurrencyRepository(),
   );
 
   getIt.registerSingleton<CurrencyNotifier>(CurrencyNotifier());

@@ -29,8 +29,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
   TransactionBloc(
     this.transactionRepository,
-      this.categoryBloc,
-      this.categoryRepository,
+    this.categoryBloc,
+    this.categoryRepository,
     this.currencyConversionBloc,
     this.currencyNotifier,
   ) : super(TransactionsLoading()) {
@@ -39,10 +39,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<UpdateTransaction>(_onUpdateTransaction);
     on<DeleteTransaction>(_onDeleteTransaction);
 
-    _currencyRatesSubscription = currencyConversionBloc.stream.listen((state) {
-      if (state is CurrencyRatesLoaded) {
-        add(LoadTransactions());
-      }
+    currencyConversionBloc.registerOnCurrencyRatesLoadedCallback(() {
+      add(LoadTransactions());
     });
 
     _currencyChangeListener = () {
@@ -58,7 +56,13 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
       final transactions = await transactionRepository.getAllTransactions();
       final categories = await categoryRepository.getAllCategories();
-      final rates = await currencyConversionBloc.repository.fetchCurrencyRates();
+
+      final state = currencyConversionBloc.state;
+      if (state is! CurrencyRatesLoaded) {
+        throw Exception("Currency rates not loaded");
+      }
+
+      final rates = state.rates;
       final userCurrency = currencyNotifier.currency;
 
       final ratesMap = {
@@ -69,18 +73,20 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
       final convertedTransactions = transactions.map((transaction) {
         final category = categories.firstWhere(
-              (cat) => cat.id == transaction.categoryId,
+          (cat) => cat.id == transaction.categoryId,
           orElse: () => Category(
             id: null,
             name: 'Unknown',
+            description: 'Unknown',
             isIncome: false,
             currency: userCurrency,
           ),
         );
 
-        final baseToUsdRate = ratesMap[transaction.currency.value.toUpperCase()] ?? defaultRate;
-
-        final usdToUserCurrencyRate = ratesMap[userCurrency.value.toUpperCase()] ?? defaultRate;
+        final baseToUsdRate =
+            ratesMap[transaction.currency.value.toUpperCase()] ?? defaultRate;
+        final usdToUserCurrencyRate =
+            ratesMap[userCurrency.value.toUpperCase()] ?? defaultRate;
 
         final conversionRate = usdToUserCurrencyRate / baseToUsdRate;
 
@@ -102,6 +108,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
     } catch (e) {
       MyLogger.write("Error loading transactions", e.toString());
+      emit(TransactionError('Failed to load transactions: $e'));
     }
   }
 
@@ -116,7 +123,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         end: DateTime.now(),
       );
       getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
-
     } catch (e) {
       emit(TransactionError('Failed to add transaction'));
     }

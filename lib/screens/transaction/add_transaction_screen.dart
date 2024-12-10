@@ -3,14 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
-import '../blocs/category/category_bloc.dart';
-import '../blocs/category/category_state.dart';
-import '../blocs/transaction/transaction_bloc.dart';
-import '../blocs/transaction/transaction_event.dart';
-import '../di/notifiers/currency_notifier.dart';
-import '../models/category.dart';
-import '../models/transaction.dart';
-import '../utils/enums/currency.dart';
+import '../../blocs/category/category_bloc.dart';
+import '../../blocs/category/category_state.dart';
+import '../../blocs/transaction/transaction_bloc.dart';
+import '../../blocs/transaction/transaction_event.dart';
+import '../../di/notifiers/currency_notifier.dart';
+import '../../models/category.dart';
+import '../../models/transaction.dart';
+import '../../utils/enums/currency.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -233,7 +233,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => _saveTransaction(),
+                onPressed: _selectedCurrency != null ? _saveTransaction : null,
                 child: Text(AppLocalizations.of(context)!.saveTransaction),
               ),
             ],

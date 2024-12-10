@@ -40,21 +40,8 @@ class CategoryRepository {
     await db.insert(
       'categories',
       CategoryMapper.toEntity(category).toJson(),
-    conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
-  }
-
-  Future<void> initCoreCategories(List<Category> categories) async {
-    final db = await _databaseHelper.database;
-    await db.transaction((txn) async {
-      for(var category in categories) {
-        await db.insert(
-          'categories',
-          CategoryMapper.toEntity(category).toJson(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-    });
   }
 
   Future<List<Category>> getCategoriesWithTransactions() async {
@@ -62,7 +49,8 @@ class CategoryRepository {
 
     final categoriesResult = await db.query('categories');
 
-    final categories = await Future.wait(categoriesResult.map((categoryJson) async {
+    final categories =
+        await Future.wait(categoriesResult.map((categoryJson) async {
       final transactionsResult = await db.query(
         'transactions',
         where: 'category_id = ?',

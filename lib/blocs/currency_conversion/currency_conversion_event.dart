@@ -6,10 +6,5 @@ abstract class CurrencyConversionEvent extends Equatable {
 }
 
 class LoadCurrencyRates extends CurrencyConversionEvent {
-  final String baseCurrency;
-
-  LoadCurrencyRates(this.baseCurrency);
-
-  @override
-  List<Object?> get props => [baseCurrency];
+  LoadCurrencyRates();
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:smart_budget/screens/transactions_screen.dart';
+import 'package:smart_budget/screens/transaction/transactions_screen.dart';
 
-import './category_list_screen.dart';
 import './settings_screen.dart';
+import 'category/category_list_screen.dart';
 import 'home_screen.dart';
 
 class MainScreen extends StatefulWidget {

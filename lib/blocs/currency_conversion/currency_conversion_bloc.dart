@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,9 +12,18 @@ import 'currency_conversion_state.dart';
 class CurrencyConversionBloc
     extends Bloc<CurrencyConversionEvent, CurrencyConversionState> {
   final CurrencyRepository repository;
+  final List<VoidCallback> _onCurrencyRatesLoadedCallbacks = [];
 
   CurrencyConversionBloc(this.repository) : super(CurrencyRatesLoading()) {
     on<LoadCurrencyRates>(_onLoadCurrencyRates);
+  }
+
+  void registerOnCurrencyRatesLoadedCallback(VoidCallback callback) {
+    _onCurrencyRatesLoadedCallbacks.add(callback);
+  }
+
+  void unregisterOnCurrencyRatesLoadedCallback(VoidCallback callback) {
+    _onCurrencyRatesLoadedCallbacks.remove(callback);
   }
 
   Future<void> _onLoadCurrencyRates(
@@ -31,6 +41,7 @@ class CurrencyConversionBloc
         final cachedRates = await _getCachedCurrencyRates();
         if (cachedRates != null) {
           emit(CurrencyRatesLoaded(cachedRates));
+          _triggerCallbacks();
           return;
         }
       }
@@ -40,8 +51,15 @@ class CurrencyConversionBloc
       await _setLastUpdatedTimestamp(currentTime);
 
       emit(CurrencyRatesLoaded(rates));
+      _triggerCallbacks();
     } catch (error) {
       emit(CurrencyRatesError(error.toString()));
+    }
+  }
+
+  void _triggerCallbacks() {
+    for (final callback in _onCurrencyRatesLoadedCallbacks) {
+      callback();
     }
   }
 

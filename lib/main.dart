@@ -4,12 +4,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_budget/screens/add_category_screen.dart';
-import 'package:smart_budget/screens/add_transaction_screen.dart';
-import 'package:smart_budget/screens/edit_category_screen.dart';
-import 'package:smart_budget/screens/edit_transaction_screen.dart';
+import 'package:smart_budget/screens/category/add_category_screen.dart';
+import 'package:smart_budget/screens/category/edit_category_screen.dart';
 import 'package:smart_budget/screens/main_screen.dart';
 import 'package:smart_budget/screens/settings_screen.dart';
+import 'package:smart_budget/screens/transaction/add_transaction_screen.dart';
+import 'package:smart_budget/screens/transaction/edit_transaction_screen.dart';
 
 import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
@@ -52,9 +52,7 @@ void main() async {
                 getIt<CurrencyRepository>(),
               );
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                bloc.add(LoadCurrencyRates(
-                  context.read<CurrencyNotifier>().currency.value,
-                ));
+                bloc.add(LoadCurrencyRates());
               });
               return bloc;
             },
@@ -65,11 +63,10 @@ void main() async {
               context.read<CurrencyConversionBloc>(),
               context.read<CurrencyNotifier>(),
             )..add(LoadCategoriesWithSpentAmounts(DateTimeRange(
-              start: DateTime.now().subtract(Duration(days: 30)),
-              end: DateTime.now(),
-            ))),
+                start: DateTime.now().subtract(Duration(days: 30)),
+                end: DateTime.now(),
+              ))),
           ),
-
           BlocProvider(
             create: (context) => TransactionBloc(
               getIt<TransactionRepository>(),

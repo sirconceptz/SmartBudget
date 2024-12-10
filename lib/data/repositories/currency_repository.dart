@@ -44,7 +44,8 @@ class CurrencyRepository {
 
         return rates;
       } else {
-        MyLogger.write("Currency - FETCH", 'Failed to fetch currency rates: ${response.reasonPhrase}');
+        MyLogger.write("Currency - FETCH",
+            'Failed to fetch currency rates: ${response.reasonPhrase}');
         throw Exception(
             'Failed to fetch currency rates: ${response.reasonPhrase}');
       }

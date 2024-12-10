@@ -6,9 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:smart_budget/models/transaction.dart';
 import 'package:smart_budget/utils/enums/currency.dart';
 
-import '../blocs/transaction/transaction_bloc.dart';
-import '../blocs/transaction/transaction_state.dart';
-import '../di/notifiers/currency_notifier.dart';
+import '../../blocs/transaction/transaction_bloc.dart';
+import '../../blocs/transaction/transaction_state.dart';
+import '../../di/notifiers/currency_notifier.dart';
 
 class TransactionsScreen extends StatelessWidget {
   const TransactionsScreen({super.key});
@@ -69,7 +69,8 @@ class TransactionsScreen extends StatelessWidget {
                       children: [
                         Text(
                           currentCurrency
-                              .formatAmount(transaction.convertedAmount) ?? "",
+                                  .formatAmount(transaction.convertedAmount) ??
+                              "",
                           style: TextStyle(
                             color: transaction.type == 1
                                 ? Colors.green

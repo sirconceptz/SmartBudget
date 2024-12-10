@@ -19,6 +19,7 @@ void main() {
     final category = Category(
       id: 2,
       name: 'Test Category',
+      description: 'Test Description',
       isIncome: false,
       currency: Currency.usd,
     );

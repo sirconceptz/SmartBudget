@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
-import '../blocs/category/category_bloc.dart';
-import '../blocs/category/category_event.dart';
-import '../di/notifiers/currency_notifier.dart';
-import '../models/category.dart';
-import '../widgets/icon_picker_dialog.dart';
+import '../../blocs/category/category_bloc.dart';
+import '../../blocs/category/category_event.dart';
+import '../../di/notifiers/currency_notifier.dart';
+import '../../models/category.dart';
+import '../../utils/enums/currency.dart';
+import '../../widgets/icon_picker_dialog.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   const AddCategoryScreen({super.key});
@@ -18,10 +19,18 @@ class AddCategoryScreen extends StatefulWidget {
 class _AddCategoryScreenState extends State<AddCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   String _name = '';
-  String? _description;
+  String _description = '';
   double? _budgetLimit;
   bool _isIncome = false;
   IconData? _selectedIcon;
+  Currency? _selectedCurrency;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCurrency =
+        Provider.of<CurrencyNotifier>(context, listen: false).currency;
+  }
 
   void _selectIcon() async {
     final selectedIcon = await showDialog<IconData>(
@@ -37,19 +46,16 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   void _saveCategory() {
     if (_formKey.currentState!.validate()) {
-      final currencyNotifier = Provider.of<CurrencyNotifier>(context);
-      final currentCurrency = currencyNotifier.currency;
-
       _formKey.currentState!.save();
 
       final newCategory = Category(
-          name: _name,
-          description: _description,
-          icon: _selectedIcon?.codePoint,
-          isIncome: _isIncome,
-          budgetLimit: _budgetLimit,
-          currency: currentCurrency);
-
+        name: _name,
+        description: _description,
+        icon: _selectedIcon?.codePoint,
+        isIncome: _isIncome,
+        budgetLimit: _budgetLimit,
+        currency: _selectedCurrency!,
+      );
       context.read<CategoryBloc>().add(AddCategory(newCategory));
 
       Navigator.pop(context, true);
@@ -88,7 +94,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.description),
                 onSaved: (value) {
-                  _description = value;
+                  _description = value!;
                 },
               ),
               TextFormField(
@@ -100,6 +106,24 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 onSaved: (value) {
                   _budgetLimit = double.tryParse(value!);
                 },
+              ),
+              DropdownButtonFormField<Currency>(
+                value: _selectedCurrency,
+                items: Currency.values.map((currency) {
+                  return DropdownMenuItem(
+                    value: currency,
+                    child: Text(
+                        currency.localizedName(AppLocalizations.of(context)!)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCurrency = value!;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.currency,
+                ),
               ),
               const SizedBox(
                 height: 10,
@@ -138,7 +162,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _saveCategory,
+                onPressed: _selectedCurrency != null ? _saveCategory : null,
                 child: Text(AppLocalizations.of(context)!.saveCategory),
               ),
             ],

@@ -6,7 +6,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 class MyLogger {
-
   MyLogger();
 
   static Future<void> write(String tag, String message) async {
@@ -16,7 +15,7 @@ class MyLogger {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     String appVersion = packageInfo.version;
     Directory externalStorageDirectory =
-    await getApplicationDocumentsDirectory();
+        await getApplicationDocumentsDirectory();
     String path = externalStorageDirectory.path;
     String fileName = filenamePrefix + appVersion + extension;
     String date = DateFormat("dd.MM.yyyy HH.mm.ss.SSS").format(parsedDate);

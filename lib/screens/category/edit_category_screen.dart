@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
-import '../blocs/category/category_bloc.dart';
-import '../blocs/category/category_event.dart';
-import '../di/notifiers/currency_notifier.dart';
-import '../models/category.dart';
-import '../utils/enums/currency.dart';
+import '../../blocs/category/category_bloc.dart';
+import '../../blocs/category/category_event.dart';
+import '../../di/notifiers/currency_notifier.dart';
+import '../../models/category.dart';
+import '../../utils/enums/currency.dart';
 
 class EditCategoryScreen extends StatefulWidget {
   final Category category;
@@ -21,9 +21,10 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   late String _name;
   late double? _budgetLimit;
-  late String? _description;
+  late String _description;
   late int? _icon;
   late bool _isIncome;
+  late Currency _selectedCurrency;
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
     _icon = widget.category.icon;
     _isIncome = widget.category.isIncome;
     _budgetLimit = widget.category.budgetLimit;
+    _selectedCurrency = widget.category.currency;
   }
 
   void _saveCategory(Currency currency) {
@@ -40,13 +42,14 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
       _formKey.currentState!.save();
 
       final updatedCategory = Category(
-          id: widget.category.id,
-          name: _name,
-          description: _description,
-          icon: _icon,
-          isIncome: _isIncome,
-          budgetLimit: _budgetLimit,
-          currency: currency);
+        id: widget.category.id,
+        name: _name,
+        description: _description,
+        icon: _icon,
+        isIncome: _isIncome,
+        budgetLimit: _budgetLimit,
+        currency: _selectedCurrency,
+      );
 
       context.read<CategoryBloc>().add(UpdateCategory(updatedCategory));
 
@@ -123,7 +126,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   border: OutlineInputBorder(),
                 ),
                 onSaved: (value) {
-                  _description = value;
+                  _description = value!;
                 },
               ),
               SizedBox(height: 16),
@@ -138,6 +141,24 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                 onSaved: (value) {
                   _budgetLimit = double.tryParse(value!);
                 },
+              ),
+              DropdownButtonFormField<Currency>(
+                value: _selectedCurrency,
+                items: Currency.values.map((currency) {
+                  return DropdownMenuItem(
+                    value: currency,
+                    child: Text(
+                        currency.localizedName(AppLocalizations.of(context)!)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCurrency = value!;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.currency,
+                ),
               ),
               SizedBox(height: 16),
               Row(
