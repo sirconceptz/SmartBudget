@@ -73,12 +73,12 @@ class Category {
       description: category.description,
       icon: category.icon,
       spentAmount: category.spentAmount != null
-          ? category.spentAmount! * rateToUserCurrency
+          ? category.spentAmount! / rateToUserCurrency
           : null,
       isIncome: category.isIncome,
       budgetLimit: category.budgetLimit,
       convertedBudgetLimit: category.budgetLimit != null
-          ? category.budgetLimit! * rateToUserCurrency
+          ? category.budgetLimit! / rateToUserCurrency
           : null,
       currency: category.currency,
     );

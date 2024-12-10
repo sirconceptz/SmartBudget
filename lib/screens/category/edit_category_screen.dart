@@ -88,9 +88,6 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyNotifier = Provider.of<CurrencyNotifier>(context);
-    final currentCurrency = currencyNotifier.currency;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.editCategory),
@@ -136,7 +133,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.budgetLimit,
                   border: OutlineInputBorder(),
-                  suffixText: currentCurrency.name,
+                  suffixText: _selectedCurrency.sign,
                 ),
                 onSaved: (value) {
                   _budgetLimit = double.tryParse(value!);
@@ -182,7 +179,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   children: [
                     ElevatedButton.icon(
                       onPressed: () {
-                        _saveCategory(currentCurrency);
+                        _saveCategory(_selectedCurrency);
                       },
                       icon: Icon(Icons.save),
                       label: Text(AppLocalizations.of(context)!.saveChanges),

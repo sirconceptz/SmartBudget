@@ -64,9 +64,6 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyNotifier = Provider.of<CurrencyNotifier>(context);
-    final currentCurrency = currencyNotifier.currency;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.addCategory),
@@ -101,7 +98,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.budgetLimit,
-                  suffixText: currentCurrency.name,
+                  suffixText: _selectedCurrency?.sign,
                 ),
                 onSaved: (value) {
                   _budgetLimit = double.tryParse(value!);
