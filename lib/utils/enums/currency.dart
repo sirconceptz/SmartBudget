@@ -81,7 +81,8 @@ extension CurrencyExtension on Currency {
     }
   }
 
-  String formatAmount(double amount) {
+  String? formatAmount(double? amount) {
+    if(amount == null) return null;
     final formattedAmount = amount.toStringAsFixed(2);
     return isLeftSigned ? '$sign$formattedAmount' : '$formattedAmount $sign';
   }

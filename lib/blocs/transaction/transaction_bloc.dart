@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_budget/blocs/currency_conversion/currency_conversion_bloc.dart';
 import 'package:smart_budget/blocs/currency_conversion/currency_conversion_state.dart';
 import 'package:smart_budget/blocs/transaction/transaction_event.dart';
 import 'package:smart_budget/blocs/transaction/transaction_state.dart';
+import 'package:smart_budget/utils/my_logger.dart';
 
 import '../../data/mappers/transaction_mapper.dart';
 import '../../data/repositories/category_repository.dart';
@@ -13,7 +14,6 @@ import '../../data/repositories/transaction_repository.dart';
 import '../../di/di.dart';
 import '../../di/notifiers/currency_notifier.dart';
 import '../../models/category.dart';
-import '../../models/currency_rate.dart';
 import '../category/category_bloc.dart';
 import '../category/category_event.dart';
 
@@ -58,36 +58,29 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
       final transactions = await transactionRepository.getAllTransactions();
       final categories = await categoryRepository.getAllCategories();
-      final rates =
-          await currencyConversionBloc.repository.fetchCurrencyRates();
+      final rates = await currencyConversionBloc.repository.fetchCurrencyRates();
       final userCurrency = currencyNotifier.currency;
+
+      final ratesMap = {
+        for (var rate in rates) rate.code.toUpperCase(): rate.rate
+      };
+
+      const defaultRate = 1.0;
 
       final convertedTransactions = transactions.map((transaction) {
         final category = categories.firstWhere(
-          (cat) => cat.id == transaction.categoryId,
+              (cat) => cat.id == transaction.categoryId,
           orElse: () => Category(
             id: null,
             name: 'Unknown',
             isIncome: false,
+            currency: userCurrency,
           ),
         );
 
-        final baseToUsdRate = rates
-            .firstWhere(
-              (rate) =>
-                  rate.code.toUpperCase() ==
-                  transaction.currency.value.toUpperCase(),
-              orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
-            )
-            .rate;
+        final baseToUsdRate = ratesMap[transaction.currency.value.toUpperCase()] ?? defaultRate;
 
-        final usdToUserCurrencyRate = rates
-            .firstWhere(
-              (rate) =>
-                  rate.code.toUpperCase() == userCurrency.value.toUpperCase(),
-              orElse: () => CurrencyRate(name: 'USD', code: 'USD', rate: 1.0),
-            )
-            .rate;
+        final usdToUserCurrencyRate = ratesMap[userCurrency.value.toUpperCase()] ?? defaultRate;
 
         final conversionRate = usdToUserCurrencyRate / baseToUsdRate;
 
@@ -99,11 +92,16 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       }).toList();
 
       emit(TransactionsLoaded(convertedTransactions));
-      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts());
-    } catch (e, stackTrace) {
-      print('Error loading transactions: $e');
-      print(stackTrace);
-      emit(TransactionError('Failed to load transactions: $e'));
+
+      final dateRange = event.dateRange ??
+          DateTimeRange(
+            start: DateTime.now().subtract(Duration(days: 30)),
+            end: DateTime.now(),
+          );
+
+      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
+    } catch (e) {
+      MyLogger.write("Error loading transactions", e.toString());
     }
   }
 
@@ -113,7 +111,11 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       final transaction = TransactionMapper.toEntity(event.transaction);
       await transactionRepository.createTransaction(transaction);
       add(LoadTransactions());
-      categoryBloc.add(LoadCategoriesWithSpentAmounts());
+      final dateRange = DateTimeRange(
+        start: DateTime.now().subtract(Duration(days: 30)),
+        end: DateTime.now(),
+      );
+      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
 
     } catch (e) {
       emit(TransactionError('Failed to add transaction'));
@@ -126,7 +128,11 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       final transaction = TransactionMapper.toEntity(event.transaction);
       await transactionRepository.updateTransaction(transaction);
       add(LoadTransactions());
-      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts());
+      final dateRange = DateTimeRange(
+        start: DateTime.now().subtract(Duration(days: 30)),
+        end: DateTime.now(),
+      );
+      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
     } catch (e) {
       emit(TransactionError('Failed to update transaction'));
     }
@@ -137,7 +143,11 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     try {
       await transactionRepository.deleteTransaction(event.id);
       add(LoadTransactions());
-      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts());
+      final dateRange = DateTimeRange(
+        start: DateTime.now().subtract(Duration(days: 30)),
+        end: DateTime.now(),
+      );
+      getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
     } catch (e) {
       emit(TransactionError('Failed to delete transaction'));
     }

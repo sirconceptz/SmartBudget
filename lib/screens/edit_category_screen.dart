@@ -6,6 +6,7 @@ import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
 import '../di/notifiers/currency_notifier.dart';
 import '../models/category.dart';
+import '../utils/enums/currency.dart';
 
 class EditCategoryScreen extends StatefulWidget {
   final Category category;
@@ -34,18 +35,18 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
     _budgetLimit = widget.category.budgetLimit;
   }
 
-  void _saveCategory() {
+  void _saveCategory(Currency currency) {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
       final updatedCategory = Category(
-        id: widget.category.id,
-        name: _name,
-        description: _description,
-        icon: _icon,
-        isIncome: _isIncome,
-        budgetLimit: _budgetLimit,
-      );
+          id: widget.category.id,
+          name: _name,
+          description: _description,
+          icon: _icon,
+          isIncome: _isIncome,
+          budgetLimit: _budgetLimit,
+          currency: currency);
 
       context.read<CategoryBloc>().add(UpdateCategory(updatedCategory));
 
@@ -159,7 +160,9 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                 child: Column(
                   children: [
                     ElevatedButton.icon(
-                      onPressed: _saveCategory,
+                      onPressed: () {
+                        _saveCategory(currentCurrency);
+                      },
                       icon: Icon(Icons.save),
                       label: Text(AppLocalizations.of(context)!.saveChanges),
                     ),

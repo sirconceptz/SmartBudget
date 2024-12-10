@@ -69,7 +69,7 @@ class TransactionsScreen extends StatelessWidget {
                       children: [
                         Text(
                           currentCurrency
-                              .formatAmount(transaction.convertedAmount),
+                              .formatAmount(transaction.convertedAmount) ?? "",
                           style: TextStyle(
                             color: transaction.type == 1
                                 ? Colors.green

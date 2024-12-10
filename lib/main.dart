@@ -60,9 +60,16 @@ void main() async {
             },
           ),
           BlocProvider(
-            create: (context) => CategoryBloc(getIt<CategoryRepository>())
-              ..add(LoadCategoriesWithSpentAmounts()),
+            create: (context) => CategoryBloc(
+              getIt<CategoryRepository>(),
+              context.read<CurrencyConversionBloc>(),
+              context.read<CurrencyNotifier>(),
+            )..add(LoadCategoriesWithSpentAmounts(DateTimeRange(
+              start: DateTime.now().subtract(Duration(days: 30)),
+              end: DateTime.now(),
+            ))),
           ),
+
           BlocProvider(
             create: (context) => TransactionBloc(
               getIt<TransactionRepository>(),
