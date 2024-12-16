@@ -25,7 +25,6 @@ class LocaleNotifier extends ChangeNotifier {
   Future<void> _loadLocale() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Pobierz zapisany język, jeśli istnieje
     final localeCode = prefs.getString(_localeKey);
 
     if (localeCode == null) {

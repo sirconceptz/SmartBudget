@@ -18,6 +18,7 @@ import '../di/notifiers/finance_notifier.dart';
 import '../di/notifiers/locale_notifier.dart';
 import '../di/notifiers/theme_notifier.dart';
 import '../utils/enums/currency.dart';
+import '../utils/enums/supported_language.dart';
 import '../utils/toast.dart';
 import '../widgets/setting_row.dart';
 
@@ -89,18 +90,14 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.language,
             title: AppLocalizations.of(context)!.chooseLanguage,
             value: localeNotifier.locale,
-            items: const [
-              DropdownMenuItem(
-                value: Locale('en'),
-                child: Text('English'),
-              ),
-              DropdownMenuItem(
-                value: Locale('pl'),
-                child: Text('Polski'),
-              ),
-            ],
-            onChanged: (newLocale) {
-              if (newLocale != null) {
+            items: SupportedLanguage.values.map((language) {
+              return DropdownMenuItem(
+                value: language.locale,
+                child: Text(language.displayName),
+              );
+            }).toList(),
+            onChanged: (Locale? newLocale) {
+              if (newLocale != null && newLocale != localeNotifier.locale) {
                 localeNotifier.setLocale(newLocale);
               }
             },
