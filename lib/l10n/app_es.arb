@@ -81,5 +81,15 @@
   "exportBackupError": "Problema al exportar copia de seguridad.",
   "importBackupError": "Problema al importar copia de seguridad.",
   "sendApplicationLog": "Enviar registros de la aplicación",
-  "noDataToSend": "No hay datos para enviar"
+  "noDataToSend": "No hay datos para enviar",
+  "monthlyReportTitle": "Informe Mensual",
+    "totalIncome": "Ingresos Totales",
+    "totalExpenses": "Gastos Totales",
+    "incomeDistribution": "Distribución de Ingresos",
+    "expenseDistribution": "Distribución de Gastos",
+    "transactionDetails": "Detalles de Transacciones",
+    "category": "Categoría",
+    "spentAmount": "Monto Gastado",
+    "budgetDistribution": "Distribución del Presupuesto",
+    "budgetUsage": "Uso del Presupuesto"
 }

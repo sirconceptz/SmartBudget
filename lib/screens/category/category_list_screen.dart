@@ -34,11 +34,10 @@ class CategoryListScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   elevation: 5,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   color: category.isIncome
-                      ? Colors.green.withOpacity(0.8)
-                      : Colors.red.withOpacity(0.8),
+                      ? Colors.green.withValues(red: 0, blue: 0, green: 255, alpha: 204)
+                      : Colors.red.withValues(red: 255, blue: 0, green: 0, alpha: 204),
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.white,

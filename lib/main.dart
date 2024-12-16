@@ -16,7 +16,6 @@ import 'blocs/category/category_event.dart';
 import 'blocs/currency_conversion/currency_conversion_bloc.dart';
 import 'blocs/currency_conversion/currency_conversion_event.dart';
 import 'blocs/transaction/transaction_bloc.dart';
-import 'blocs/transaction/transaction_event.dart';
 import 'data/db/database_helper.dart';
 import 'data/repositories/category_repository.dart';
 import 'data/repositories/currency_repository.dart';

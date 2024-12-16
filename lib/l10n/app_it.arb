@@ -81,5 +81,15 @@
   "exportBackupError": "Problema durante l'esportazione del backup.",
   "importBackupError": "Problema durante l'importazione del backup.",
   "sendApplicationLog": "Invia registri dell'applicazione",
-  "noDataToSend": "Nessun dato da inviare"
+  "noDataToSend": "Nessun dato da inviare",
+    "monthlyReportTitle": "Rapporto Mensile",
+    "totalIncome": "Entrate Totali",
+    "totalExpenses": "Spese Totali",
+    "incomeDistribution": "Distribuzione delle Entrate",
+    "expenseDistribution": "Distribuzione delle Spese",
+    "transactionDetails": "Dettagli delle Transazioni",
+    "category": "Categoria",
+    "spentAmount": "Importo Speso",
+    "budgetDistribution": "Distribuzione del Budget",
+    "budgetUsage": "Utilizzo del Budget"
 }

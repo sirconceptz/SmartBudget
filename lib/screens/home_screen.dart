@@ -13,6 +13,15 @@ import '../di/notifiers/finance_notifier.dart';
 import '../models/category.dart';
 import '../utils/enums/currency.dart';
 
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart';
+import 'package:share_plus/share_plus.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -82,32 +91,51 @@ class _HomeScreenState extends State<HomeScreen> {
             final incomeCategories = state.incomeCategories;
             final expenseCategories = state.expenseCategories;
 
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  if (incomeCategories.isNotEmpty)
-                    _buildChartSection(
-                      AppLocalizations.of(context)!.incomes,
-                      incomeCategories,
-                      context,
-                    ),
-                  if (expenseCategories.isNotEmpty)
-                    _buildChartSection(
-                      AppLocalizations.of(context)!.expenses,
-                      expenseCategories,
-                      context,
-                    ),
-                  if (incomeCategories.isEmpty && expenseCategories.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        AppLocalizations.of(context)!.noChartsToDisplay,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                ],
-              ),
+            return Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (incomeCategories.isNotEmpty)
+                        _buildChartSection(
+                          AppLocalizations.of(context)!.incomes,
+                          incomeCategories,
+                          context,
+                        ),
+                      if (expenseCategories.isNotEmpty)
+                        _buildChartSection(
+                          AppLocalizations.of(context)!.expenses,
+                          expenseCategories,
+                          context,
+                        ),
+                      if (incomeCategories.isEmpty && expenseCategories.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            AppLocalizations.of(context)!.noChartsToDisplay,
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      generateMonthlyReport(
+                        context,
+                        selectedMonth,
+                        incomeCategories,
+                        expenseCategories,
+                      );
+                    },
+                    child: const Icon(Icons.picture_as_pdf),
+                  ),
+                ),
+              ],
             );
           } else if (state is CategoryError) {
             return Center(child: Text(state.message));
@@ -277,6 +305,164 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }).toList(),
       ),
+    );
+  }
+
+
+  Future<void> generateMonthlyReport(
+      BuildContext context,
+      DateTime selectedMonth,
+      List<Category> incomeCategories,
+      List<Category> expenseCategories,
+      ) async {
+    final pdf = pw.Document();
+
+    // Total Income and Expenses
+    final totalIncome = incomeCategories.fold<double>(
+      0.0,
+          (sum, category) => sum + (category.spentAmount ?? 0),
+    );
+    final totalExpenses = expenseCategories.fold<double>(
+      0.0,
+          (sum, category) => sum + (category.spentAmount ?? 0),
+    );
+
+    // Render income chart as an image
+    final incomeChartImage = await _generateChartImage(
+      context,
+      _buildPieChart(incomeCategories, 'Income'),
+    );
+
+    // Render expense chart as an image
+    final expenseChartImage = await _generateChartImage(
+      context,
+      _buildPieChart(expenseCategories, 'Expense'),
+    );
+    final currency = Provider.of<CurrencyNotifier>(context, listen: false).currency;
+
+    // Generate PDF
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context ctx) => [
+          pw.Text(
+            '${AppLocalizations.of(context)!.monthlyReportTitle} - '
+                '${DateFormat.yMMMM(AppLocalizations.of(context)!.localeName).format(selectedMonth)}',
+            style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 20),
+          pw.Text(
+            '${AppLocalizations.of(context)!.totalIncome}: '
+                '${totalIncome.toStringAsFixed(2)} ${currency.sign}',
+          ),
+          pw.Text(
+            '${AppLocalizations.of(context)!.totalExpenses}: '
+                '${totalExpenses.toStringAsFixed(2)} ${currency.sign}',
+          ),
+          pw.SizedBox(height: 20),
+          pw.Text(AppLocalizations.of(context)!.incomeDistribution),
+          pw.SizedBox(height: 10),
+          if (incomeChartImage != null)
+            pw.Image(pw.MemoryImage(incomeChartImage), height: 200),
+          pw.SizedBox(height: 20),
+          pw.Text(AppLocalizations.of(context)!.expenseDistribution),
+          pw.SizedBox(height: 10),
+          if (expenseChartImage != null)
+            pw.Image(pw.MemoryImage(expenseChartImage), height: 200),
+          pw.SizedBox(height: 20),
+          pw.Text(AppLocalizations.of(context)!.transactionDetails),
+          _buildTransactionTable(incomeCategories, expenseCategories),
+        ],
+      ),
+    );
+
+    // Save and share the PDF
+    final output = await pdf.save();
+    final tempDir = await Directory.systemTemp.createTemp();
+    final file = File('${tempDir.path}/Monthly_Report.pdf');
+    await file.writeAsBytes(output);
+    await Share.shareXFiles([XFile(file.path)], text: 'Monthly Report');
+  }
+
+  Future<Uint8List?> _generateChartImage(BuildContext context, Widget chart) async {
+    final boundaryKey = GlobalKey();
+    final widget = RepaintBoundary(
+      key: boundaryKey,
+      child: chart,
+    );
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final size = renderBox?.size ?? const Size(300, 300);
+
+    final renderBoundary = boundaryKey.currentContext?.findRenderObject()
+    as RenderRepaintBoundary?;
+
+    if (renderBoundary != null) {
+      final image = await renderBoundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    }
+
+    return null;
+  }
+
+  Widget _buildPieChart(List<Category> categories, String title) {
+    final total = categories.fold<double>(
+      0.0,
+          (sum, category) => sum + (category.spentAmount ?? 0),
+    );
+
+    return AspectRatio(
+      aspectRatio: 1.5,
+      child: PieChart(
+        PieChartData(
+          sections: categories.map((category) {
+            final value = (category.spentAmount ?? 0) / (total == 0 ? 1 : total);
+            return PieChartSectionData(
+              value: value,
+              title: '${(value * 100).toStringAsFixed(1)}%',
+              color: Colors.primaries[categories.indexOf(category) %
+                  Colors.primaries.length],
+              radius: 100,
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  pw.Widget _buildTransactionTable(
+      List<Category> incomeCategories,
+      List<Category> expenseCategories,
+      ) {
+    final data = <pw.TableRow>[
+      pw.TableRow(
+        children: [
+          pw.Text('Category', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+          pw.Text('Spent Amount', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        ],
+      ),
+      ...incomeCategories.map(
+            (category) => pw.TableRow(
+          children: [
+            pw.Text(category.name),
+            pw.Text(category.spentAmount?.toStringAsFixed(2) ?? "0.00"),
+          ],
+        ),
+      ),
+      ...expenseCategories.map(
+            (category) => pw.TableRow(
+          children: [
+            pw.Text(category.name),
+            pw.Text(category.spentAmount?.toStringAsFixed(2) ?? "0.00"),
+          ],
+        ),
+      ),
+    ];
+
+    return pw.Table(
+      border: pw.TableBorder.all(),
+      children: data,
     );
   }
 }

@@ -81,5 +81,15 @@
   "exportBackupError": "Problem beim Exportieren des Backups.",
   "importBackupError": "Problem beim Importieren des Backups.",
   "sendApplicationLog": "Anwendungsprotokolle senden",
-  "noDataToSend": "Keine Daten zum Senden"
+  "noDataToSend": "Keine Daten zum Senden",
+  "monthlyReportTitle": "Monatlicher Bericht",
+    "totalIncome": "Gesamteinkommen",
+    "totalExpenses": "Gesamtausgaben",
+    "incomeDistribution": "Einkommensverteilung",
+    "expenseDistribution": "Ausgabenverteilung",
+    "transactionDetails": "Transaktionsdetails",
+    "category": "Kategorie",
+    "spentAmount": "Ausgegebener Betrag",
+    "budgetDistribution": "Budgetverteilung",
+    "budgetUsage": "Budgetnutzung"
 }

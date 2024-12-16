@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../blocs/category/category_bloc.dart';
 import '../../blocs/category/category_event.dart';
-import '../../di/notifiers/currency_notifier.dart';
 import '../../models/category.dart';
 import '../../utils/enums/currency.dart';
 
