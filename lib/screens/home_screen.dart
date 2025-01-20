@@ -1,9 +1,17 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
@@ -11,16 +19,6 @@ import '../blocs/category/category_state.dart';
 import '../di/notifiers/currency_notifier.dart';
 import '../di/notifiers/finance_notifier.dart';
 import '../models/category.dart';
-import '../utils/enums/currency.dart';
-
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-import 'package:flutter/rendering.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'dart:io';
-import 'package:flutter/services.dart';
-import 'package:pdf/pdf.dart';
-import 'package:share_plus/share_plus.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,7 +30,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late DateTime selectedMonth;
   late int firstDayOfMonth;
-  late Currency currency;
 
   @override
   void initState() {
@@ -40,7 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
     selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
     firstDayOfMonth =
         Provider.of<FinanceNotifier>(context, listen: false).firstDayOfMonth;
-    currency = Provider.of<CurrencyNotifier>(context, listen: false).currency;
+
+    // Dodana linijka:
     _loadCategoriesForSelectedMonth();
   }
 
@@ -114,7 +112,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Text(
                             AppLocalizations.of(context)!.noChartsToDisplay,
                             style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w500),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                     ],
@@ -156,13 +156,22 @@ class _HomeScreenState extends State<HomeScreen> {
         DateTime(selectedMonth.year, selectedMonth.month, firstDayOfMonth);
     final nextMonth = DateTime(selectedMonth.year, selectedMonth.month + 1);
     final end = DateTime(
-        nextMonth.year, nextMonth.month, firstDayOfMonth - 1, 23, 59, 59);
+      nextMonth.year,
+      nextMonth.month,
+      firstDayOfMonth - 1,
+      23,
+      59,
+      59,
+    );
 
     return DateTimeRange(start: start, end: end);
   }
 
   Widget _buildChartSection(
-      String title, List<Category> categories, BuildContext context) {
+    String title,
+    List<Category> categories,
+    BuildContext context,
+  ) {
     if (categories.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -202,7 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
-            '${AppLocalizations.of(context)!.total} $title: ${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
+            '${AppLocalizations.of(context)!.total} $title: '
+            '${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
             '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
             style: const TextStyle(fontSize: 16),
           ),
@@ -275,56 +285,62 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLegend(List<Category> categories, {required bool isBudget}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: categories.map((category) {
-          final color = Colors.primaries[
-              categories.indexOf(category) % Colors.primaries.length];
-          final value = isBudget
-              ? '${currency.isLeftSigned ? currency.sign : ""}${(category.budgetLimit ?? 0).toStringAsFixed(2)}${!currency.isLeftSigned ? currency.sign : ""}'
-              : '${((category.spentAmount ?? 0) / (category.budgetLimit ?? 1) * 100).toStringAsFixed(1)}%';
+    return Consumer<CurrencyNotifier>(
+      builder: (context, currencyNotifier, child) {
+        final currency = currencyNotifier.currency;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: categories.map((category) {
+              final color = Colors.primaries[
+                  categories.indexOf(category) % Colors.primaries.length];
+              final value = isBudget
+                  ? '${currency.isLeftSigned ? currency.sign : ""}'
+                      '${(category.budgetLimit ?? 0).toStringAsFixed(2)}'
+                      '${!currency.isLeftSigned ? ' ${currency.sign}' : ""}'
+                  : '${((category.spentAmount ?? 0) / (category.budgetLimit ?? 1) * 100).toStringAsFixed(1)}%';
 
-          return Row(
-            children: [
-              Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${category.name}: $value',
-                style: const TextStyle(fontSize: 14),
-              ),
-            ],
-          );
-        }).toList(),
-      ),
+              return Row(
+                children: [
+                  Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${category.name}: $value',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 
-
   Future<void> generateMonthlyReport(
-      BuildContext context,
-      DateTime selectedMonth,
-      List<Category> incomeCategories,
-      List<Category> expenseCategories,
-      ) async {
+    BuildContext context,
+    DateTime selectedMonth,
+    List<Category> incomeCategories,
+    List<Category> expenseCategories,
+  ) async {
     final pdf = pw.Document();
 
     // Total Income and Expenses
     final totalIncome = incomeCategories.fold<double>(
       0.0,
-          (sum, category) => sum + (category.spentAmount ?? 0),
+      (sum, category) => sum + (category.spentAmount ?? 0),
     );
     final totalExpenses = expenseCategories.fold<double>(
       0.0,
-          (sum, category) => sum + (category.spentAmount ?? 0),
+      (sum, category) => sum + (category.spentAmount ?? 0),
     );
 
     // Render income chart as an image
@@ -338,7 +354,9 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       _buildPieChart(expenseCategories, 'Expense'),
     );
-    final currency = Provider.of<CurrencyNotifier>(context, listen: false).currency;
+
+    final currency =
+        Provider.of<CurrencyNotifier>(context, listen: false).currency;
 
     // Generate PDF
     pdf.addPage(
@@ -347,17 +365,17 @@ class _HomeScreenState extends State<HomeScreen> {
         build: (pw.Context ctx) => [
           pw.Text(
             '${AppLocalizations.of(context)!.monthlyReportTitle} - '
-                '${DateFormat.yMMMM(AppLocalizations.of(context)!.localeName).format(selectedMonth)}',
+            '${DateFormat.yMMMM(AppLocalizations.of(context)!.localeName).format(selectedMonth)}',
             style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 20),
           pw.Text(
             '${AppLocalizations.of(context)!.totalIncome}: '
-                '${totalIncome.toStringAsFixed(2)} ${currency.sign}',
+            '${totalIncome.toStringAsFixed(2)} ${currency.sign}',
           ),
           pw.Text(
             '${AppLocalizations.of(context)!.totalExpenses}: '
-                '${totalExpenses.toStringAsFixed(2)} ${currency.sign}',
+            '${totalExpenses.toStringAsFixed(2)} ${currency.sign}',
           ),
           pw.SizedBox(height: 20),
           pw.Text(AppLocalizations.of(context)!.incomeDistribution),
@@ -384,18 +402,12 @@ class _HomeScreenState extends State<HomeScreen> {
     await Share.shareXFiles([XFile(file.path)], text: 'Monthly Report');
   }
 
-  Future<Uint8List?> _generateChartImage(BuildContext context, Widget chart) async {
+  Future<Uint8List?> _generateChartImage(
+      BuildContext context, Widget chart) async {
     final boundaryKey = GlobalKey();
-    final widget = RepaintBoundary(
-      key: boundaryKey,
-      child: chart,
-    );
-
-    final renderBox = context.findRenderObject() as RenderBox?;
-    final size = renderBox?.size ?? const Size(300, 300);
 
     final renderBoundary = boundaryKey.currentContext?.findRenderObject()
-    as RenderRepaintBoundary?;
+        as RenderRepaintBoundary?;
 
     if (renderBoundary != null) {
       final image = await renderBoundary.toImage(pixelRatio: 3.0);
@@ -409,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildPieChart(List<Category> categories, String title) {
     final total = categories.fold<double>(
       0.0,
-          (sum, category) => sum + (category.spentAmount ?? 0),
+      (sum, category) => sum + (category.spentAmount ?? 0),
     );
 
     return AspectRatio(
@@ -417,12 +429,13 @@ class _HomeScreenState extends State<HomeScreen> {
       child: PieChart(
         PieChartData(
           sections: categories.map((category) {
-            final value = (category.spentAmount ?? 0) / (total == 0 ? 1 : total);
+            final value =
+                (category.spentAmount ?? 0) / (total == 0 ? 1 : total);
             return PieChartSectionData(
               value: value,
               title: '${(value * 100).toStringAsFixed(1)}%',
-              color: Colors.primaries[categories.indexOf(category) %
-                  Colors.primaries.length],
+              color: Colors.primaries[
+                  categories.indexOf(category) % Colors.primaries.length],
               radius: 100,
             );
           }).toList(),
@@ -432,18 +445,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   pw.Widget _buildTransactionTable(
-      List<Category> incomeCategories,
-      List<Category> expenseCategories,
-      ) {
+    List<Category> incomeCategories,
+    List<Category> expenseCategories,
+  ) {
     final data = <pw.TableRow>[
       pw.TableRow(
         children: [
-          pw.Text('Category', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-          pw.Text('Spent Amount', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+          pw.Text('Category',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+          pw.Text('Spent Amount',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
         ],
       ),
       ...incomeCategories.map(
-            (category) => pw.TableRow(
+        (category) => pw.TableRow(
           children: [
             pw.Text(category.name),
             pw.Text(category.spentAmount?.toStringAsFixed(2) ?? "0.00"),
@@ -451,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       ...expenseCategories.map(
-            (category) => pw.TableRow(
+        (category) => pw.TableRow(
           children: [
             pw.Text(category.name),
             pw.Text(category.spentAmount?.toStringAsFixed(2) ?? "0.00"),

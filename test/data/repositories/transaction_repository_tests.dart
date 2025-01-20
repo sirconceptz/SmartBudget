@@ -24,7 +24,7 @@ void main() {
     test('createTransaction inserts a transaction into the database', () async {
       final transaction = t.Transaction(
         id: null,
-        type: 1,
+        isExpense: 1,
         originalAmount: 100.0,
         convertedAmount: 100.0,
         category: Category(id: 1, name: "Food", description: "", isIncome: false, currency: Currency.usd),
@@ -74,7 +74,7 @@ void main() {
     test('updateTransaction updates a transaction in the database', () async {
       final transaction = t.Transaction(
         id: 1,
-        type: 1,
+        isExpense: 1,
         originalAmount: 150.0,
         convertedAmount: 150.0,
         category: Category(id: 1, name: "Food", description: "", isIncome: false, currency: Currency.usd),

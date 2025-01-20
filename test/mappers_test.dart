@@ -13,7 +13,7 @@ void main() {
       currency: Currency.usd,
       date: DateTime.now(),
       description: 'Test transaction',
-      type: 1,
+      isExpense: 1,
     );
 
     final category = Category(

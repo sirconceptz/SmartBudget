@@ -49,7 +49,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       );
 
       final newTransaction = Transaction(
-        type: _type == AppLocalizations.of(context)!.income ? 1 : 2,
+        isExpense: _type == AppLocalizations.of(context)!.income ? 1 : 2,
         originalAmount: _amount!,
         convertedAmount: _amount!,
         category: _selectedCategory!,

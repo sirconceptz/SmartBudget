@@ -1,8 +1,9 @@
 import 'package:smart_budget/data/mappers/transaction_mapper.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../models/transaction_entity.dart';
+import '../../models/category.dart';
 import '../../models/transaction.dart' as t;
+import '../../models/transaction_entity.dart';
 import '../db/database_helper.dart';
 
 class TransactionRepository {
@@ -19,14 +20,15 @@ class TransactionRepository {
     );
   }
 
-  Future<List<t.Transaction>> getAllTransactions() async {
+  Future<List<t.Transaction>> getAllTransactions(
+      List<Category> categories) async {
     final db = await _databaseHelper.database;
     final result = await db.query('transactions');
     return result
-        .map((json) => TransactionMapper.mapFromEntity(TransactionEntity.fromJson(json)))
+        .map((json) => TransactionMapper.mapFromEntity(
+            TransactionEntity.fromJson(json), categories))
         .toList();
   }
-
 
   Future<int> updateTransaction(t.Transaction transaction) async {
     final db = await _databaseHelper.database;

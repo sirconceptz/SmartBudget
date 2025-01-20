@@ -54,8 +54,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     try {
       emit(TransactionsLoading());
 
-      final transactions = await transactionRepository.getAllTransactions();
       final categories = await categoryRepository.getAllCategories();
+      final transactions =
+          await transactionRepository.getAllTransactions(categories);
 
       final state = currencyConversionBloc.state;
       if (state is! CurrencyRatesLoaded) {
@@ -84,7 +85,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         );
 
         final baseToUsdRate =
-            ratesMap[transaction.originalCurrency.value.toUpperCase()] ?? defaultRate;
+            ratesMap[transaction.originalCurrency.value.toUpperCase()] ??
+                defaultRate;
         final usdToUserCurrencyRate =
             ratesMap[userCurrency.value.toUpperCase()] ?? defaultRate;
 

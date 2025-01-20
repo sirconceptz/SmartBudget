@@ -3,7 +3,7 @@ import 'category.dart';
 
 class Transaction {
   final int? id;
-  final int type;
+  final int isExpense;
   final double originalAmount;
   final double convertedAmount;
   final DateTime date;
@@ -13,7 +13,7 @@ class Transaction {
 
   Transaction({
     this.id,
-    required this.type,
+    required this.isExpense,
     required this.originalAmount,
     required this.convertedAmount,
     required this.date,
@@ -24,7 +24,7 @@ class Transaction {
 
   Transaction copyWith({
     int? id,
-    int? type,
+    int? isExpense,
     double? originalAmount,
     double? convertedAmount,
     DateTime? date,
@@ -34,7 +34,7 @@ class Transaction {
   }) {
     return Transaction(
       id: id ?? this.id,
-      type: type ?? this.type,
+      isExpense: isExpense ?? this.isExpense,
       originalAmount: originalAmount ?? this.originalAmount,
       convertedAmount: convertedAmount ?? this.convertedAmount,
       date: date ?? this.date,

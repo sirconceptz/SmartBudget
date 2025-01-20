@@ -34,24 +34,28 @@ class CategoryListScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   elevation: 5,
-                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   color: category.isIncome
-                      ? Colors.green.withValues(red: 0, blue: 0, green: 255, alpha: 204)
-                      : Colors.red.withValues(red: 255, blue: 0, green: 0, alpha: 204),
+                      ? Colors.green.shade800
+                      : Colors.red.shade800,
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.white,
                       child: category.icon != null
                           ? Icon(
-                              IconData(category.icon!,
-                                  fontFamily: 'MaterialIcons'),
-                              color:
-                                  category.isIncome ? Colors.green : Colors.red,
+                              IconData(
+                                category.icon!,
+                                fontFamily: 'MaterialIcons',
+                              ),
+                              color: category.isIncome
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
                             )
                           : Icon(Icons.category,
                               color: category.isIncome
-                                  ? Colors.green
-                                  : Colors.red),
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800),
                     ),
                     title: Text(
                       category.name,

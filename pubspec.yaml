@@ -45,11 +45,11 @@ dev_dependencies:
 flutter:
   generate: true
   uses-material-design: true
+  assets:
+    - lib/l10n/
 
 flutter_icons:
   android: true
   ios: true
   remove_alpha_ios: true
   image_path: "assets/icons/app_icon.png"
-  assets:
-    - lib/l10n/

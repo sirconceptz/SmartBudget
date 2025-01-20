@@ -49,7 +49,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
     super.didChangeDependencies();
 
     setState(() {
-      _type = widget.transaction.type == 1
+      _type = widget.transaction.isExpense == 1
           ? AppLocalizations.of(context)!.income
           : AppLocalizations.of(context)!.expense;
     });
@@ -61,7 +61,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
       final updatedTransaction = Transaction(
         id: widget.transaction.id,
-        type: _type == AppLocalizations.of(context)!.income ? 1 : 2,
+        isExpense: _type == AppLocalizations.of(context)!.income ? 1 : 2,
         originalAmount: _amount,
         convertedAmount: _amount,
         date: DateTime(

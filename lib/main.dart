@@ -29,8 +29,8 @@ import 'models/category.dart';
 import 'models/transaction.dart';
 
 void main() async {
-  setupDependencies();
   WidgetsFlutterBinding.ensureInitialized();
+  setupDependencies();
   await initializeDateFormatting('pl_PL', null);
 
   final dbHelper = DatabaseHelper();
@@ -96,19 +96,19 @@ class MyApp extends StatelessWidget {
       locale: localeNotifier.locale,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.green, brightness: Brightness.light),
+            seedColor: Colors.green.shade800, brightness: Brightness.light),
         useMaterial3: true,
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          selectedItemColor: Colors.green,
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          selectedItemColor: Colors.green.shade800,
           unselectedItemColor: Colors.grey,
         ),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.green, brightness: Brightness.dark),
+            seedColor: Colors.green.shade800, brightness: Brightness.dark),
         useMaterial3: true,
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          selectedItemColor: Colors.green,
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          selectedItemColor: Colors.green.shade800,
           unselectedItemColor: Colors.grey,
         ),
       ),

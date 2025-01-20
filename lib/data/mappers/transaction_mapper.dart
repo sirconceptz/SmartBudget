@@ -4,10 +4,13 @@ import '../../models/transaction_entity.dart';
 
 class TransactionMapper {
   static Transaction mapFromEntityAndConvert(
-      TransactionEntity entity, double rateToUserCurrency, Category category) {
+    TransactionEntity entity,
+    double rateToUserCurrency,
+    Category category,
+  ) {
     return Transaction(
       id: entity.id,
-      type: entity.type,
+      isExpense: entity.isExpense,
       originalAmount: entity.amount,
       convertedAmount: entity.amount * rateToUserCurrency,
       category: category,
@@ -18,13 +21,18 @@ class TransactionMapper {
   }
 
   static Transaction mapFromEntity(
-      TransactionEntity entity) {
+    TransactionEntity entity,
+    List<Category> categories,
+  ) {
+    final matchingCategory =
+        categories.firstWhere((cat) => cat.id == entity.categoryId);
+
     return Transaction(
       id: entity.id,
-      type: entity.type,
+      isExpense: entity.isExpense,
       originalAmount: entity.amount,
       convertedAmount: entity.amount,
-      category: null,
+      category: matchingCategory,
       date: entity.date,
       description: entity.description,
       originalCurrency: entity.currency,
@@ -33,12 +41,13 @@ class TransactionMapper {
 
   static TransactionEntity toEntity(Transaction transaction) {
     return TransactionEntity(
-        id: transaction.id,
-        type: transaction.type,
-        amount: transaction.originalAmount,
-        date: transaction.date,
-        description: transaction.description,
-        currency: transaction.originalCurrency,
-        categoryId: transaction.category!.id);
+      id: transaction.id,
+      isExpense: transaction.isExpense,
+      amount: transaction.originalAmount,
+      date: transaction.date,
+      description: transaction.description,
+      currency: transaction.originalCurrency,
+      categoryId: transaction.category!.id,
+    );
   }
 }

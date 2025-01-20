@@ -6,9 +6,12 @@ import 'package:provider/provider.dart';
 import 'package:smart_budget/models/transaction.dart';
 import 'package:smart_budget/utils/enums/currency.dart';
 
+import '../../blocs/category/category_bloc.dart';
+import '../../blocs/category/category_state.dart';
 import '../../blocs/transaction/transaction_bloc.dart';
 import '../../blocs/transaction/transaction_state.dart';
 import '../../di/notifiers/currency_notifier.dart';
+import '../../utils/toast.dart';
 
 class TransactionsScreen extends StatelessWidget {
   const TransactionsScreen({super.key});
@@ -42,17 +45,19 @@ class TransactionsScreen extends StatelessWidget {
                       backgroundColor: Colors.white,
                       child: transaction.category!.icon != null
                           ? Icon(
-                              IconData(transaction.category!.icon!,
-                                  fontFamily: 'MaterialIcons'),
-                              color: transaction.type == 1
-                                  ? Colors.green
-                                  : Colors.red,
+                              IconData(
+                                transaction.category!.icon!,
+                                fontFamily: 'MaterialIcons',
+                              ),
+                              color: transaction.isExpense == 1
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
                             )
                           : Icon(
                               Icons.category,
-                              color: transaction.type == 1
-                                  ? Colors.green
-                                  : Colors.red,
+                              color: transaction.isExpense == 1
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
                             ),
                     ),
                     title: Text(
@@ -72,9 +77,9 @@ class TransactionsScreen extends StatelessWidget {
                                   .formatAmount(transaction.convertedAmount) ??
                               "",
                           style: TextStyle(
-                            color: transaction.type == 1
-                                ? Colors.green
-                                : Colors.red,
+                            color: transaction.isExpense == 1
+                                ? Colors.green.shade800
+                                : Colors.red.shade800,
                             fontWeight: FontWeight.bold,
                             fontSize: 22,
                           ),
@@ -85,9 +90,9 @@ class TransactionsScreen extends StatelessWidget {
                           Text(
                             "(${transaction.originalCurrency.formatAmount(transaction.originalAmount)})",
                             style: TextStyle(
-                              color: transaction.type == 1
-                                  ? Colors.green
-                                  : Colors.red,
+                              color: transaction.isExpense == 1
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
@@ -115,9 +120,22 @@ class TransactionsScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: 'transactions_fab',
         onPressed: () async {
-          await Navigator.pushNamed(context, '/addTransaction');
+          final catState = context.read<CategoryBloc>().state;
+
+          if (catState is CategoriesWithSpentAmountsLoaded) {
+            if (catState.allCategories.isEmpty) {
+              Toast.show(context, 'Proszę najpierw dodać kategorie');
+            } else {
+              await Navigator.pushNamed(context, '/addTransaction');
+            }
+          } else if (catState is CategoryError) {
+            Toast.show(context, 'Wystąpił błąd przy ładowaniu kategorii.');
+          } else {
+            Toast.show(
+                context, 'Proszę zaczekać, trwa wczytywanie kategorii...');
+          }
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

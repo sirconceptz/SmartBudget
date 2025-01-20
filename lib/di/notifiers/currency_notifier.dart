@@ -26,6 +26,9 @@ class CurrencyNotifier extends ChangeNotifier {
     if (savedCurrency != null) {
       _currency = CurrencyExtension.fromString(savedCurrency);
       notifyListeners();
+    } else {
+      _currency = Currency.usd;
+      notifyListeners();
     }
   }
 }
