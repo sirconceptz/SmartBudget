@@ -32,6 +32,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _type = AppLocalizations.of(context)!.expense;
+      });
+    });
+
     _selectedCurrency =
         Provider.of<CurrencyNotifier>(context, listen: false).currency;
   }
@@ -99,144 +105,153 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.addTransaction),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              DropdownButtonFormField<String>(
-                enableFeedback: true,
-                value: _type,
-                items: [
-                  AppLocalizations.of(context)!.income,
-                  AppLocalizations.of(context)!.expense
-                ].map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _type = value!;
-                    _selectedCategory = null;
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Typ transakcji'),
-              ),
-              BlocBuilder<CategoryBloc, CategoryState>(
-                builder: (context, state) {
-                  if (state is CategoriesLoading) {
-                    return CircularProgressIndicator();
-                  } else if (state is CategoriesWithSpentAmountsLoaded) {
-                    final categories = state.allCategories
-                        .where((category) =>
-                            (_type == AppLocalizations.of(context)!.income
-                                ? category.isIncome
-                                : !category.isIncome))
-                        .toList();
-
-                    return DropdownButtonFormField<Category>(
-                      enableFeedback: true,
-                      value: _selectedCategory,
-                      items: categories.map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(category.name),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCategory = value!;
-                        });
-                      },
-                      decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.category),
-                      validator: (value) => value == null
-                          ? AppLocalizations.of(context)!.chooseCategory
-                          : null,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                DropdownButtonFormField<String>(
+                  enableFeedback: true,
+                  value: _type,
+                  items: [
+                    AppLocalizations.of(context)!.income,
+                    AppLocalizations.of(context)!.expense
+                  ].map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(type),
                     );
-                  } else {
-                    return Text(AppLocalizations.of(context)!
-                        .errorWhileLoadingCategories);
-                  }
-                },
-              ),
-              TextFormField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.amount,
-                  suffixText: currentCurrency.name,
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _type = value!;
+                      _selectedCategory = null;
+                    });
+                  },
+                  decoration: InputDecoration(labelText: 'Typ transakcji'),
                 ),
-                validator: (value) {
-                  if (value == null || double.tryParse(value) == null) {
-                    return AppLocalizations.of(context)!.giveCorrectAmount;
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _amount = double.parse(value!);
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.description),
-                onSaved: (value) {
-                  _description = value;
-                },
-              ),
-              DropdownButtonFormField<Currency>(
-                value: _selectedCurrency,
-                items: Currency.values.map((currency) {
-                  return DropdownMenuItem(
-                    value: currency,
-                    child: Text(
-                        currency.localizedName(AppLocalizations.of(context)!)),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCurrency = value!;
-                  });
-                },
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.currency,
+                BlocBuilder<CategoryBloc, CategoryState>(
+                  builder: (context, state) {
+                    if (state is CategoriesLoading) {
+                      return const CircularProgressIndicator();
+                    } else if (state is CategoriesWithSpentAmountsLoaded) {
+                      final categories = state.allCategories
+                          .where((category) => (_type ==
+                          AppLocalizations.of(context)!.income
+                          ? category.isIncome
+                          : !category.isIncome))
+                          .toList();
+
+                      return DropdownButtonFormField<Category>(
+                        enableFeedback: true,
+                        value: _selectedCategory,
+                        items: categories.map((category) {
+                          return DropdownMenuItem(
+                            value: category,
+                            child: Text(category.name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategory = value!;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.category,
+                        ),
+                        validator: (value) => value == null
+                            ? AppLocalizations.of(context)!.chooseCategory
+                            : null,
+                      );
+                    } else {
+                      return Text(AppLocalizations.of(context)!
+                          .errorWhileLoadingCategories);
+                    }
+                  },
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
+                TextFormField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.amount,
+                    suffixText: currentCurrency.name,
+                  ),
+                  validator: (value) {
+                    if (value == null || double.tryParse(value) == null) {
+                      return AppLocalizations.of(context)!.giveCorrectAmount;
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _amount = double.parse(value!);
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.description,
+                  ),
+                  onSaved: (value) {
+                    _description = value;
+                  },
+                ),
+                DropdownButtonFormField<Currency>(
+                  value: _selectedCurrency,
+                  items: Currency.values.map((currency) {
+                    return DropdownMenuItem(
+                      value: currency,
+                      child: Text(
+                        currency.localizedName(
+                          AppLocalizations.of(context)!,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCurrency = value!;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.currency,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
                           '${AppLocalizations.of(context)!.date}: ${_selectedDate.toLocal()}'
-                              .split(' ')[0]),
-                      Text(
-                          '${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}'),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      TextButton(
-                        onPressed: _pickDate,
-                        child: Text(AppLocalizations.of(context)!.chooseDate),
-                      ),
-                      TextButton(
-                        onPressed: _pickTime,
-                        child: Text(AppLocalizations.of(context)!.chooseTime),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _selectedCurrency != null ? _saveTransaction : null,
-                child: Text(AppLocalizations.of(context)!.saveTransaction),
-              ),
-            ],
+                              .split(' ')[0],
+                        ),
+                        Text(
+                          '${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}',
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        TextButton(
+                          onPressed: _pickDate,
+                          child: Text(AppLocalizations.of(context)!.chooseDate),
+                        ),
+                        TextButton(
+                          onPressed: _pickTime,
+                          child: Text(AppLocalizations.of(context)!.chooseTime),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _selectedCurrency != null ? _saveTransaction : null,
+                  child: Text(AppLocalizations.of(context)!.saveTransaction),
+                ),
+              ],
+            ),
           ),
         ),
       ),

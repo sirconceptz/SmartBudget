@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ import '../di/notifiers/finance_notifier.dart';
 import '../models/category.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -38,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     firstDayOfMonth =
         Provider.of<FinanceNotifier>(context, listen: false).firstDayOfMonth;
 
-    // Dodana linijka:
+    // Ładujemy kategorie (w BLoC) dla wybranego zakresu
     _loadCategoriesForSelectedMonth();
   }
 
@@ -46,13 +45,21 @@ class _HomeScreenState extends State<HomeScreen> {
     final now = DateTime.now();
     return List.generate(
       count,
-      (index) => DateTime(now.year, now.month - index),
+          (index) => DateTime(now.year, now.month - index, 1),
     );
   }
 
   void _loadCategoriesForSelectedMonth() {
-    final dateRange = getMonthRange(selectedMonth, firstDayOfMonth);
+    final dateRange = _getCustomMonthRange(selectedMonth, firstDayOfMonth);
     context.read<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
+  }
+
+  // Wylicza np. "10 stycznia 2024 – 9 lutego 2024" itd.
+  DateTimeRange _getCustomMonthRange(DateTime month, int firstDay) {
+    final start = DateTime(month.year, month.month, firstDay);
+    final nextMonth = DateTime(month.year, month.month + 1, firstDay);
+    final end = nextMonth.subtract(const Duration(seconds: 1));
+    return DateTimeRange(start: start, end: end);
   }
 
   @override
@@ -85,9 +92,16 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, state) {
           if (state is CategoriesLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is CategoriesWithSpentAmountsLoaded) {
+          } else if (state is CategoriesForMonthLoaded) {
+            // Mamy gotowe listy, łącznie z sumami
             final incomeCategories = state.incomeCategories;
             final expenseCategories = state.expenseCategories;
+
+            // Zero obliczeń w UI – BLoC dał nam gotowe sumy:
+            final totalIncomes = state.totalIncomes;
+            final totalExpenses = state.totalExpenses;
+            final budgetIncomes = state.budgetIncomes;
+            final budgetExpenses = state.budgetExpenses;
 
             return Stack(
               children: [
@@ -96,15 +110,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       if (incomeCategories.isNotEmpty)
                         _buildChartSection(
-                          AppLocalizations.of(context)!.incomes,
-                          incomeCategories,
-                          context,
+                          title: AppLocalizations.of(context)!.incomes,
+                          categories: incomeCategories,
+                          totalSpent: totalIncomes,
+                          totalBudget: budgetIncomes,
                         ),
                       if (expenseCategories.isNotEmpty)
                         _buildChartSection(
-                          AppLocalizations.of(context)!.expenses,
-                          expenseCategories,
-                          context,
+                          title: AppLocalizations.of(context)!.expenses,
+                          categories: expenseCategories,
+                          totalSpent: totalExpenses,
+                          totalBudget: budgetExpenses,
                         ),
                       if (incomeCategories.isEmpty && expenseCategories.isEmpty)
                         Padding(
@@ -126,10 +142,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: FloatingActionButton(
                     onPressed: () {
                       generateMonthlyReport(
-                        context,
-                        selectedMonth,
-                        incomeCategories,
-                        expenseCategories,
+                        context: context,
+                        selectedMonth: selectedMonth,
+                        incomeCategories: incomeCategories,
+                        expenseCategories: expenseCategories,
+                        totalIncomes: totalIncomes,
+                        totalExpenses: totalExpenses,
                       );
                     },
                     child: const Icon(Icons.picture_as_pdf),
@@ -151,27 +169,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  DateTimeRange getMonthRange(DateTime selectedMonth, int firstDayOfMonth) {
-    final start =
-        DateTime(selectedMonth.year, selectedMonth.month, firstDayOfMonth);
-    final nextMonth = DateTime(selectedMonth.year, selectedMonth.month + 1);
-    final end = DateTime(
-      nextMonth.year,
-      nextMonth.month,
-      firstDayOfMonth - 1,
-      23,
-      59,
-      59,
-    );
-
-    return DateTimeRange(start: start, end: end);
-  }
-
-  Widget _buildChartSection(
-    String title,
-    List<Category> categories,
-    BuildContext context,
-  ) {
+  /// Sekcja wykresu / podsumowania dla Incomes / Expenses
+  /// ŻADNYCH obliczeń – wszystko gotowe w parametrach
+  Widget _buildChartSection({
+    required String title,
+    required List<Category> categories,
+    required double totalSpent,
+    required double totalBudget,
+  }) {
     if (categories.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -181,16 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     }
-
-    final totalBudget = categories.fold<double>(
-      0.0,
-      (sum, category) => sum + (category.budgetLimit ?? 0),
-    );
-
-    final totalSpent = categories.fold<double>(
-      0.0,
-      (sum, category) => sum + (category.spentAmount ?? 0),
-    );
 
     return Column(
       children: [
@@ -202,18 +197,29 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         _buildChartTitle(AppLocalizations.of(context)!.budgetDistribution),
+
+        // Wykres udziału w budżecie
         _buildBudgetPieChart(categories, totalBudget),
+
+        // Legenda do budżetu
         _buildLegend(categories, isBudget: true),
+
         const SizedBox(height: 16),
         _buildChartTitle(AppLocalizations.of(context)!.budgetUsage),
+
+        // Wykres zużycia (spent / budget)
         _buildUsagePieChart(categories),
+
+        // Legenda do zużycia
         _buildLegend(categories, isBudget: false),
+
+        // Tekst: "Razem X/Y"
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
             '${AppLocalizations.of(context)!.total} $title: '
-            '${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
-            '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
+                '${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
+                '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
             style: const TextStyle(fontSize: 16),
           ),
         ),
@@ -234,21 +240,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Wykres kołowy - rozłożenie budżetu między kategorie
   Widget _buildBudgetPieChart(List<Category> categories, double totalBudget) {
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
         PieChartData(
-          sections: categories.map((category) {
-            final budgetShare = (category.budgetLimit ?? 0) /
-                (totalBudget == 0 ? 1 : totalBudget) *
-                100;
+          sections: categories.map((cat) {
+            final catBudget = cat.budgetLimit ?? 0;
+            final budgetShare =
+                (catBudget / (totalBudget == 0 ? 1 : totalBudget)) * 100;
 
             return PieChartSectionData(
               value: budgetShare,
-              title: "${category.name}\n${budgetShare.toStringAsFixed(2)}%",
+              title: "${cat.name}\n${budgetShare.toStringAsFixed(2)}%",
               color: Colors.primaries[
-                  categories.indexOf(category) % Colors.primaries.length],
+              categories.indexOf(cat) % Colors.primaries.length],
               radius: 100,
             );
           }).toList(),
@@ -259,21 +266,26 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Wykres kołowy - zużycie budżetu w % (spent / budget)
   Widget _buildUsagePieChart(List<Category> categories) {
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
         PieChartData(
-          sections: categories.map((category) {
-            final spent = category.spentAmount ?? 0;
-            final budget = category.budgetLimit ?? spent;
+          sections: categories.map((cat) {
+            // BLoC wypełnił monthlySpent, mamy np. monthlySpent[0].spentAmount
+            final spent = cat.monthlySpent.isNotEmpty
+                ? cat.monthlySpent.first.spentAmount
+                : 0.0;
+
+            final budget = cat.budgetLimit ?? 0;
             final usagePercentage = (spent / (budget == 0 ? 1 : budget)) * 100;
 
             return PieChartSectionData(
               value: usagePercentage,
-              title: "${category.name}\n${usagePercentage.toStringAsFixed(2)}%",
+              title: "${cat.name}\n${usagePercentage.toStringAsFixed(2)}%",
               color: Colors.primaries[
-                  categories.indexOf(category) % Colors.primaries.length],
+              categories.indexOf(cat) % Colors.primaries.length],
               radius: 100,
             );
           }).toList(),
@@ -284,6 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Legenda do wykresu
   Widget _buildLegend(List<Category> categories, {required bool isBudget}) {
     return Consumer<CurrencyNotifier>(
       builder: (context, currencyNotifier, child) {
@@ -292,32 +305,25 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: categories.map((category) {
+            children: categories.map((cat) {
               final color = Colors.primaries[
-                  categories.indexOf(category) % Colors.primaries.length];
-              final value = isBudget
-                  ? '${currency.isLeftSigned ? currency.sign : ""}'
-                      '${(category.budgetLimit ?? 0).toStringAsFixed(2)}'
-                      '${!currency.isLeftSigned ? ' ${currency.sign}' : ""}'
-                  : '${((category.spentAmount ?? 0) / (category.budgetLimit ?? 1) * 100).toStringAsFixed(1)}%';
+              categories.indexOf(cat) % Colors.primaries.length];
 
-              return Row(
-                children: [
-                  Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${category.name}: $value',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ],
-              );
+              if (isBudget) {
+                final budget = cat.budgetLimit ?? 0;
+                final value = '${currency.isLeftSigned ? currency.sign : ""}'
+                    '${budget.toStringAsFixed(2)}'
+                    '${!currency.isLeftSigned ? ' ${currency.sign}' : ""}';
+                return _buildLegendRow(color, cat.name, value);
+              } else {
+                final spent = cat.monthlySpent.isNotEmpty
+                    ? cat.monthlySpent.first.spentAmount
+                    : 0.0;
+                final budget = cat.budgetLimit ?? 1;
+                final usagePct = (spent / budget) * 100;
+                final value = '${usagePct.toStringAsFixed(1)}%';
+                return _buildLegendRow(color, cat.name, value);
+              }
             }).toList(),
           ),
         );
@@ -325,57 +331,65 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> generateMonthlyReport(
-    BuildContext context,
-    DateTime selectedMonth,
-    List<Category> incomeCategories,
-    List<Category> expenseCategories,
-  ) async {
+  Widget _buildLegendRow(Color color, String categoryName, String value) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '$categoryName: $value',
+          style: const TextStyle(fontSize: 14),
+        ),
+      ],
+    );
+  }
+
+  /// Generowanie raportu PDF
+  Future<void> generateMonthlyReport({
+    required BuildContext context,
+    required DateTime selectedMonth,
+    required List<Category> incomeCategories,
+    required List<Category> expenseCategories,
+    required double totalIncomes,
+    required double totalExpenses,
+  }) async {
     final pdf = pw.Document();
+    final currency =
+        Provider.of<CurrencyNotifier>(context, listen: false).currency;
 
-    // Total Income and Expenses
-    final totalIncome = incomeCategories.fold<double>(
-      0.0,
-      (sum, category) => sum + (category.spentAmount ?? 0),
-    );
-    final totalExpenses = expenseCategories.fold<double>(
-      0.0,
-      (sum, category) => sum + (category.spentAmount ?? 0),
-    );
-
-    // Render income chart as an image
     final incomeChartImage = await _generateChartImage(
       context,
       _buildPieChart(incomeCategories, 'Income'),
     );
-
-    // Render expense chart as an image
     final expenseChartImage = await _generateChartImage(
       context,
       _buildPieChart(expenseCategories, 'Expense'),
     );
 
-    final currency =
-        Provider.of<CurrencyNotifier>(context, listen: false).currency;
-
-    // Generate PDF
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         build: (pw.Context ctx) => [
           pw.Text(
             '${AppLocalizations.of(context)!.monthlyReportTitle} - '
-            '${DateFormat.yMMMM(AppLocalizations.of(context)!.localeName).format(selectedMonth)}',
+                '${DateFormat.yMMMM(AppLocalizations.of(context)!.localeName).format(selectedMonth)}',
             style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 20),
           pw.Text(
             '${AppLocalizations.of(context)!.totalIncome}: '
-            '${totalIncome.toStringAsFixed(2)} ${currency.sign}',
+                '${totalIncomes.toStringAsFixed(2)} ${currency.sign}',
           ),
           pw.Text(
             '${AppLocalizations.of(context)!.totalExpenses}: '
-            '${totalExpenses.toStringAsFixed(2)} ${currency.sign}',
+                '${totalExpenses.toStringAsFixed(2)} ${currency.sign}',
           ),
           pw.SizedBox(height: 20),
           pw.Text(AppLocalizations.of(context)!.incomeDistribution),
@@ -394,7 +408,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    // Save and share the PDF
     final output = await pdf.save();
     final tempDir = await Directory.systemTemp.createTemp();
     final file = File('${tempDir.path}/Monthly_Report.pdf');
@@ -402,40 +415,28 @@ class _HomeScreenState extends State<HomeScreen> {
     await Share.shareXFiles([XFile(file.path)], text: 'Monthly Report');
   }
 
-  Future<Uint8List?> _generateChartImage(
-      BuildContext context, Widget chart) async {
-    final boundaryKey = GlobalKey();
-
-    final renderBoundary = boundaryKey.currentContext?.findRenderObject()
-        as RenderRepaintBoundary?;
-
-    if (renderBoundary != null) {
-      final image = await renderBoundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      return byteData?.buffer.asUint8List();
-    }
-
-    return null;
-  }
-
   Widget _buildPieChart(List<Category> categories, String title) {
     final total = categories.fold<double>(
       0.0,
-      (sum, category) => sum + (category.spentAmount ?? 0),
+          (sum, cat) => sum + (cat.monthlySpent.isNotEmpty
+          ? cat.monthlySpent.first.spentAmount
+          : 0.0),
     );
 
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
         PieChartData(
-          sections: categories.map((category) {
-            final value =
-                (category.spentAmount ?? 0) / (total == 0 ? 1 : total);
+          sections: categories.map((cat) {
+            final catSpent = cat.monthlySpent.isNotEmpty
+                ? cat.monthlySpent.first.spentAmount
+                : 0.0;
+            final value = catSpent / (total == 0 ? 1 : total);
             return PieChartSectionData(
               value: value,
               title: '${(value * 100).toStringAsFixed(1)}%',
               color: Colors.primaries[
-                  categories.indexOf(category) % Colors.primaries.length],
+              categories.indexOf(cat) % Colors.primaries.length],
               radius: 100,
             );
           }).toList(),
@@ -445,31 +446,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   pw.Widget _buildTransactionTable(
-    List<Category> incomeCategories,
-    List<Category> expenseCategories,
-  ) {
+      List<Category> incomeCategories,
+      List<Category> expenseCategories,
+      ) {
     final data = <pw.TableRow>[
       pw.TableRow(
         children: [
-          pw.Text('Category',
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+          pw.Text('Category', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
           pw.Text('Spent Amount',
               style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
         ],
       ),
       ...incomeCategories.map(
-        (category) => pw.TableRow(
+            (cat) => pw.TableRow(
           children: [
-            pw.Text(category.name),
-            pw.Text(category.spentAmount?.toStringAsFixed(2) ?? "0.00"),
+            pw.Text(cat.name),
+            pw.Text(
+              cat.monthlySpent.isNotEmpty
+                  ? cat.monthlySpent.first.spentAmount.toStringAsFixed(2)
+                  : "0.00",
+            ),
           ],
         ),
       ),
       ...expenseCategories.map(
-        (category) => pw.TableRow(
+            (cat) => pw.TableRow(
           children: [
-            pw.Text(category.name),
-            pw.Text(category.spentAmount?.toStringAsFixed(2) ?? "0.00"),
+            pw.Text(cat.name),
+            pw.Text(
+              cat.monthlySpent.isNotEmpty
+                  ? cat.monthlySpent.first.spentAmount.toStringAsFixed(2)
+                  : "0.00",
+            ),
           ],
         ),
       ),
@@ -479,5 +487,12 @@ class _HomeScreenState extends State<HomeScreen> {
       border: pw.TableBorder.all(),
       children: data,
     );
+  }
+
+  Future<Uint8List?> _generateChartImage(
+      BuildContext context, Widget chart) async {
+    // W praktyce musisz użyć RepaintBoundary z jakimś GlobalKey,
+    // to tylko przykład.
+    return null;
   }
 }

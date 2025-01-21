@@ -1,4 +1,5 @@
 import 'package:smart_budget/data/mappers/transaction_mapper.dart';
+import 'package:smart_budget/utils/custom_date_time_range.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../models/category.dart';
@@ -48,4 +49,33 @@ class TransactionRepository {
       whereArgs: [id],
     );
   }
+
+  Future<List<t.Transaction>> getTransactionsByCustomMonth(
+      DateTime selectedMonth,
+      int firstDayOfMonth,
+      List<Category> categories,
+      ) async {
+    final db = await _databaseHelper.database;
+
+    final customRange = CustomDateTimeRange.getCustomMonthRange(selectedMonth, firstDayOfMonth);
+
+    final startIso = customRange.start.toIso8601String();
+    final endIso = customRange.end.toIso8601String();
+
+    final result = await db.query(
+      'transactions',
+      where: 'date >= ? AND date <= ?',
+      whereArgs: [startIso, endIso],
+    );
+
+    return result
+        .map(
+          (map) => TransactionMapper.mapFromEntity(
+        TransactionEntity.fromJson(map),
+        categories,
+      ),
+    )
+        .toList();
+  }
+
 }
