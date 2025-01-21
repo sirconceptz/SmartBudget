@@ -138,10 +138,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       return const CircularProgressIndicator();
                     } else if (state is CategoriesWithSpentAmountsLoaded) {
                       final categories = state.allCategories
-                          .where((category) => (_type ==
-                          AppLocalizations.of(context)!.income
-                          ? category.isIncome
-                          : !category.isIncome))
+                          .where((category) =>
+                              (_type == AppLocalizations.of(context)!.income
+                                  ? category.isIncome
+                                  : !category.isIncome))
                           .toList();
 
                       return DropdownButtonFormField<Category>(
@@ -247,7 +247,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _selectedCurrency != null ? _saveTransaction : null,
+                  onPressed:
+                      _selectedCurrency != null ? _saveTransaction : null,
                   child: Text(AppLocalizations.of(context)!.saveTransaction),
                 ),
               ],

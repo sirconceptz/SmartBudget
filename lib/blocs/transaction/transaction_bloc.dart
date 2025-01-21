@@ -38,6 +38,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<AddTransaction>(_onAddTransaction);
     on<UpdateTransaction>(_onUpdateTransaction);
     on<DeleteTransaction>(_onDeleteTransaction);
+    on<FilterTransactions>(_onFilterTransactions);
 
     currencyConversionBloc.registerOnCurrencyRatesLoadedCallback(() {
       add(LoadTransactions());
@@ -156,6 +157,103 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
     } catch (e) {
       emit(TransactionError('Failed to delete transaction'));
+    }
+  }
+
+  Future<void> _onFilterTransactions(
+    FilterTransactions event,
+    Emitter<TransactionState> emit,
+  ) async {
+    try {
+      emit(TransactionsLoading());
+
+      // 1. Pobierz kategorie
+      final categories = await categoryRepository.getAllCategories();
+
+      // 2. Pobierz transakcje z repo (możesz dodać metodę getFilteredTransactions(...) w repo)
+      final allTx = await transactionRepository.getAllTransactions(categories);
+
+      // 3. Przefiltruj w pamięci (jeśli nie masz dedykowanej metody w repo).
+      //   Jeżeli wolisz w repo, stwórz tam getTransactionsByFilter(...),
+      //   i tam zrób SQL z klauzulami WHERE. Poniżej jest przykład filtra w pamięci.
+
+      final filtered = allTx.where((tx) {
+        // Kategoria
+        if (event.categoryId != null &&
+            tx.category != null &&
+            tx.category!.id != event.categoryId) {
+          return false;
+        }
+        // Data
+        if (event.dateFrom != null && tx.date.isBefore(event.dateFrom!)) {
+          return false;
+        }
+        if (event.dateTo != null && tx.date.isAfter(event.dateTo!)) {
+          return false;
+        }
+        // Nazwa
+        if (event.name != null && event.name!.isNotEmpty) {
+          final desc = tx.description?.toLowerCase() ?? "";
+          final filter = event.name!.toLowerCase();
+          if (!desc.contains(filter)) {
+            return false;
+          }
+        }
+        // Kwota
+        if (event.amountMin != null && tx.convertedAmount < event.amountMin!) {
+          return false;
+        }
+        if (event.amountMax != null && tx.convertedAmount > event.amountMax!) {
+          return false;
+        }
+        return true;
+      }).toList();
+
+      // 4. Sprawdź stawki walut (jak w _onLoadTransactions)
+      final currentState = currencyConversionBloc.state;
+      if (currentState is! CurrencyRatesLoaded) {
+        throw Exception("Currency rates not loaded");
+      }
+      final rates = currentState.rates;
+      final userCurrency = currencyNotifier.currency;
+
+      final ratesMap = {
+        for (var rate in rates) rate.code.toUpperCase(): rate.rate
+      };
+      const defaultRate = 1.0;
+
+      // 5. Konwertuj transakcje
+      final convertedTransactions = filtered.map((transaction) {
+        final category = categories.firstWhere(
+          (cat) => cat.id == transaction.category!.id,
+          orElse: () => Category(
+            id: null,
+            name: 'Unknown',
+            description: 'Unknown',
+            isIncome: false,
+            currency: userCurrency,
+          ),
+        );
+
+        final baseToUsdRate =
+            ratesMap[transaction.originalCurrency.value.toUpperCase()] ??
+                defaultRate;
+        final usdToUserCurrencyRate =
+            ratesMap[userCurrency.value.toUpperCase()] ?? defaultRate;
+
+        final conversionRate = usdToUserCurrencyRate / baseToUsdRate;
+
+        return TransactionMapper.mapFromEntityAndConvert(
+          TransactionMapper.toEntity(transaction),
+          conversionRate,
+          category,
+        );
+      }).toList();
+
+      // 6. Emituj stan
+      emit(TransactionsLoaded(convertedTransactions));
+    } catch (e) {
+      emit(TransactionError('Failed to filter transactions: $e'));
     }
   }
 

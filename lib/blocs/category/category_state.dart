@@ -6,6 +6,7 @@ class CategoriesLoading extends CategoryState {}
 
 class CategoryError extends CategoryState {
   final String message;
+
   CategoryError(this.message);
 }
 
@@ -32,7 +33,6 @@ class CategoriesForMonthLoaded extends CategoriesWithSpentAmountsLoaded {
     required super.incomeCategories,
     required super.expenseCategories,
     required super.allCategories,
-
     required this.totalIncomes,
     required this.totalExpenses,
     required this.budgetIncomes,

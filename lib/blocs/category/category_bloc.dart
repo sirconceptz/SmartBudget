@@ -16,10 +16,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CurrencyNotifier currencyNotifier;
 
   CategoryBloc(
-      this.categoryRepository,
-      this.currencyConversionBloc,
-      this.currencyNotifier,
-      ) : super(CategoriesLoading()) {
+    this.categoryRepository,
+    this.currencyConversionBloc,
+    this.currencyNotifier,
+  ) : super(CategoriesLoading()) {
     on<AddCategory>(_onAddCategory);
     on<UpdateCategory>(_onUpdateCategory);
     on<DeleteCategory>(_onDeleteCategory);
@@ -28,14 +28,15 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onLoadCategoriesWithSpentAmounts(
-      LoadCategoriesWithSpentAmounts event,
-      Emitter<CategoryState> emit,
-      ) async {
+    LoadCategoriesWithSpentAmounts event,
+    Emitter<CategoryState> emit,
+  ) async {
     try {
       emit(CategoriesLoading());
 
       // 1. Pobierz kategorie wraz z transakcjami
-      final categories = await categoryRepository.getCategoriesWithTransactions();
+      final categories =
+          await categoryRepository.getCategoriesWithTransactions();
       // W tym momencie każda kategoria ma: category.transactions (lista TransactionEntity)
 
       // 2. Grupujemy transakcje w obrębie każdej kategorii po (year-month) i sumujemy
@@ -100,26 +101,30 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
       // 4. Podziel na income / expense
       final incomeCategories =
-      convertedCategories.where((c) => c.isIncome).toList();
+          convertedCategories.where((c) => c.isIncome).toList();
       final expenseCategories =
-      convertedCategories.where((c) => !c.isIncome).toList();
+          convertedCategories.where((c) => !c.isIncome).toList();
 
       // 5. Wylicz sumy -> sumujemy we wszystkich miesiącach
       final totalIncomes = incomeCategories.fold<double>(0, (sum, cat) {
-        double catSum = cat.monthlySpent.fold(0.0, (acc, ms) => acc + ms.spentAmount);
+        double catSum =
+            cat.monthlySpent.fold(0.0, (acc, ms) => acc + ms.spentAmount);
         return sum + catSum;
       });
 
       final totalExpenses = expenseCategories.fold<double>(0, (sum, cat) {
-        double catSum = cat.monthlySpent.fold(0.0, (acc, ms) => acc + ms.spentAmount);
+        double catSum =
+            cat.monthlySpent.fold(0.0, (acc, ms) => acc + ms.spentAmount);
         return sum + catSum;
       });
 
       final budgetIncomes = incomeCategories.fold<double>(
-        0, (sum, cat) => sum + (cat.budgetLimit ?? 0),
+        0,
+        (sum, cat) => sum + (cat.budgetLimit ?? 0),
       );
       final budgetExpenses = expenseCategories.fold<double>(
-        0, (sum, cat) => sum + (cat.budgetLimit ?? 0),
+        0,
+        (sum, cat) => sum + (cat.budgetLimit ?? 0),
       );
 
       emit(

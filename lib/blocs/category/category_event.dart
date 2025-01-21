@@ -36,4 +36,3 @@ class UpdateLocalizedCategories extends CategoryEvent {
 
   UpdateLocalizedCategories(this.localizations);
 }
-

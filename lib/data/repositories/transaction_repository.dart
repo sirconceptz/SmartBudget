@@ -51,13 +51,14 @@ class TransactionRepository {
   }
 
   Future<List<t.Transaction>> getTransactionsByCustomMonth(
-      DateTime selectedMonth,
-      int firstDayOfMonth,
-      List<Category> categories,
-      ) async {
+    DateTime selectedMonth,
+    int firstDayOfMonth,
+    List<Category> categories,
+  ) async {
     final db = await _databaseHelper.database;
 
-    final customRange = CustomDateTimeRange.getCustomMonthRange(selectedMonth, firstDayOfMonth);
+    final customRange =
+        CustomDateTimeRange.getCustomMonthRange(selectedMonth, firstDayOfMonth);
 
     final startIso = customRange.start.toIso8601String();
     final endIso = customRange.end.toIso8601String();
@@ -71,11 +72,10 @@ class TransactionRepository {
     return result
         .map(
           (map) => TransactionMapper.mapFromEntity(
-        TransactionEntity.fromJson(map),
-        categories,
-      ),
-    )
+            TransactionEntity.fromJson(map),
+            categories,
+          ),
+        )
         .toList();
   }
-
 }

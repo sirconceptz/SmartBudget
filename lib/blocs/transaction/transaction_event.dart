@@ -27,3 +27,21 @@ class DeleteTransaction extends TransactionEvent {
 
   DeleteTransaction(this.id);
 }
+
+class FilterTransactions extends TransactionEvent {
+  final String? name;
+  final int? categoryId;
+  final double? amountMin;
+  final double? amountMax;
+  final DateTime? dateFrom;
+  final DateTime? dateTo;
+
+  FilterTransactions({
+    this.name,
+    this.categoryId,
+    this.amountMin,
+    this.amountMax,
+    this.dateFrom,
+    this.dateTo,
+  });
+}

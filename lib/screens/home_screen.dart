@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -30,31 +29,75 @@ class _HomeScreenState extends State<HomeScreen> {
   late DateTime selectedMonth;
   late int firstDayOfMonth;
 
+  /// Tutaj będziemy przechowywać listę *dostępnych* miesięcy,
+  /// które faktycznie mają wydatki (> 0) w co najmniej jednej kategorii.
+  List<DateTime> _availableMonths = [];
+
   @override
   void initState() {
     super.initState();
+    // Domyślnie ustawiamy aktualny miesiąc
     selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
     firstDayOfMonth =
         Provider.of<FinanceNotifier>(context, listen: false).firstDayOfMonth;
 
-    // Ładujemy kategorie (w BLoC) dla wybranego zakresu
     _loadCategoriesForSelectedMonth();
   }
 
+  /// Metoda używana w Twoim oryginalnym kodzie – zostaje,
+  /// ale niekoniecznie musisz z niej korzystać
   List<DateTime> _getPreviousMonths(int count) {
     final now = DateTime.now();
     return List.generate(
       count,
-          (index) => DateTime(now.year, now.month - index, 1),
+      (index) => DateTime(now.year, now.month - index, 1),
     );
   }
 
+  /// NOWA METODA:
+  /// Zwraca listę miesięcy (DateTime(yyyy, mm, 1)),
+  /// w których łączne spentAmount > 0 w *jakiejkolwiek* kategorii
+  List<DateTime> _getAvailableMonthsFromCategories(
+      List<Category> incomeCategories, List<Category> expenseCategories) {
+    // Zbierz wszystkie kategorie
+    final allCats = [...incomeCategories, ...expenseCategories];
+
+    // Zbierz monthKey (np. "2024-01") tylko tam, gdzie spentAmount > 0
+    final monthKeys = <String>{}; // używamy Set, żeby uniknąć duplikatów
+
+    for (final cat in allCats) {
+      for (final ms in cat.monthlySpent) {
+        if (ms.spentAmount > 0) {
+          monthKeys.add(ms.monthKey);
+        }
+      }
+    }
+
+    // Parsujemy monthKey -> DateTime(yyyy, mm, 1)
+    final parsedMonths = monthKeys.map((key) => _parseMonthKey(key)).toList();
+
+    // Sortujemy np. malejąco (nowsze miesiące na górze),
+    // lub rosnąco, jak wolisz
+    parsedMonths.sort((a, b) => b.compareTo(a));
+
+    return parsedMonths;
+  }
+
+  /// Pomocnicza funkcja do zamiany "YYYY-MM" na DateTime(YYYY, MM, 1)
+  DateTime _parseMonthKey(String monthKey) {
+    final parts = monthKey.split('-'); // ["2024", "01"]
+    final y = int.parse(parts[0]);
+    final m = int.parse(parts[1]);
+    return DateTime(y, m, 1);
+  }
+
+  /// Wywołuje event z BLoC, aby załadować kategorie w danym przedziale
   void _loadCategoriesForSelectedMonth() {
     final dateRange = _getCustomMonthRange(selectedMonth, firstDayOfMonth);
     context.read<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
   }
 
-  // Wylicza np. "10 stycznia 2024 – 9 lutego 2024" itd.
+  /// Wylicza np. "10 stycznia 2024 – 9 lutego 2024" itd.
   DateTimeRange _getCustomMonthRange(DateTime month, int firstDay) {
     final start = DateTime(month.year, month.month, firstDay);
     final nextMonth = DateTime(month.year, month.month + 1, firstDay);
@@ -64,26 +107,66 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final months = _getPreviousMonths(12);
+    // final months = _getPreviousMonths(12); // STARE
+    // -> teraz będziemy dynamicznie ustawiać _availableMonths w builderze
 
     return Scaffold(
       appBar: AppBar(
-        title: DropdownButton<DateTime>(
-          value: selectedMonth,
-          icon: const Icon(Icons.arrow_drop_down),
-          items: months.map((month) {
-            final formattedMonth = DateFormat.yMMMM('pl_PL').format(month);
-            return DropdownMenuItem<DateTime>(
-              value: month,
-              child: Text(formattedMonth),
-            );
-          }).toList(),
-          onChanged: (newMonth) {
-            if (newMonth != null) {
-              setState(() {
-                selectedMonth = newMonth;
-              });
-              _loadCategoriesForSelectedMonth();
+        title: BlocBuilder<CategoryBloc, CategoryState>(
+          buildWhen: (previous, current) {
+            // odśwież dropdown tylko, gdy zmienia się stan
+            return true;
+          },
+          builder: (context, state) {
+            if (state is CategoriesForMonthLoaded) {
+              // 1. Oblicz listę *dostępnych* miesięcy z transakcji
+              _availableMonths = _getAvailableMonthsFromCategories(
+                state.incomeCategories,
+                state.expenseCategories,
+              );
+
+              // 2. Jeśli nasz selectedMonth nie jest w liście _availableMonths,
+              //    to można ustawić default (np. pierwszy element listy)
+              if (_availableMonths.isNotEmpty &&
+                  !_availableMonths.contains(selectedMonth)) {
+                // Ustawiamy wybrany miesiąc na najnowszy (pierwszy w posortowanej liście)
+                // lub cokolwiek innego chcesz
+                selectedMonth = _availableMonths.first;
+                // i od razu ładujemy kategorie?
+                // _loadCategoriesForSelectedMonth();
+                // Lepiej nie, bo by się zapętliło –
+                // raczej user sam wybierze z dropdown
+              }
+
+              // Budujemy dropdown
+              return DropdownButton<DateTime>(
+                value: _availableMonths.contains(selectedMonth)
+                    ? selectedMonth
+                    : (_availableMonths.isNotEmpty
+                        ? _availableMonths.first
+                        : null),
+                icon: const Icon(Icons.arrow_drop_down),
+                items: _availableMonths.map((monthDate) {
+                  final formattedMonth =
+                      DateFormat.yMMMM('pl_PL').format(monthDate);
+                  return DropdownMenuItem<DateTime>(
+                    value: monthDate,
+                    child: Text(formattedMonth),
+                  );
+                }).toList(),
+                onChanged: (newMonth) {
+                  if (newMonth != null) {
+                    setState(() {
+                      selectedMonth = newMonth;
+                    });
+                    _loadCategoriesForSelectedMonth();
+                  }
+                },
+              );
+            } else {
+              // Dopóki nie mamy stanu z listą kategorii,
+              // możemy np. pokazać proste Text("...")
+              return Text(AppLocalizations.of(context)!.incomes);
             }
           },
         ),
@@ -93,67 +176,44 @@ class _HomeScreenState extends State<HomeScreen> {
           if (state is CategoriesLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is CategoriesForMonthLoaded) {
-            // Mamy gotowe listy, łącznie z sumami
             final incomeCategories = state.incomeCategories;
             final expenseCategories = state.expenseCategories;
 
-            // Zero obliczeń w UI – BLoC dał nam gotowe sumy:
             final totalIncomes = state.totalIncomes;
             final totalExpenses = state.totalExpenses;
             final budgetIncomes = state.budgetIncomes;
             final budgetExpenses = state.budgetExpenses;
 
-            return Stack(
-              children: [
-                SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      if (incomeCategories.isNotEmpty)
-                        _buildChartSection(
-                          title: AppLocalizations.of(context)!.incomes,
-                          categories: incomeCategories,
-                          totalSpent: totalIncomes,
-                          totalBudget: budgetIncomes,
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (incomeCategories.isNotEmpty)
+                    _buildChartSection(
+                      title: AppLocalizations.of(context)!.incomes,
+                      categories: incomeCategories,
+                      totalSpent: totalIncomes,
+                      totalBudget: budgetIncomes,
+                    ),
+                  if (expenseCategories.isNotEmpty)
+                    _buildChartSection(
+                      title: AppLocalizations.of(context)!.expenses,
+                      categories: expenseCategories,
+                      totalSpent: totalExpenses,
+                      totalBudget: budgetExpenses,
+                    ),
+                  if (incomeCategories.isEmpty && expenseCategories.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        AppLocalizations.of(context)!.noChartsToDisplay,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
-                      if (expenseCategories.isNotEmpty)
-                        _buildChartSection(
-                          title: AppLocalizations.of(context)!.expenses,
-                          categories: expenseCategories,
-                          totalSpent: totalExpenses,
-                          totalBudget: budgetExpenses,
-                        ),
-                      if (incomeCategories.isEmpty && expenseCategories.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            AppLocalizations.of(context)!.noChartsToDisplay,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  bottom: 16,
-                  right: 16,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      generateMonthlyReport(
-                        context: context,
-                        selectedMonth: selectedMonth,
-                        incomeCategories: incomeCategories,
-                        expenseCategories: expenseCategories,
-                        totalIncomes: totalIncomes,
-                        totalExpenses: totalExpenses,
-                      );
-                    },
-                    child: const Icon(Icons.picture_as_pdf),
-                  ),
-                ),
-              ],
+                      ),
+                    ),
+                ],
+              ),
             );
           } else if (state is CategoryError) {
             return Center(child: Text(state.message));
@@ -169,8 +229,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Sekcja wykresu / podsumowania dla Incomes / Expenses
-  /// ŻADNYCH obliczeń – wszystko gotowe w parametrach
   Widget _buildChartSection({
     required String title,
     required List<Category> categories,
@@ -197,29 +255,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         _buildChartTitle(AppLocalizations.of(context)!.budgetDistribution),
-
-        // Wykres udziału w budżecie
         _buildBudgetPieChart(categories, totalBudget),
-
-        // Legenda do budżetu
         _buildLegend(categories, isBudget: true),
-
         const SizedBox(height: 16),
         _buildChartTitle(AppLocalizations.of(context)!.budgetUsage),
-
-        // Wykres zużycia (spent / budget)
         _buildUsagePieChart(categories),
-
-        // Legenda do zużycia
         _buildLegend(categories, isBudget: false),
-
-        // Tekst: "Razem X/Y"
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
             '${AppLocalizations.of(context)!.total} $title: '
-                '${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
-                '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
+            '${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
+            '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
             style: const TextStyle(fontSize: 16),
           ),
         ),
@@ -240,7 +287,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Wykres kołowy - rozłożenie budżetu między kategorie
   Widget _buildBudgetPieChart(List<Category> categories, double totalBudget) {
     return AspectRatio(
       aspectRatio: 1.5,
@@ -253,10 +299,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
             return PieChartSectionData(
               value: budgetShare,
-              title: "${cat.name}\n${budgetShare.toStringAsFixed(2)}%",
-              color: Colors.primaries[
-              categories.indexOf(cat) % Colors.primaries.length],
-              radius: 100,
+              title: "${budgetShare.toStringAsFixed(2)}%",
+              color: Colors
+                  .primaries[categories.indexOf(cat) % Colors.primaries.length],
+              radius: 60,
             );
           }).toList(),
           centerSpaceRadius: 40,
@@ -266,14 +312,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Wykres kołowy - zużycie budżetu w % (spent / budget)
   Widget _buildUsagePieChart(List<Category> categories) {
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
         PieChartData(
           sections: categories.map((cat) {
-            // BLoC wypełnił monthlySpent, mamy np. monthlySpent[0].spentAmount
             final spent = cat.monthlySpent.isNotEmpty
                 ? cat.monthlySpent.first.spentAmount
                 : 0.0;
@@ -284,9 +328,9 @@ class _HomeScreenState extends State<HomeScreen> {
             return PieChartSectionData(
               value: usagePercentage,
               title: "${cat.name}\n${usagePercentage.toStringAsFixed(2)}%",
-              color: Colors.primaries[
-              categories.indexOf(cat) % Colors.primaries.length],
-              radius: 100,
+              color: Colors
+                  .primaries[categories.indexOf(cat) % Colors.primaries.length],
+              radius: 60,
             );
           }).toList(),
           centerSpaceRadius: 40,
@@ -296,7 +340,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Legenda do wykresu
   Widget _buildLegend(List<Category> categories, {required bool isBudget}) {
     return Consumer<CurrencyNotifier>(
       builder: (context, currencyNotifier, child) {
@@ -306,8 +349,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: categories.map((cat) {
-              final color = Colors.primaries[
-              categories.indexOf(cat) % Colors.primaries.length];
+              final color = Colors
+                  .primaries[categories.indexOf(cat) % Colors.primaries.length];
 
               if (isBudget) {
                 final budget = cat.budgetLimit ?? 0;
@@ -351,7 +394,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Generowanie raportu PDF
   Future<void> generateMonthlyReport({
     required BuildContext context,
     required DateTime selectedMonth,
@@ -379,17 +421,17 @@ class _HomeScreenState extends State<HomeScreen> {
         build: (pw.Context ctx) => [
           pw.Text(
             '${AppLocalizations.of(context)!.monthlyReportTitle} - '
-                '${DateFormat.yMMMM(AppLocalizations.of(context)!.localeName).format(selectedMonth)}',
+            '${DateFormat.yMMMM(AppLocalizations.of(context)!.localeName).format(selectedMonth)}',
             style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 20),
           pw.Text(
             '${AppLocalizations.of(context)!.totalIncome}: '
-                '${totalIncomes.toStringAsFixed(2)} ${currency.sign}',
+            '${totalIncomes.toStringAsFixed(2)} ${currency.sign}',
           ),
           pw.Text(
             '${AppLocalizations.of(context)!.totalExpenses}: '
-                '${totalExpenses.toStringAsFixed(2)} ${currency.sign}',
+            '${totalExpenses.toStringAsFixed(2)} ${currency.sign}',
           ),
           pw.SizedBox(height: 20),
           pw.Text(AppLocalizations.of(context)!.incomeDistribution),
@@ -418,9 +460,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildPieChart(List<Category> categories, String title) {
     final total = categories.fold<double>(
       0.0,
-          (sum, cat) => sum + (cat.monthlySpent.isNotEmpty
-          ? cat.monthlySpent.first.spentAmount
-          : 0.0),
+      (sum, cat) =>
+          sum +
+          (cat.monthlySpent.isNotEmpty
+              ? cat.monthlySpent.first.spentAmount
+              : 0.0),
     );
 
     return AspectRatio(
@@ -435,8 +479,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return PieChartSectionData(
               value: value,
               title: '${(value * 100).toStringAsFixed(1)}%',
-              color: Colors.primaries[
-              categories.indexOf(cat) % Colors.primaries.length],
+              color: Colors
+                  .primaries[categories.indexOf(cat) % Colors.primaries.length],
               radius: 100,
             );
           }).toList(),
@@ -446,19 +490,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   pw.Widget _buildTransactionTable(
-      List<Category> incomeCategories,
-      List<Category> expenseCategories,
-      ) {
+    List<Category> incomeCategories,
+    List<Category> expenseCategories,
+  ) {
     final data = <pw.TableRow>[
       pw.TableRow(
         children: [
-          pw.Text('Category', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+          pw.Text('Category',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
           pw.Text('Spent Amount',
               style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
         ],
       ),
       ...incomeCategories.map(
-            (cat) => pw.TableRow(
+        (cat) => pw.TableRow(
           children: [
             pw.Text(cat.name),
             pw.Text(
@@ -470,7 +515,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       ...expenseCategories.map(
-            (cat) => pw.TableRow(
+        (cat) => pw.TableRow(
           children: [
             pw.Text(cat.name),
             pw.Text(
@@ -491,8 +536,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<Uint8List?> _generateChartImage(
       BuildContext context, Widget chart) async {
-    // W praktyce musisz użyć RepaintBoundary z jakimś GlobalKey,
-    // to tylko przykład.
     return null;
   }
 }
