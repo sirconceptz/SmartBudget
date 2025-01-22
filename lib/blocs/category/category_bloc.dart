@@ -44,7 +44,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
       final currentState = currencyConversionBloc.state;
       if (currentState is! CurrencyRatesLoaded) {
-        throw Exception("Currency rates not loaded");
+        await Future.delayed(const Duration(seconds: 2));
+        add(event);
+        return;
       }
       final rates = currentState.rates;
 
