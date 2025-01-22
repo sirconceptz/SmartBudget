@@ -66,11 +66,6 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           final txCurrencyCode = tx.currency?.value.toUpperCase() ?? "USD";
           final txCurToUsdRate = ratesMap[txCurrencyCode] ?? defaultRate;
 
-          final userAmount = tx.amount *
-              ((userCurToUsdRate == 0) ? 0 : (1.0 / userCurToUsdRate)) *
-              txCurToUsdRate;
-
-          // Lepiej: userAmount = tx.amount * ( userCurToUsdRate / txCurToUsdRate );
           final finalAmount = tx.amount *
               ((userCurToUsdRate == 0.0)
                   ? 1.0

@@ -1,23 +1,26 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocaleNotifier extends ChangeNotifier {
   static const String _localeKey = 'selectedLocale';
 
-  Locale _locale = const Locale('en');
+  late Locale _locale;
 
   Locale get locale => _locale;
 
   LocaleNotifier() {
+    final systemLocale = PlatformDispatcher.instance.locale;
+    _locale = Locale(systemLocale.languageCode);
+
     _loadLocale();
   }
 
-  void setLocale(Locale locale) async {
+  Future<void> setLocale(Locale locale) async {
     _locale = locale;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('localizedCategoriesUpdated', false);
+
     await _saveLocale(locale);
     notifyListeners();
   }
@@ -27,10 +30,7 @@ class LocaleNotifier extends ChangeNotifier {
 
     final localeCode = prefs.getString(_localeKey);
 
-    if (localeCode == null) {
-      final systemLocale = PlatformDispatcher.instance.locale;
-      _locale = Locale(systemLocale.languageCode);
-    } else {
+    if (localeCode != null) {
       _locale = Locale(localeCode);
     }
 
