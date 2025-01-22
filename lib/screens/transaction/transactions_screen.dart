@@ -158,7 +158,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
           if (catState is CategoriesWithSpentAmountsLoaded) {
             if (catState.allCategories.isEmpty) {
-              Toast.show(context, AppLocalizations.of(context)!.pleaseAddCategoriesFirst);
+              Toast.show(context,
+                  AppLocalizations.of(context)!.pleaseAddCategoriesFirst);
             } else {
               await Navigator.pushNamed(context, '/addTransaction');
             }
@@ -228,7 +229,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   ),
                 TextField(
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(labelText: AppLocalizations.of(ctx)!.amountFrom),
+                  decoration: InputDecoration(
+                      labelText: AppLocalizations.of(ctx)!.amountFrom),
                   controller: TextEditingController(
                     text: tmpAmountMin?.toString() ?? "",
                   ),
@@ -239,7 +241,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 ),
                 TextField(
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(labelText: AppLocalizations.of(ctx)!.amountTo),
+                  decoration: InputDecoration(
+                      labelText: AppLocalizations.of(ctx)!.amountTo),
                   controller: TextEditingController(
                     text: tmpAmountMax?.toString() ?? "",
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_budget/data/repositories/category_repository.dart';
+import 'package:smart_budget/di/notifiers/finance_notifier.dart';
 
 import '../../blocs/currency_conversion/currency_conversion_bloc.dart';
 import '../../di/notifiers/currency_notifier.dart';
@@ -14,11 +15,13 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CategoryRepository categoryRepository;
   final CurrencyConversionBloc currencyConversionBloc;
   final CurrencyNotifier currencyNotifier;
+  final FinanceNotifier financeNotifier;
 
   CategoryBloc(
     this.categoryRepository,
     this.currencyConversionBloc,
     this.currencyNotifier,
+    this.financeNotifier,
   ) : super(CategoriesLoading()) {
     on<AddCategory>(_onAddCategory);
     on<UpdateCategory>(_onUpdateCategory);
@@ -34,118 +37,131 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     try {
       emit(CategoriesLoading());
 
-      // 1. Pobierz kategorie wraz z transakcjami
       final categories =
           await categoryRepository.getCategoriesWithTransactions();
-      // W tym momencie każda kategoria ma: category.transactions (lista TransactionEntity)
 
-      // 2. Grupujemy transakcje w obrębie każdej kategorii po (year-month) i sumujemy
-      for (final cat in categories) {
-        // Zbuduj mapę: "YYYY-MM" -> suma
-        final Map<String, double> monthMap = {};
+      final firstDayOfMonth = financeNotifier.firstDayOfMonth;
 
-        for (final tx in cat.transactions) {
-          // (Opcjonalnie) filtruj transakcje w event.dateRange
-          // Jeśli NIE chcesz filtru, usuń warunek poniżej
-          final start = event.dateRange.start.millisecondsSinceEpoch;
-          final end = event.dateRange.end.millisecondsSinceEpoch;
-          final txMs = tx.date.millisecondsSinceEpoch;
-          if (txMs < start || txMs > end) {
-            // pomijamy transakcje poza zakresem, jeśli chcesz
-            continue;
-          }
-
-          // wyliczamy klucz miesiąca "YYYY-MM"
-          final key = _formatYearMonth(tx.date);
-
-          // dodajemy do sumy
-          final currentSum = monthMap[key] ?? 0.0;
-          monthMap[key] = currentSum + tx.amount;
-        }
-
-        // zmapuj na listę MonthlySpent
-        final monthlySpentList = monthMap.entries.map((entry) {
-          return MonthlySpent(
-            monthKey: entry.key,
-            spentAmount: entry.value,
-          );
-        }).toList();
-
-        // wpisz do kategorii
-        cat.monthlySpent = monthlySpentList;
-      }
-
-      // 3. Konwersja walut
       final currentState = currencyConversionBloc.state;
       if (currentState is! CurrencyRatesLoaded) {
         throw Exception("Currency rates not loaded");
       }
       final rates = currentState.rates;
-      final userCurrency = currencyNotifier.currency;
 
       final ratesMap = {
         for (var rate in rates) rate.code.toUpperCase(): rate.rate
       };
       const defaultRate = 1.0;
 
-      // przeliczamy każdą kategorię
+      final userCurrency = currencyNotifier.currency;
+      final userCurCode = userCurrency.value.toUpperCase();
+      final userCurToUsdRate = ratesMap[userCurCode] ?? defaultRate;
+
+      for (final cat in categories) {
+        final Map<String, double> monthMap = {};
+
+        for (final tx in cat.transactions) {
+          final key = _computeCustomMonthKey(tx.date, firstDayOfMonth);
+
+          final txCurrencyCode = tx.currency?.value.toUpperCase() ?? "USD";
+          final txCurToUsdRate = ratesMap[txCurrencyCode] ?? defaultRate;
+
+          final userAmount = tx.amount *
+              ((userCurToUsdRate == 0) ? 0 : (1.0 / userCurToUsdRate)) *
+              txCurToUsdRate;
+
+          // Lepiej: userAmount = tx.amount * ( userCurToUsdRate / txCurToUsdRate );
+          final finalAmount = tx.amount *
+              ((userCurToUsdRate == 0.0)
+                  ? 1.0
+                  : (userCurToUsdRate / txCurToUsdRate));
+
+          final currentSum = monthMap[key] ?? 0.0;
+          monthMap[key] = currentSum + finalAmount;
+        }
+
+        cat.monthlySpent = monthMap.entries.map((entry) {
+          return MonthlySpent(
+            monthKey: entry.key,
+            spentAmount: entry.value, // w userCurrency
+          );
+        }).toList();
+      }
+
       final convertedCategories = categories.map((cat) {
         final baseToUserRate =
             (ratesMap[cat.currency.value.toUpperCase()] ?? defaultRate) /
                 (ratesMap[userCurrency.value.toUpperCase()] ?? defaultRate);
 
-        // Category.convertMoney powinno przeliczać monthlySpent
-        // z cat.monthlySpent[i].spentAmount
-        return Category.convertMoney(cat, baseToUserRate);
+        return _convertBudgetOnly(cat, baseToUserRate);
       }).toList();
 
-      // 4. Podziel na income / expense
       final incomeCategories =
           convertedCategories.where((c) => c.isIncome).toList();
       final expenseCategories =
           convertedCategories.where((c) => !c.isIncome).toList();
 
-      // 5. Wylicz sumy -> sumujemy we wszystkich miesiącach
       final totalIncomes = incomeCategories.fold<double>(0, (sum, cat) {
-        double catSum =
+        final catSum =
             cat.monthlySpent.fold(0.0, (acc, ms) => acc + ms.spentAmount);
         return sum + catSum;
       });
 
       final totalExpenses = expenseCategories.fold<double>(0, (sum, cat) {
-        double catSum =
+        final catSum =
             cat.monthlySpent.fold(0.0, (acc, ms) => acc + ms.spentAmount);
         return sum + catSum;
       });
 
       final budgetIncomes = incomeCategories.fold<double>(
-        0,
-        (sum, cat) => sum + (cat.budgetLimit ?? 0),
-      );
+          0, (sum, cat) => sum + (cat.budgetLimit ?? 0));
       final budgetExpenses = expenseCategories.fold<double>(
-        0,
-        (sum, cat) => sum + (cat.budgetLimit ?? 0),
-      );
+          0, (sum, cat) => sum + (cat.budgetLimit ?? 0));
 
-      emit(
-        CategoriesForMonthLoaded(
-          incomeCategories: incomeCategories,
-          expenseCategories: expenseCategories,
-          allCategories: convertedCategories,
-          totalIncomes: totalIncomes,
-          totalExpenses: totalExpenses,
-          budgetIncomes: budgetIncomes,
-          budgetExpenses: budgetExpenses,
-        ),
-      );
+      emit(CategoriesForMonthLoaded(
+        incomeCategories: incomeCategories,
+        expenseCategories: expenseCategories,
+        allCategories: convertedCategories,
+        totalIncomes: totalIncomes,
+        totalExpenses: totalExpenses,
+        budgetIncomes: budgetIncomes,
+        budgetExpenses: budgetExpenses,
+      ));
     } catch (e) {
       emit(CategoryError('Failed to load categories with spent amounts: $e'));
     }
   }
 
-  String _formatYearMonth(DateTime date) {
-    final y = date.year.toString().padLeft(4, '0');
-    final m = date.month.toString().padLeft(2, '0');
+  Category _convertBudgetOnly(Category cat, double rateToUserCurrency) {
+    final newBudgetLimit =
+        cat.budgetLimit != null ? cat.budgetLimit! * rateToUserCurrency : null;
+
+    return cat.copyWith(
+      budgetLimit: newBudgetLimit,
+      convertedBudgetLimit: newBudgetLimit,
+    );
+  }
+
+  String _computeCustomMonthKey(DateTime date, int firstDayOfMonth) {
+    final txYear = date.year;
+    final txMonth = date.month;
+    final txDay = date.day;
+
+    if (txDay < firstDayOfMonth) {
+      final prevMonth = txMonth - 1;
+      if (prevMonth < 1) {
+        return _formatYearMonth(txYear - 1, 12);
+      } else {
+        return _formatYearMonth(txYear, prevMonth);
+      }
+    } else {
+      return _formatYearMonth(txYear, txMonth);
+    }
+  }
+
+  String _formatYearMonth(int year, int month) {
+    final y = year.toString().padLeft(4, '0');
+    final m = month.toString().padLeft(2, '0');
     return '$y-$m';
   }
 

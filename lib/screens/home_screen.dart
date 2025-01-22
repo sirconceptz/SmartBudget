@@ -1,15 +1,9 @@
-import 'dart:io';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
@@ -17,6 +11,8 @@ import '../blocs/category/category_state.dart';
 import '../di/notifiers/currency_notifier.dart';
 import '../di/notifiers/finance_notifier.dart';
 import '../models/category.dart';
+import '../models/monthly_spent.dart';
+import '../utils/enums/currency.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -29,14 +25,11 @@ class _HomeScreenState extends State<HomeScreen> {
   late DateTime selectedMonth;
   late int firstDayOfMonth;
 
-  /// Tutaj będziemy przechowywać listę *dostępnych* miesięcy,
-  /// które faktycznie mają wydatki (> 0) w co najmniej jednej kategorii.
   List<DateTime> _availableMonths = [];
 
   @override
   void initState() {
     super.initState();
-    // Domyślnie ustawiamy aktualny miesiąc
     selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
     firstDayOfMonth =
         Provider.of<FinanceNotifier>(context, listen: false).firstDayOfMonth;
@@ -44,26 +37,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadCategoriesForSelectedMonth();
   }
 
-  /// Metoda używana w Twoim oryginalnym kodzie – zostaje,
-  /// ale niekoniecznie musisz z niej korzystać
-  List<DateTime> _getPreviousMonths(int count) {
-    final now = DateTime.now();
-    return List.generate(
-      count,
-      (index) => DateTime(now.year, now.month - index, 1),
-    );
-  }
-
-  /// NOWA METODA:
-  /// Zwraca listę miesięcy (DateTime(yyyy, mm, 1)),
-  /// w których łączne spentAmount > 0 w *jakiejkolwiek* kategorii
   List<DateTime> _getAvailableMonthsFromCategories(
       List<Category> incomeCategories, List<Category> expenseCategories) {
-    // Zbierz wszystkie kategorie
     final allCats = [...incomeCategories, ...expenseCategories];
 
-    // Zbierz monthKey (np. "2024-01") tylko tam, gdzie spentAmount > 0
-    final monthKeys = <String>{}; // używamy Set, żeby uniknąć duplikatów
+    final monthKeys = <String>{};
 
     for (final cat in allCats) {
       for (final ms in cat.monthlySpent) {
@@ -73,31 +51,23 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    // Parsujemy monthKey -> DateTime(yyyy, mm, 1)
     final parsedMonths = monthKeys.map((key) => _parseMonthKey(key)).toList();
-
-    // Sortujemy np. malejąco (nowsze miesiące na górze),
-    // lub rosnąco, jak wolisz
     parsedMonths.sort((a, b) => b.compareTo(a));
-
     return parsedMonths;
   }
 
-  /// Pomocnicza funkcja do zamiany "YYYY-MM" na DateTime(YYYY, MM, 1)
   DateTime _parseMonthKey(String monthKey) {
-    final parts = monthKey.split('-'); // ["2024", "01"]
+    final parts = monthKey.split('-');
     final y = int.parse(parts[0]);
     final m = int.parse(parts[1]);
     return DateTime(y, m, 1);
   }
 
-  /// Wywołuje event z BLoC, aby załadować kategorie w danym przedziale
   void _loadCategoriesForSelectedMonth() {
     final dateRange = _getCustomMonthRange(selectedMonth, firstDayOfMonth);
     context.read<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
   }
 
-  /// Wylicza np. "10 stycznia 2024 – 9 lutego 2024" itd.
   DateTimeRange _getCustomMonthRange(DateTime month, int firstDay) {
     final start = DateTime(month.year, month.month, firstDay);
     final nextMonth = DateTime(month.year, month.month + 1, firstDay);
@@ -107,38 +77,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final months = _getPreviousMonths(12); // STARE
-    // -> teraz będziemy dynamicznie ustawiać _availableMonths w builderze
-
     return Scaffold(
       appBar: AppBar(
         title: BlocBuilder<CategoryBloc, CategoryState>(
           buildWhen: (previous, current) {
-            // odśwież dropdown tylko, gdy zmienia się stan
             return true;
           },
           builder: (context, state) {
             if (state is CategoriesForMonthLoaded) {
-              // 1. Oblicz listę *dostępnych* miesięcy z transakcji
               _availableMonths = _getAvailableMonthsFromCategories(
                 state.incomeCategories,
                 state.expenseCategories,
               );
 
-              // 2. Jeśli nasz selectedMonth nie jest w liście _availableMonths,
-              //    to można ustawić default (np. pierwszy element listy)
               if (_availableMonths.isNotEmpty &&
                   !_availableMonths.contains(selectedMonth)) {
-                // Ustawiamy wybrany miesiąc na najnowszy (pierwszy w posortowanej liście)
-                // lub cokolwiek innego chcesz
                 selectedMonth = _availableMonths.first;
-                // i od razu ładujemy kategorie?
-                // _loadCategoriesForSelectedMonth();
-                // Lepiej nie, bo by się zapętliło –
-                // raczej user sam wybierze z dropdown
               }
 
-              // Budujemy dropdown
               return DropdownButton<DateTime>(
                 value: _availableMonths.contains(selectedMonth)
                     ? selectedMonth
@@ -164,8 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               );
             } else {
-              // Dopóki nie mamy stanu z listą kategorii,
-              // możemy np. pokazać proste Text("...")
               return Text(AppLocalizations.of(context)!.incomes);
             }
           },
@@ -179,8 +133,6 @@ class _HomeScreenState extends State<HomeScreen> {
             final incomeCategories = state.incomeCategories;
             final expenseCategories = state.expenseCategories;
 
-            final totalIncomes = state.totalIncomes;
-            final totalExpenses = state.totalExpenses;
             final budgetIncomes = state.budgetIncomes;
             final budgetExpenses = state.budgetExpenses;
 
@@ -191,14 +143,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildChartSection(
                       title: AppLocalizations.of(context)!.incomes,
                       categories: incomeCategories,
-                      totalSpent: totalIncomes,
+                      totalSpent: state.totalIncomes,
                       totalBudget: budgetIncomes,
                     ),
                   if (expenseCategories.isNotEmpty)
                     _buildChartSection(
                       title: AppLocalizations.of(context)!.expenses,
                       categories: expenseCategories,
-                      totalSpent: totalExpenses,
+                      totalSpent: state.totalExpenses,
                       totalBudget: budgetExpenses,
                     ),
                   if (incomeCategories.isEmpty && expenseCategories.isEmpty)
@@ -245,6 +197,12 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
+    final totalSpentThisMonth = categories.fold<double>(
+      0.0,
+      (sum, cat) =>
+          sum + _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth),
+    );
+
     return Column(
       children: [
         Padding(
@@ -263,11 +221,27 @@ class _HomeScreenState extends State<HomeScreen> {
         _buildLegend(categories, isBudget: false),
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text(
-            '${AppLocalizations.of(context)!.total} $title: '
-            '${totalSpent.toStringAsFixed(2)} / ${totalBudget.toStringAsFixed(2)} '
-            '(${(totalSpent / (totalBudget == 0 ? 1 : totalBudget) * 100).toStringAsFixed(1)}%)',
-            style: const TextStyle(fontSize: 16),
+          child: Consumer<CurrencyNotifier>(
+            builder: (ctx, currencyNotifier, _) {
+              final currency = currencyNotifier.currency;
+
+              // Formatowanie wydanej kwoty i budżetu z symbolem waluty
+              final spentFormatted =
+                  _formatWithCurrency(totalSpentThisMonth, currency);
+              final budgetFormatted =
+                  _formatWithCurrency(totalBudget, currency);
+
+              final percentage =
+                  (totalSpentThisMonth / (totalBudget == 0 ? 1 : totalBudget)) *
+                      100;
+
+              return Text(
+                '${AppLocalizations.of(context)!.total} $title: '
+                '$spentFormatted / $budgetFormatted '
+                '(${percentage.toStringAsFixed(1)}%)',
+                style: const TextStyle(fontSize: 16),
+              );
+            },
           ),
         ),
       ],
@@ -288,6 +262,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBudgetPieChart(List<Category> categories, double totalBudget) {
+    final currency =
+        Provider.of<CurrencyNotifier>(context, listen: false).currency;
+
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
@@ -297,9 +274,15 @@ class _HomeScreenState extends State<HomeScreen> {
             final budgetShare =
                 (catBudget / (totalBudget == 0 ? 1 : totalBudget)) * 100;
 
+            final budgetAmountFormatted = _formatWithCurrency(
+              catBudget,
+              currency,
+            );
+
             return PieChartSectionData(
               value: budgetShare,
-              title: "${budgetShare.toStringAsFixed(2)}%",
+              title:
+                  '$budgetAmountFormatted\n(${budgetShare.toStringAsFixed(2)}%)',
               color: Colors
                   .primaries[categories.indexOf(cat) % Colors.primaries.length],
               radius: 60,
@@ -313,21 +296,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildUsagePieChart(List<Category> categories) {
+    final currency =
+        Provider.of<CurrencyNotifier>(context, listen: false).currency;
+
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
         PieChartData(
           sections: categories.map((cat) {
-            final spent = cat.monthlySpent.isNotEmpty
-                ? cat.monthlySpent.first.spentAmount
-                : 0.0;
-
+            final spent =
+                _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
             final budget = cat.budgetLimit ?? 0;
             final usagePercentage = (spent / (budget == 0 ? 1 : budget)) * 100;
 
+            final spentFormatted = _formatWithCurrency(spent, currency);
+
             return PieChartSectionData(
               value: usagePercentage,
-              title: "${cat.name}\n${usagePercentage.toStringAsFixed(2)}%",
+              title:
+                  '$spentFormatted\n(${usagePercentage.toStringAsFixed(2)}%)',
               color: Colors
                   .primaries[categories.indexOf(cat) % Colors.primaries.length],
               radius: 60,
@@ -354,18 +341,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
               if (isBudget) {
                 final budget = cat.budgetLimit ?? 0;
-                final value = '${currency.isLeftSigned ? currency.sign : ""}'
-                    '${budget.toStringAsFixed(2)}'
-                    '${!currency.isLeftSigned ? ' ${currency.sign}' : ""}';
-                return _buildLegendRow(color, cat.name, value);
+                final formattedBudget = _formatWithCurrency(budget, currency);
+
+                return _buildLegendRow(color, cat.name, formattedBudget);
               } else {
-                final spent = cat.monthlySpent.isNotEmpty
-                    ? cat.monthlySpent.first.spentAmount
-                    : 0.0;
-                final budget = cat.budgetLimit ?? 1;
-                final usagePct = (spent / budget) * 100;
-                final value = '${usagePct.toStringAsFixed(1)}%';
-                return _buildLegendRow(color, cat.name, value);
+                final spent = _spentInSelectedMonth(
+                  cat,
+                  selectedMonth,
+                  firstDayOfMonth,
+                );
+                final spentFormatted = _formatWithCurrency(spent, currency);
+
+                final budget = cat.budgetLimit ?? 0;
+                final usagePct = (spent / (budget == 0 ? 1 : budget)) * 100;
+                final usageText = '${usagePct.toStringAsFixed(1)}%';
+
+                final legendValue = '$spentFormatted ($usageText)';
+
+                return _buildLegendRow(color, cat.name, legendValue);
               }
             }).toList(),
           ),
@@ -401,141 +394,40 @@ class _HomeScreenState extends State<HomeScreen> {
     required List<Category> expenseCategories,
     required double totalIncomes,
     required double totalExpenses,
-  }) async {
-    final pdf = pw.Document();
-    final currency =
-        Provider.of<CurrencyNotifier>(context, listen: false).currency;
+  }) async {}
 
-    final incomeChartImage = await _generateChartImage(
-      context,
-      _buildPieChart(incomeCategories, 'Income'),
-    );
-    final expenseChartImage = await _generateChartImage(
-      context,
-      _buildPieChart(expenseCategories, 'Expense'),
-    );
-
-    pdf.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        build: (pw.Context ctx) => [
-          pw.Text(
-            '${AppLocalizations.of(context)!.monthlyReportTitle} - '
-            '${DateFormat.yMMMM(AppLocalizations.of(context)!.localeName).format(selectedMonth)}',
-            style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 20),
-          pw.Text(
-            '${AppLocalizations.of(context)!.totalIncome}: '
-            '${totalIncomes.toStringAsFixed(2)} ${currency.sign}',
-          ),
-          pw.Text(
-            '${AppLocalizations.of(context)!.totalExpenses}: '
-            '${totalExpenses.toStringAsFixed(2)} ${currency.sign}',
-          ),
-          pw.SizedBox(height: 20),
-          pw.Text(AppLocalizations.of(context)!.incomeDistribution),
-          pw.SizedBox(height: 10),
-          if (incomeChartImage != null)
-            pw.Image(pw.MemoryImage(incomeChartImage), height: 200),
-          pw.SizedBox(height: 20),
-          pw.Text(AppLocalizations.of(context)!.expenseDistribution),
-          pw.SizedBox(height: 10),
-          if (expenseChartImage != null)
-            pw.Image(pw.MemoryImage(expenseChartImage), height: 200),
-          pw.SizedBox(height: 20),
-          pw.Text(AppLocalizations.of(context)!.transactionDetails),
-          _buildTransactionTable(incomeCategories, expenseCategories),
-        ],
-      ),
-    );
-
-    final output = await pdf.save();
-    final tempDir = await Directory.systemTemp.createTemp();
-    final file = File('${tempDir.path}/Monthly_Report.pdf');
-    await file.writeAsBytes(output);
-    await Share.shareXFiles([XFile(file.path)], text: 'Monthly Report');
-  }
-
-  Widget _buildPieChart(List<Category> categories, String title) {
-    final total = categories.fold<double>(
-      0.0,
-      (sum, cat) =>
-          sum +
-          (cat.monthlySpent.isNotEmpty
-              ? cat.monthlySpent.first.spentAmount
-              : 0.0),
-    );
-
-    return AspectRatio(
-      aspectRatio: 1.5,
-      child: PieChart(
-        PieChartData(
-          sections: categories.map((cat) {
-            final catSpent = cat.monthlySpent.isNotEmpty
-                ? cat.monthlySpent.first.spentAmount
-                : 0.0;
-            final value = catSpent / (total == 0 ? 1 : total);
-            return PieChartSectionData(
-              value: value,
-              title: '${(value * 100).toStringAsFixed(1)}%',
-              color: Colors
-                  .primaries[categories.indexOf(cat) % Colors.primaries.length],
-              radius: 100,
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  pw.Widget _buildTransactionTable(
-    List<Category> incomeCategories,
-    List<Category> expenseCategories,
+  double _spentInSelectedMonth(
+    Category cat,
+    DateTime selectedMonth,
+    int firstDayOfMonth,
   ) {
-    final data = <pw.TableRow>[
-      pw.TableRow(
-        children: [
-          pw.Text('Category',
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-          pw.Text('Spent Amount',
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-        ],
-      ),
-      ...incomeCategories.map(
-        (cat) => pw.TableRow(
-          children: [
-            pw.Text(cat.name),
-            pw.Text(
-              cat.monthlySpent.isNotEmpty
-                  ? cat.monthlySpent.first.spentAmount.toStringAsFixed(2)
-                  : "0.00",
-            ),
-          ],
-        ),
-      ),
-      ...expenseCategories.map(
-        (cat) => pw.TableRow(
-          children: [
-            pw.Text(cat.name),
-            pw.Text(
-              cat.monthlySpent.isNotEmpty
-                  ? cat.monthlySpent.first.spentAmount.toStringAsFixed(2)
-                  : "0.00",
-            ),
-          ],
-        ),
-      ),
-    ];
-
-    return pw.Table(
-      border: pw.TableBorder.all(),
-      children: data,
+    final monthKey = _computeCustomMonthKey(selectedMonth, firstDayOfMonth);
+    final match = cat.monthlySpent.firstWhere(
+      (ms) => ms.monthKey == monthKey,
+      orElse: () => MonthlySpent(monthKey: monthKey, spentAmount: 0.0),
     );
+    return match.spentAmount;
   }
 
-  Future<Uint8List?> _generateChartImage(
-      BuildContext context, Widget chart) async {
-    return null;
+  String _computeCustomMonthKey(DateTime month, int firstDayOfMonth) {
+    final y = month.year;
+    final m = month.month;
+    return _formatYearMonth(y, m);
+  }
+
+  String _formatYearMonth(int year, int month) {
+    final yy = year.toString().padLeft(4, '0');
+    final mm = month.toString().padLeft(2, '0');
+    return '$yy-$mm';
+  }
+
+  String _formatWithCurrency(double amount, Currency currency) {
+    final formatted = amount.toStringAsFixed(2);
+
+    if (currency.isLeftSigned) {
+      return '${currency.sign}$formatted';
+    } else {
+      return '$formatted ${currency.sign}';
+    }
   }
 }

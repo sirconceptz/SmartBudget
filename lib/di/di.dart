@@ -7,6 +7,7 @@ import '../data/repositories/category_repository.dart';
 import '../data/repositories/currency_repository.dart';
 import '../data/repositories/transaction_repository.dart';
 import '../di/notifiers/currency_notifier.dart';
+import 'notifiers/finance_notifier.dart';
 
 final getIt = GetIt.instance;
 
@@ -31,11 +32,14 @@ void setupDependencies() {
     CurrencyConversionBloc(getIt<CurrencyRepository>()),
   );
 
+  getIt.registerLazySingleton<FinanceNotifier>(() => FinanceNotifier());
+
   getIt.registerSingleton<CategoryBloc>(
     CategoryBloc(
       getIt<CategoryRepository>(),
       getIt<CurrencyConversionBloc>(),
       getIt<CurrencyNotifier>(),
+      getIt<FinanceNotifier>(),
     ),
   );
 }

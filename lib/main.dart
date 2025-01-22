@@ -61,6 +61,7 @@ void main() async {
               getIt<CategoryRepository>(),
               context.read<CurrencyConversionBloc>(),
               context.read<CurrencyNotifier>(),
+              context.read<FinanceNotifier>(),
             ),
           ),
           BlocProvider(
