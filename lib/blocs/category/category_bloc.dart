@@ -7,6 +7,7 @@ import '../../blocs/currency_conversion/currency_conversion_bloc.dart';
 import '../../di/notifiers/currency_notifier.dart';
 import '../../models/category.dart';
 import '../../models/monthly_spent.dart';
+import '../../utils/custom_date_time_range.dart';
 import '../currency_conversion/currency_conversion_state.dart';
 import 'category_event.dart';
 import 'category_state.dart';
@@ -147,19 +148,13 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     if (txDay < firstDayOfMonth) {
       final prevMonth = txMonth - 1;
       if (prevMonth < 1) {
-        return _formatYearMonth(txYear - 1, 12);
+        return CustomDateTimeRange.formatYearMonth(txYear - 1, 12);
       } else {
-        return _formatYearMonth(txYear, prevMonth);
+        return CustomDateTimeRange.formatYearMonth(txYear, prevMonth);
       }
     } else {
-      return _formatYearMonth(txYear, txMonth);
+      return CustomDateTimeRange.formatYearMonth(txYear, txMonth);
     }
-  }
-
-  String _formatYearMonth(int year, int month) {
-    final y = year.toString().padLeft(4, '0');
-    final m = month.toString().padLeft(2, '0');
-    return '$y-$m';
   }
 
   Future<void> _onAddCategory(

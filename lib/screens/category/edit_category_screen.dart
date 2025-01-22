@@ -13,7 +13,7 @@ class EditCategoryScreen extends StatefulWidget {
   const EditCategoryScreen({super.key, required this.category});
 
   @override
-  _EditCategoryScreenState createState() => _EditCategoryScreenState();
+  State<EditCategoryScreen> createState() => _EditCategoryScreenState();
 }
 
 class _EditCategoryScreenState extends State<EditCategoryScreen> {

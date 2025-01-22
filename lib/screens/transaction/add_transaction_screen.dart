@@ -16,7 +16,7 @@ class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
 
   @override
-  _AddTransactionScreenState createState() => _AddTransactionScreenState();
+  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {

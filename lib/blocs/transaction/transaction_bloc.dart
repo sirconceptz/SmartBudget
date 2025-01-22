@@ -167,31 +167,22 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     try {
       emit(TransactionsLoading());
 
-      // 1. Pobierz kategorie
       final categories = await categoryRepository.getAllCategories();
 
-      // 2. Pobierz transakcje z repo (możesz dodać metodę getFilteredTransactions(...) w repo)
       final allTx = await transactionRepository.getAllTransactions(categories);
 
-      // 3. Przefiltruj w pamięci (jeśli nie masz dedykowanej metody w repo).
-      //   Jeżeli wolisz w repo, stwórz tam getTransactionsByFilter(...),
-      //   i tam zrób SQL z klauzulami WHERE. Poniżej jest przykład filtra w pamięci.
-
       final filtered = allTx.where((tx) {
-        // Kategoria
         if (event.categoryId != null &&
             tx.category != null &&
             tx.category!.id != event.categoryId) {
           return false;
         }
-        // Data
         if (event.dateFrom != null && tx.date.isBefore(event.dateFrom!)) {
           return false;
         }
         if (event.dateTo != null && tx.date.isAfter(event.dateTo!)) {
           return false;
         }
-        // Nazwa
         if (event.name != null && event.name!.isNotEmpty) {
           final desc = tx.description?.toLowerCase() ?? "";
           final filter = event.name!.toLowerCase();
@@ -209,7 +200,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         return true;
       }).toList();
 
-      // 4. Sprawdź stawki walut (jak w _onLoadTransactions)
       final currentState = currencyConversionBloc.state;
       if (currentState is! CurrencyRatesLoaded) {
         throw Exception("Currency rates not loaded");
@@ -222,7 +212,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       };
       const defaultRate = 1.0;
 
-      // 5. Konwertuj transakcje
       final convertedTransactions = filtered.map((transaction) {
         final category = categories.firstWhere(
           (cat) => cat.id == transaction.category!.id,
@@ -250,7 +239,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         );
       }).toList();
 
-      // 6. Emituj stan
       emit(TransactionsLoaded(convertedTransactions));
     } catch (e) {
       emit(TransactionError('Failed to filter transactions: $e'));

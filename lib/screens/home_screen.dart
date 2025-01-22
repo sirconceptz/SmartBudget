@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_budget/utils/custom_date_time_range.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/category/category_event.dart';
@@ -15,7 +16,7 @@ import '../models/monthly_spent.dart';
 import '../utils/enums/currency.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -412,13 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _computeCustomMonthKey(DateTime month, int firstDayOfMonth) {
     final y = month.year;
     final m = month.month;
-    return _formatYearMonth(y, m);
-  }
-
-  String _formatYearMonth(int year, int month) {
-    final yy = year.toString().padLeft(4, '0');
-    final mm = month.toString().padLeft(2, '0');
-    return '$yy-$mm';
+    return CustomDateTimeRange.formatYearMonth(y, m);
   }
 
   String _formatWithCurrency(double amount, Currency currency) {

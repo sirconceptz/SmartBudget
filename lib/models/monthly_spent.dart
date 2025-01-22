@@ -1,5 +1,5 @@
 class MonthlySpent {
-  final String monthKey; // np. "2025-01"
+  final String monthKey; // example: "2025-01"
   final double spentAmount;
 
   MonthlySpent({

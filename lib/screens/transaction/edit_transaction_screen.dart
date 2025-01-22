@@ -17,7 +17,7 @@ class EditTransactionScreen extends StatefulWidget {
   const EditTransactionScreen({super.key, required this.transaction});
 
   @override
-  _EditTransactionScreenState createState() => _EditTransactionScreenState();
+  State<EditTransactionScreen> createState() => _EditTransactionScreenState();
 }
 
 class _EditTransactionScreenState extends State<EditTransactionScreen> {

@@ -25,4 +25,10 @@ class CustomDateTimeRange {
 
     return DateTimeRange(start: start, end: end);
   }
+
+  static String formatYearMonth(int year, int month) {
+    final yy = year.toString().padLeft(4, '0');
+    final mm = month.toString().padLeft(2, '0');
+    return '$yy-$mm';
+  }
 }
