@@ -66,7 +66,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         for (final tx in cat.transactions) {
           final key = _computeCustomMonthKey(tx.date, firstDayOfMonth);
 
-          final txCurrencyCode = tx.currency?.value.toUpperCase() ?? "USD";
+          final txCurrencyCode = tx.currency.value.toUpperCase();
           final txCurToUsdRate = ratesMap[txCurrencyCode] ?? defaultRate;
 
           final finalAmount = tx.amount *
