@@ -83,7 +83,6 @@ void main() {
 
     test('saveLastUpdateDate saves the current date to SharedPreferences', () async {
       final now = DateTime.now();
-      final formattedNow = now.toIso8601String();
 
       when(() => mockSharedPreferences.setString(any(), any())).thenAnswer((_) async => true);
 
