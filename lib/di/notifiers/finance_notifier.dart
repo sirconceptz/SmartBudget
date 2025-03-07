@@ -8,10 +8,10 @@ class FinanceNotifier extends ChangeNotifier {
   int get firstDayOfMonth => _firstDayOfMonth;
 
   FinanceNotifier() {
-    _loadFirstDayOfMonth();
+    loadFirstDayOfMonth();
   }
 
-  Future<void> _loadFirstDayOfMonth() async {
+  Future<void> loadFirstDayOfMonth() async {
     final prefs = await SharedPreferences.getInstance();
     _firstDayOfMonth = prefs.getInt(_firstDayKey) ?? 1;
     notifyListeners();

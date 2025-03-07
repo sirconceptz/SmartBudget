@@ -88,7 +88,7 @@ void main() {
       bloc.registerOnCurrencyRatesLoadedCallback(testCallback);
       bloc.add(LoadCurrencyRates());
 
-      await Future.delayed(Duration(milliseconds: 100)); // Poczekaj na async eventy
+      await Future.delayed(Duration(milliseconds: 100));
 
       expect(callbackCalled, isTrue);
     });

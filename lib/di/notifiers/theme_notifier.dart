@@ -11,11 +11,11 @@ class ThemeNotifier extends ChangeNotifier {
   ThemeMode get themeMode => _themeMode;
 
   void setTheme(ThemeMode themeMode) async {
-    _themeMode = themeMode;
-    notifyListeners();
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('theme_mode', themeMode.toString());
+
+    _themeMode = themeMode;
+    notifyListeners();
   }
 
   void _loadTheme() async {
