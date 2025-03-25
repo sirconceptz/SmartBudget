@@ -8,7 +8,7 @@ import 'package:smart_budget/models/transaction.dart' as t;
 import 'package:smart_budget/utils/enums/currency.dart';
 import 'package:sqflite/sqflite.dart';
 
-class MockDatabaseHelper extends Mock implements DatabaseHelper {}
+import '../screens/settings_screen_test.mocks.dart';
 
 class MockDatabase extends Mock implements Database {}
 

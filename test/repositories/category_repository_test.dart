@@ -1,15 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:smart_budget/data/db/database_helper.dart';
 import 'package:smart_budget/data/mappers/category_mapper.dart';
 import 'package:smart_budget/data/repositories/category_repository.dart';
 import 'package:smart_budget/models/category.dart';
 import 'package:smart_budget/utils/enums/currency.dart';
 import 'package:sqflite/sqflite.dart';
 
-class MockDatabaseHelper extends Mock implements DatabaseHelper {}
-
-class MockDatabase extends Mock implements Database {}
+import '../screens/settings_screen_test.mocks.dart';
+import 'transaction_repository_test.dart';
 
 void main() {
   late CategoryRepository categoryRepository;

@@ -94,6 +94,7 @@ class MyApp extends StatelessWidget {
       title: 'Smart Budget',
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      debugShowCheckedModeBanner: false,
       locale: localeNotifier.locale,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
