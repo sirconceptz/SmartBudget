@@ -29,6 +29,8 @@
   "budgetUsage": "Wykorzystanie budżetu",
   "unbudgetedCategoriesNotice": "Niektóre kategorie nie mają ustawionego budżetu",
   "incomes": "Przychody",
+  "backup_file_title": "Plik kopii zapasowej",
+  "backup_file_text": "Oto mój plik kopii zapasowej Smart Budget.",
   "expenses": "Wydatki",
   "income": "Przychód",
   "expense": "Wydatek",

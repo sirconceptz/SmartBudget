@@ -9,6 +9,8 @@
   "chooseLanguage": "Sprache auswählen",
   "categories": "Kategorie",
   "home": "Startseite",
+  "backup_file_title": "Sicherungsdatei",
+  "backup_file_text": "Hier ist meine Smart Budget-Sicherungsdatei.",
   "transactions": "Transaktionen",
   "settings": "Einstellungen",
   "addTransaction": "Transaktion hinzufügen",

@@ -14,6 +14,8 @@
   "addTransaction": "Aggiungi transazione",
   "addCategory": "Aggiungi categoria",
   "budgetLimit": "Limite di budget",
+  "backup_file_title": "File di backup",
+  "backup_file_text": "Ecco il mio file di backup di Smart Budget.",
   "description": "Descrizione",
   "name": "Nome",
   "giveCategoryName": "Inserisci il nome della categoria",

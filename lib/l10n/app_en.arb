@@ -8,6 +8,8 @@
   "dark": "Dark",
   "chooseLanguage": "Choose Language",
   "categories": "Category",
+  "backup_file_title": "Backup File",
+  "backup_file_text": "Here is my Smart Budget backup file.",
   "home": "Home",
   "transactions": "Transactions",
   "settings": "Settings",

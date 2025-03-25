@@ -16,6 +16,8 @@
   "budgetLimit": "Límite de presupuesto",
   "description": "Descripción",
   "name": "Nombre",
+  "backup_file_title": "Archivo de copia de seguridad",
+  "backup_file_text": "Aquí está mi archivo de copia de seguridad de Smart Budget.",
   "giveCategoryName": "Dar nombre a la categoría",
   "deleteCategory": "Eliminar categoría",
   "deleteTransaction": "Eliminar transacción",

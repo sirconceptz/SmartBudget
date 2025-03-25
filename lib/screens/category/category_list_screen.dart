@@ -76,7 +76,7 @@ class CategoryListScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "${category.budgetLimit != null ? "${AppLocalizations.of(context)!.budgetLimit}:" : ""} ${category.currency.formatAmount(category.budgetLimit) ?? ""}",
+                          "${category.budgetLimit != null ? "${AppLocalizations.of(context)!.budgetLimit}:" : ""} ${category.budgetLimit != null ? category.currency.formatAmount(category.budgetLimit) : ""}",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -85,9 +85,11 @@ class CategoryListScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         if (category.budgetLimit !=
-                            category.convertedBudgetLimit)
+                            category.convertedBudgetLimit && category.budgetLimit != null)
                           Text(
-                            "(≈${currentCurrency.formatAmount(category.convertedBudgetLimit) ?? ""})",
+                            category.budgetLimit != null
+                                ? "(≈${currentCurrency.formatAmount(category.convertedBudgetLimit) ?? ""})"
+                                : "",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,

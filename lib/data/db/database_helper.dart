@@ -86,8 +86,8 @@ class DatabaseHelper {
 
     final jsonString = jsonEncode(backupData);
 
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/backup.json');
+    final directory = await getExternalStorageDirectory();
+    final file = File('${directory!.path}/backup.json');
     await file.writeAsString(jsonString);
 
     return file.path;
@@ -96,8 +96,8 @@ class DatabaseHelper {
   Future<void> importDatabase() async {
     final db = await database;
 
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/backup.json');
+    final directory = await getExternalStorageDirectory();
+    final file = File('${directory!.path}/backup.json');
     final jsonString = await file.readAsString();
     final Map<String, dynamic> backupData = jsonDecode(jsonString);
 
