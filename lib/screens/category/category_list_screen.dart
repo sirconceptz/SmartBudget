@@ -85,7 +85,8 @@ class CategoryListScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         if (category.budgetLimit !=
-                            category.convertedBudgetLimit && category.budgetLimit != null)
+                                category.convertedBudgetLimit &&
+                            category.budgetLimit != null)
                           Text(
                             category.budgetLimit != null
                                 ? "(≈${currentCurrency.formatAmount(category.convertedBudgetLimit) ?? ""})"

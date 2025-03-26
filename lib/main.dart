@@ -4,12 +4,14 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_budget/data/repositories/recurring_transactions_repository.dart';
 import 'package:smart_budget/screens/category/add_category_screen.dart';
 import 'package:smart_budget/screens/category/edit_category_screen.dart';
 import 'package:smart_budget/screens/main_screen.dart';
 import 'package:smart_budget/screens/settings_screen.dart';
 import 'package:smart_budget/screens/transaction/add_transaction_screen.dart';
 import 'package:smart_budget/screens/transaction/edit_transaction_screen.dart';
+import 'package:smart_budget/utils/recurring_transaction_worker.dart';
 
 import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
@@ -34,6 +36,8 @@ void main() async {
   await initializeDateFormatting('pl_PL', null);
 
   final dbHelper = DatabaseHelper();
+
+  RecurringTransactionWorker.initialize();
 
   runApp(
     MultiProvider(
@@ -67,6 +71,7 @@ void main() async {
           BlocProvider(
             create: (context) => TransactionBloc(
               getIt<TransactionRepository>(),
+              getIt<RecurringTransactionRepository>(),
               BlocProvider.of<CategoryBloc>(context),
               getIt<CategoryRepository>(),
               context.read<CurrencyConversionBloc>(),

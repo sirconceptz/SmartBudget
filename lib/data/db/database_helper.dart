@@ -67,6 +67,21 @@ class DatabaseHelper {
         FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
       )
     ''');
+
+    await db.execute('''
+    CREATE TABLE recurring_transactions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      isExpense INTEGER NOT NULL,
+      amount REAL NOT NULL,
+      category_id INTEGER,
+      currency TEXT,
+      start_date TIMESTAMP NOT NULL,
+      repeat_interval TEXT NOT NULL, -- daily, weekly, monthly, yearly
+      repeat_count INTEGER, -- null for unlimited, otherwise stops after n times
+      description TEXT,
+      FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
+    )
+  ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {

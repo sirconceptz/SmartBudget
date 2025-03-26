@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:smart_budget/data/db/database_helper.dart';
 import 'package:smart_budget/data/mappers/transaction_mapper.dart';
 import 'package:smart_budget/data/repositories/transaction_repository.dart';
 import 'package:smart_budget/models/category.dart';

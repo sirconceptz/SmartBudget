@@ -6,6 +6,7 @@ import 'package:smart_budget/blocs/currency_conversion/currency_conversion_bloc.
 import 'package:smart_budget/blocs/currency_conversion/currency_conversion_state.dart';
 import 'package:smart_budget/blocs/transaction/transaction_event.dart';
 import 'package:smart_budget/blocs/transaction/transaction_state.dart';
+import 'package:smart_budget/data/repositories/recurring_transactions_repository.dart';
 import 'package:smart_budget/utils/my_logger.dart';
 
 import '../../data/mappers/transaction_mapper.dart';
@@ -19,6 +20,7 @@ import '../category/category_event.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionRepository transactionRepository;
+  final RecurringTransactionRepository recurringTransactionRepository;
   final CategoryRepository categoryRepository;
   final CurrencyConversionBloc currencyConversionBloc;
   final CurrencyNotifier currencyNotifier;
@@ -29,6 +31,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
   TransactionBloc(
     this.transactionRepository,
+    this.recurringTransactionRepository,
     this.categoryBloc,
     this.categoryRepository,
     this.currencyConversionBloc,
@@ -36,6 +39,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   ) : super(TransactionsLoading()) {
     on<LoadTransactions>(_onLoadTransactions);
     on<AddTransaction>(_onAddTransaction);
+    on<AddRecurringTransaction>(_onAddRecurringTransaction);
     on<UpdateTransaction>(_onUpdateTransaction);
     on<DeleteTransaction>(_onDeleteTransaction);
     on<FilterTransactions>(_onFilterTransactions);
@@ -127,6 +131,16 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       getIt<CategoryBloc>().add(LoadCategoriesWithSpentAmounts(dateRange));
     } catch (e) {
       emit(TransactionError('Failed to add transaction'));
+    }
+  }
+
+  Future<void> _onAddRecurringTransaction(
+      AddRecurringTransaction event, Emitter<TransactionState> emit) async {
+    try {
+      await recurringTransactionRepository
+          .addRecurringTransaction(event.recurringTransaction);
+    } catch (e) {
+      emit(TransactionError('Failed to add recurring transaction'));
     }
   }
 

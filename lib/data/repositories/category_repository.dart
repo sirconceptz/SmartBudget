@@ -66,4 +66,31 @@ class CategoryRepository {
 
     return categories;
   }
+
+  Future<Category?> getCategory(int categoryId) async {
+    final db = await _databaseHelper.database;
+
+    final result = await db.query(
+      'categories',
+      where: 'id = ?',
+      whereArgs: [categoryId],
+      limit: 1,
+    );
+
+    if (result.isEmpty) return null;
+
+    final categoryJson = result.first;
+
+    final transactionsResult = await db.query(
+      'transactions',
+      where: 'category_id = ?',
+      whereArgs: [categoryId],
+    );
+
+    final transactions = transactionsResult
+        .map((transactionJson) => TransactionEntity.fromJson(transactionJson))
+        .toList();
+
+    return Category.fromJson(categoryJson)..transactions = transactions;
+  }
 }

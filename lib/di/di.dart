@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:smart_budget/data/repositories/recurring_transactions_repository.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/currency_conversion/currency_conversion_bloc.dart';
@@ -20,6 +21,10 @@ void setupDependencies() {
 
   getIt.registerLazySingleton<CategoryRepository>(
     () => CategoryRepository(getIt<DatabaseHelper>()),
+  );
+
+  getIt.registerLazySingleton<RecurringTransactionRepository>(
+    () => RecurringTransactionRepository(getIt<DatabaseHelper>()),
   );
 
   getIt.registerLazySingleton<CurrencyRepository>(

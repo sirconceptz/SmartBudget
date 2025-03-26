@@ -181,10 +181,12 @@ class SettingsScreen extends StatelessWidget {
                         filePath: filePath,
                       );
 
-                      Toast.show(context, AppLocalizations.of(context)!.exportBackupStatement);
+                      Toast.show(context,
+                          AppLocalizations.of(context)!.exportBackupStatement);
                     } catch (e) {
                       MyLogger.write("BACKUP - EXPORT", e.toString());
-                      Toast.show(context, AppLocalizations.of(context)!.exportBackupError);
+                      Toast.show(context,
+                          AppLocalizations.of(context)!.exportBackupError);
                     }
                   },
                 ),

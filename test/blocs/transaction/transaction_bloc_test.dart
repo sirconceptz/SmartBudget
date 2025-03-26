@@ -6,6 +6,7 @@ import 'package:smart_budget/blocs/transaction/transaction_event.dart';
 import 'package:smart_budget/blocs/transaction/transaction_state.dart';
 import 'package:smart_budget/blocs/currency_conversion/currency_conversion_bloc.dart';
 import 'package:smart_budget/blocs/currency_conversion/currency_conversion_state.dart';
+import 'package:smart_budget/data/repositories/recurring_transactions_repository.dart';
 import 'package:smart_budget/data/repositories/transaction_repository.dart';
 import 'package:smart_budget/data/repositories/category_repository.dart';
 import 'package:smart_budget/di/notifiers/currency_notifier.dart';
@@ -17,6 +18,8 @@ import 'package:smart_budget/di/di.dart';
 import 'package:smart_budget/blocs/category/category_bloc.dart';
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
+
+class MockRecurringTransactionRepository extends Mock implements RecurringTransactionRepository {}
 
 class MockCategoryRepository extends Mock implements CategoryRepository {}
 
@@ -32,6 +35,7 @@ void main() {
 
   late TransactionBloc transactionBloc;
   late MockTransactionRepository mockTransactionRepository;
+  late MockRecurringTransactionRepository mockRecurringTransactionRepository;
   late MockCategoryRepository mockCategoryRepository;
   late MockCurrencyConversionBloc mockCurrencyConversionBloc;
   late MockCurrencyNotifier mockCurrencyNotifier;
@@ -79,6 +83,7 @@ void main() {
 
   setUp(() {
     mockTransactionRepository = MockTransactionRepository();
+    mockRecurringTransactionRepository = MockRecurringTransactionRepository();
     mockCategoryRepository = MockCategoryRepository();
     mockCurrencyConversionBloc = MockCurrencyConversionBloc();
     mockCurrencyNotifier = MockCurrencyNotifier();
@@ -96,6 +101,7 @@ void main() {
 
     transactionBloc = TransactionBloc(
       mockTransactionRepository,
+      mockRecurringTransactionRepository,
       mockCategoryBloc,
       mockCategoryRepository,
       mockCurrencyConversionBloc,

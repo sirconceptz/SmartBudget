@@ -9,8 +9,10 @@ import '../../blocs/transaction/transaction_bloc.dart';
 import '../../blocs/transaction/transaction_event.dart';
 import '../../di/notifiers/currency_notifier.dart';
 import '../../models/category.dart';
+import '../../models/recurring_transaction.dart';
 import '../../models/transaction.dart';
 import '../../utils/enums/currency.dart';
+import '../../utils/enums/repeat_interval.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -28,6 +30,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
   Currency? _selectedCurrency;
+  bool isRecurringTransaction = false;
+  RepeatInterval? _repeatInterval;
 
   @override
   void initState() {
@@ -65,6 +69,23 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       );
 
       context.read<TransactionBloc>().add(AddTransaction(newTransaction));
+
+      if (isRecurringTransaction) {
+        final recurringTransaction = RecurringTransaction(
+          isExpense:
+              _type == AppLocalizations.of(context)!.income ? false : true,
+          amount: _amount!,
+          categoryId: _selectedCategory!.id!,
+          startDate: transactionDateTime,
+          description: _description,
+          currency: _selectedCurrency!,
+          repeatInterval: _repeatInterval!.name,
+        );
+
+        context
+            .read<TransactionBloc>()
+            .add(AddRecurringTransaction(recurringTransaction));
+      }
 
       Navigator.pop(context, true);
     }
@@ -216,6 +237,34 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     labelText: AppLocalizations.of(context)!.currency,
                   ),
                 ),
+                CheckboxListTile(
+                    value: isRecurringTransaction,
+                    onChanged: (newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          isRecurringTransaction = newValue;
+                        });
+                      }
+                    }),
+                if (isRecurringTransaction) ...[
+                  DropdownButtonFormField<RepeatInterval>(
+                    value: _repeatInterval,
+                    items: RepeatInterval.values.map((interval) {
+                      return DropdownMenuItem(
+                        value: interval,
+                        child: Text(interval.localizedName(context)),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _repeatInterval = value!;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.repeatInterval,
+                    ),
+                  )
+                ],
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

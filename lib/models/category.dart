@@ -70,7 +70,6 @@ class Category {
       isIncome: json['is_income'] == 1,
       budgetLimit: (json['budget_limit'] ?? json['budgetLimit'])?.toDouble(),
       convertedBudgetLimit: (json['convertedBudgetLimit'] ?? 0).toDouble(),
-      // albo null
       currency: CurrencyExtension.fromString(json['currency']),
       monthlySpent: monthlySpentList,
     );

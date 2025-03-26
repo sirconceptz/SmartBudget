@@ -21,11 +21,12 @@ class TransactionMapper {
   }
 
   static Transaction mapFromEntity(
-      TransactionEntity entity,
-      List<Category> categories,
-      ) {
+    TransactionEntity entity,
+    List<Category> categories,
+  ) {
     print(entity.categoryId);
-    final category = categories.firstWhere((cat) => cat.id == entity.categoryId);
+    final category =
+        categories.firstWhere((cat) => cat.id == entity.categoryId);
 
     return Transaction(
       id: entity.id,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/recurring_transaction.dart';
 import '../../models/transaction.dart';
 
 abstract class TransactionEvent {}
@@ -14,6 +15,12 @@ class AddTransaction extends TransactionEvent {
   final Transaction transaction;
 
   AddTransaction(this.transaction);
+}
+
+class AddRecurringTransaction extends TransactionEvent {
+  final RecurringTransaction recurringTransaction;
+
+  AddRecurringTransaction(this.recurringTransaction);
 }
 
 class UpdateTransaction extends TransactionEvent {
