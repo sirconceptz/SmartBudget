@@ -103,6 +103,25 @@ class SettingsScreen extends StatelessWidget {
               }
             },
           ),
+          ListTile(
+            title: Text(
+              AppLocalizations.of(context)!.sendApplicationLog,
+              softWrap: true,
+              maxLines: 3,
+              textAlign: TextAlign.start,
+            ),
+            onTap: () async {
+              String? uri = await MyLogger().getFileUri();
+              if (uri != null) {
+                sendLogs(context, uri);
+              } else {
+                if (context.mounted) {
+                  Toast.show(
+                      context, AppLocalizations.of(context)!.noDataToSend);
+                }
+              }
+            },
+          ),
           const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -125,25 +144,6 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (newDay) {
               if (newDay != null) {
                 financeNotifier.setFirstDayOfMonth(newDay);
-              }
-            },
-          ),
-          ListTile(
-            title: Text(
-              AppLocalizations.of(context)!.sendApplicationLog,
-              softWrap: true,
-              maxLines: 3,
-              textAlign: TextAlign.center,
-            ),
-            onTap: () async {
-              String? uri = await MyLogger().getFileUri();
-              if (uri != null) {
-                sendLogs(context, uri);
-              } else {
-                if (context.mounted) {
-                  Toast.show(
-                      context, AppLocalizations.of(context)!.noDataToSend);
-                }
               }
             },
           ),
