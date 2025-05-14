@@ -1,4 +1,4 @@
-# BudgetManager
+# SmartManager
 
 A modern **Flutter** application for managing your personal budget. Track your income and expenses, categorize transactions, and set monthly budgets to gain control over your finances.
 
