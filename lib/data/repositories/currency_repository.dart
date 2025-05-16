@@ -7,15 +7,15 @@ import 'package:smart_budget/models/currency_rate.dart';
 import 'package:smart_budget/utils/my_logger.dart';
 
 class CurrencyRepository {
-  final String _baseUrl = AppConfig.apiUrl;
-  final String _apiKey = AppConfig.apiKey;
+  // final String _baseUrl = AppConfig.apiUrl;
+  // final String _apiKey = AppConfig.apiKey;
   final String _sharedKey = 'last_currency_update';
 
   Future<List<CurrencyRate>> fetchCurrencyRates() async {
     try {
       final response = await http.get(
         Uri.parse(
-            "$_baseUrl?apikey=$_apiKey&base_currency=USD&currencies=EUR,JPY,GBP,AUD,CAD,CHF,CNY,HKD,NZD,PLN"),
+            "https://smart-budget.pl/data/rates.json"),
       );
 
       if (response.statusCode == 200) {

@@ -39,7 +39,7 @@ void main() {
 
     final testDataJson = json.encode(testData);
     final testUrl =
-        "${AppConfig.apiUrl}?apikey=${AppConfig.apiKey}&base_currency=USD&currencies=EUR,JPY,GBP,AUD,CAD,CHF,CNY,HKD,NZD,PLN";
+        "https://smart-budget.pl/data/rates.json";
     test('fetchCurrencyRates returns a list of CurrencyRate on successful API call', () async {
       when(() => mockHttpClient.get(Uri.parse(testUrl))).thenAnswer(
               (_) async => http.Response(testDataJson, 200));
