@@ -14,32 +14,25 @@ class CurrencyRepository {
   Future<List<CurrencyRate>> fetchCurrencyRates() async {
     try {
       final response = await http.get(
-        Uri.parse(
-            "https://smart-budget.pl/data/rates.json"),
+        Uri.parse("https://smart-budget.pl/data/rates.json"),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        if (data['data'] == null || data['data'] is! Map<String, dynamic>) {
+        if (data is! Map<String, dynamic>) {
           throw Exception('Invalid data format received from API');
         }
 
-        final rates =
-            (data['data'] as Map<String, dynamic>).entries.map((entry) {
-          final key = entry.key;
+        final rates = data.entries.map((entry) {
+          final code = entry.key;
           final value = entry.value;
 
-          if (value is Map<String, dynamic> && value['value'] != null) {
-            final rateValue = value['value'];
-            final parsedRate = rateValue is num
-                ? rateValue.toDouble()
-                : throw Exception('Unexpected rate value type: $rateValue');
+          final parsedRate = value is num
+              ? value.toDouble()
+              : throw Exception('Unexpected rate value type: $value');
 
-            return CurrencyRate(name: key, code: key, rate: parsedRate);
-          } else {
-            throw Exception('Unexpected data structure for currency rate');
-          }
+          return CurrencyRate(name: code, code: code, rate: parsedRate);
         }).toList();
 
         return rates;

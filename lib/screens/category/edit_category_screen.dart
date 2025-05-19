@@ -127,7 +127,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
               ),
               SizedBox(height: 16),
               TextFormField(
-                initialValue: _budgetLimit?.toString(),
+                initialValue: _budgetLimit?.toStringAsFixed(2),
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.budgetLimit,
