@@ -91,21 +91,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 state.expenseCategories,
               );
 
-              if (_availableMonths.isNotEmpty &&
-                  !_availableMonths.contains(selectedMonth)) {
+              if (_availableMonths.isEmpty) {
+                return const SizedBox();
+              }
+
+              if (!_availableMonths.contains(selectedMonth)) {
                 selectedMonth = _availableMonths.first;
               }
 
               return DropdownButton<DateTime>(
-                value: _availableMonths.contains(selectedMonth)
-                    ? selectedMonth
-                    : (_availableMonths.isNotEmpty
-                        ? _availableMonths.first
-                        : null),
+                value: selectedMonth,
                 icon: const Icon(Icons.arrow_drop_down),
                 items: _availableMonths.map((monthDate) {
                   final formattedMonth =
-                      DateFormat.yMMMM('pl_PL').format(monthDate);
+                  DateFormat.yMMMM('pl_PL').format(monthDate);
                   return DropdownMenuItem<DateTime>(
                     value: monthDate,
                     child: Text(formattedMonth),

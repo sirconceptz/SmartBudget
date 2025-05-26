@@ -238,6 +238,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                 ),
                 CheckboxListTile(
+                    title: Text(AppLocalizations.of(context)!.repeatInterval),
                     value: isRecurringTransaction,
                     onChanged: (newValue) {
                       if (newValue != null) {

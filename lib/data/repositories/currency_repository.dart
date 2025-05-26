@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_budget/config.dart';
 import 'package:smart_budget/models/currency_rate.dart';
 import 'package:smart_budget/utils/my_logger.dart';
 

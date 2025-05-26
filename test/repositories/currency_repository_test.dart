@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_budget/config.dart';
 import 'package:smart_budget/data/repositories/currency_repository.dart';
 import 'package:smart_budget/models/currency_rate.dart';
 

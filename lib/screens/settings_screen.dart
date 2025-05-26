@@ -4,7 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_share/flutter_share.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_budget/blocs/category/category_bloc.dart';
@@ -175,18 +175,16 @@ class SettingsScreen extends StatelessWidget {
                     try {
                       String filePath = await DatabaseHelper().exportDatabase();
 
-                      await FlutterShare.shareFile(
-                        title: AppLocalizations.of(context)!.backup_file_title,
+                      await Share.shareXFiles(
+                        [XFile(filePath)],
+                        subject: AppLocalizations.of(context)!.backup_file_title,
                         text: AppLocalizations.of(context)!.backup_file_text,
-                        filePath: filePath,
                       );
 
-                      Toast.show(context,
-                          AppLocalizations.of(context)!.exportBackupStatement);
+                      Toast.show(context, AppLocalizations.of(context)!.exportBackupStatement);
                     } catch (e) {
                       MyLogger.write("BACKUP - EXPORT", e.toString());
-                      Toast.show(context,
-                          AppLocalizations.of(context)!.exportBackupError);
+                      Toast.show(context, AppLocalizations.of(context)!.exportBackupError);
                     }
                   },
                 ),
