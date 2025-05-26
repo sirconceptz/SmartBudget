@@ -37,7 +37,7 @@ void main() async {
 
   final dbHelper = DatabaseHelper();
 
-  RecurringTransactionWorker.initialize();
+  //RecurringTransactionWorker.initialize();
 
   runApp(
     MultiProvider(

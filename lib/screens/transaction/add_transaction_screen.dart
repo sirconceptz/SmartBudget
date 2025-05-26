@@ -70,22 +70,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
       context.read<TransactionBloc>().add(AddTransaction(newTransaction));
 
-      if (isRecurringTransaction) {
-        final recurringTransaction = RecurringTransaction(
-          isExpense:
-              _type == AppLocalizations.of(context)!.income ? false : true,
-          amount: _amount!,
-          categoryId: _selectedCategory!.id!,
-          startDate: transactionDateTime,
-          description: _description,
-          currency: _selectedCurrency!,
-          repeatInterval: _repeatInterval!.name,
-        );
-
-        context
-            .read<TransactionBloc>()
-            .add(AddRecurringTransaction(recurringTransaction));
-      }
+      // if (isRecurringTransaction) {
+      //   final recurringTransaction = RecurringTransaction(
+      //     isExpense:
+      //         _type == AppLocalizations.of(context)!.income ? false : true,
+      //     amount: _amount!,
+      //     categoryId: _selectedCategory!.id!,
+      //     startDate: transactionDateTime,
+      //     description: _description,
+      //     currency: _selectedCurrency!,
+      //     repeatInterval: _repeatInterval!.name,
+      //   );
+      //
+      //   context
+      //       .read<TransactionBloc>()
+      //       .add(AddRecurringTransaction(recurringTransaction));
+      // }
 
       Navigator.pop(context, true);
     }
@@ -237,35 +237,34 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     labelText: AppLocalizations.of(context)!.currency,
                   ),
                 ),
-                CheckboxListTile(
-                    title: Text(AppLocalizations.of(context)!.repeatInterval),
-                    value: isRecurringTransaction,
-                    onChanged: (newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          isRecurringTransaction = newValue;
-                        });
-                      }
-                    }),
-                if (isRecurringTransaction) ...[
-                  DropdownButtonFormField<RepeatInterval>(
-                    value: _repeatInterval,
-                    items: RepeatInterval.values.map((interval) {
-                      return DropdownMenuItem(
-                        value: interval,
-                        child: Text(interval.localizedName(context)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _repeatInterval = value!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.repeatInterval,
-                    ),
-                  )
-                ],
+                // CheckboxListTile(
+                //     value: isRecurringTransaction,
+                //     onChanged: (newValue) {
+                //       if (newValue != null) {
+                //         setState(() {
+                //           isRecurringTransaction = newValue;
+                //         });
+                //       }
+                //     }),
+                // if (isRecurringTransaction) ...[
+                //   DropdownButtonFormField<RepeatInterval>(
+                //     value: _repeatInterval,
+                //     items: RepeatInterval.values.map((interval) {
+                //       return DropdownMenuItem(
+                //         value: interval,
+                //         child: Text(interval.localizedName(context)),
+                //       );
+                //     }).toList(),
+                //     onChanged: (value) {
+                //       setState(() {
+                //         _repeatInterval = value!;
+                //       });
+                //     },
+                //     decoration: InputDecoration(
+                //       labelText: AppLocalizations.of(context)!.repeatInterval,
+                //     ),
+                //   )
+                // ],
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
