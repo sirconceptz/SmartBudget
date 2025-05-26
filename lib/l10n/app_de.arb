@@ -94,6 +94,7 @@
   "weekly": "Wöchentlich",
   "monthly": "Monatlich",
   "repeatInterval": "Wiederholungsintervall",
+  "noTransactions": "Keine gespeicherten Transaktionen",
   "pleaseAddCategoriesFirst": "Bitte zuerst Kategorien hinzufügen",
   "pleaseWaitLoadingCategories": "Bitte warten, Kategorien werden geladen...",
   "monthlyReportTitle": "Monatlicher Bericht",

@@ -93,6 +93,7 @@
   "daily": "Diariamente",
   "weekly": "Semanal",
   "monthly": "Mensual",
+  "noTransactions": "No hay transacciones guardadas",
   "repeatInterval": "Intervalo de repetición",
   "pleaseAddCategoriesFirst": "Por favor, agregue categorías primero",
   "pleaseWaitLoadingCategories": "Por favor espere, cargando categorías...",

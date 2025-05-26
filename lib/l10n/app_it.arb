@@ -75,6 +75,7 @@
   "currency_hkd": "Dollaro di Hong Kong",
   "currency_nzd": "Dollaro neozelandese",
   "currency": "Valuta",
+  "noTransactions": "Nessuna transazione salvata",
   "daily": "Giornaliero",
   "weekly": "Settimanale",
   "monthly": "Mensile",

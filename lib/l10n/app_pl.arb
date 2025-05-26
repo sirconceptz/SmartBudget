@@ -76,6 +76,7 @@
   "currency_nzd": "Dolar nowozelandzki",
   "currency": "Waluta",
   "daily": "Codziennie",
+  "noTransactions": "Brak zapisanych transakcji",
   "weekly": "Co tydzień",
   "monthly": "Co miesiąc",
   "repeatInterval": "Okres powtarzania",

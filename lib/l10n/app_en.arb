@@ -92,6 +92,7 @@
   "daily": "Daily",
   "weekly": "Weekly",
   "monthly": "Monthly",
+  "noTransactions": "No saved transactions",
   "repeatInterval": "Repeat Interval",
   "pleaseAddCategoriesFirst": "Please add categories first",
   "pleaseWaitLoadingCategories": "Please wait, loading categories...",
