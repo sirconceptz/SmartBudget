@@ -225,7 +225,6 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (ctx, currencyNotifier, _) {
               final currency = currencyNotifier.currency;
 
-              // Formatowanie wydanej kwoty i budżetu z symbolem waluty
               final spentFormatted =
                   _formatWithCurrency(totalSpentThisMonth, currency);
               final budgetFormatted =

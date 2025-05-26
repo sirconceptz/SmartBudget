@@ -17,6 +17,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CurrencyConversionBloc currencyConversionBloc;
   final CurrencyNotifier currencyNotifier;
   final FinanceNotifier financeNotifier;
+  VoidCallback? _currencyChangeListener;
 
   CategoryBloc(
     this.categoryRepository,
@@ -29,6 +30,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<DeleteCategory>(_onDeleteCategory);
     on<LoadCategoriesWithSpentAmounts>(_onLoadCategoriesWithSpentAmounts);
     on<UpdateLocalizedCategories>(_onUpdateLocalizedCategories);
+
+    _currencyChangeListener = () {
+      add(LoadCategoriesWithSpentAmounts(null));
+    };
+    currencyNotifier.addListener(_currencyChangeListener!);
   }
 
   Future<void> _onLoadCategoriesWithSpentAmounts(
@@ -72,7 +78,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           final finalAmount = tx.amount *
               ((userCurToUsdRate == 0.0)
                   ? 1.0
-                  : (userCurToUsdRate / txCurToUsdRate));
+                  : (txCurToUsdRate / userCurToUsdRate));
 
           final currentSum = monthMap[key] ?? 0.0;
           monthMap[key] = currentSum + finalAmount;
@@ -132,10 +138,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
   Category _convertBudgetOnly(Category cat, double rateToUserCurrency) {
     final newBudgetLimit =
-        cat.budgetLimit != null ? cat.budgetLimit! * rateToUserCurrency : null;
+        cat.budgetLimit != null ? cat.budgetLimit! / rateToUserCurrency : null;
 
     return cat.copyWith(
-      budgetLimit: newBudgetLimit,
       convertedBudgetLimit: newBudgetLimit,
     );
   }

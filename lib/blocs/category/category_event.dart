@@ -26,7 +26,7 @@ class DeleteCategory extends CategoryEvent {
 }
 
 class LoadCategoriesWithSpentAmounts extends CategoryEvent {
-  final DateTimeRange dateRange;
+  final DateTimeRange? dateRange;
 
   LoadCategoriesWithSpentAmounts(this.dateRange);
 }
