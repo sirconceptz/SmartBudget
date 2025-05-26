@@ -4,6 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -18,13 +19,44 @@ import '../di/notifiers/currency_notifier.dart';
 import '../di/notifiers/finance_notifier.dart';
 import '../di/notifiers/locale_notifier.dart';
 import '../di/notifiers/theme_notifier.dart';
+import '../main.dart';
+import '../utils/app_settings.dart';
 import '../utils/enums/currency.dart';
 import '../utils/enums/supported_language.dart';
 import '../utils/toast.dart';
 import '../widgets/setting_row.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  SettingsScreenState createState() => SettingsScreenState();
+}
+
+class SettingsScreenState extends State<SettingsScreen> {
+  String? updateDate;
+  bool isLoading = true;
+
+  Future<void> loadUpdateDate() async {
+    final date = await ApiSettings.getCurrencyUpdateDate();
+    if (mounted) {
+      setState(() {
+        updateDate = date;
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    loadUpdateDate();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +179,41 @@ class SettingsScreen extends StatelessWidget {
               }
             },
           ),
+          FutureBuilder<String?>(
+            future: ApiSettings.getCurrencyUpdateDate(),
+            builder: (context, snapshot) {
+              final loc = AppLocalizations.of(context)!;
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Text(
+                  loc.currencyUpdateDateLoading,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                );
+              } else if (snapshot.hasError) {
+                return Text(
+                  loc.currencyUpdateDateError,
+                  style: const TextStyle(fontSize: 12, color: Colors.red),
+                  textAlign: TextAlign.center,
+                );
+              } else if (snapshot.hasData && snapshot.data != null) {
+                final dateFormatted =
+                    DateFormat.yMd(Localizations.localeOf(context).toString())
+                        .format(DateTime.parse(snapshot.data!));
+                return Text(
+                    loc.currencyUpdateDateValue(dateFormatted),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                );
+              } else {
+                return Text(
+                  loc.currencyUpdateDateNone,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                );
+              }
+            },
+          ),
           const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -177,14 +244,17 @@ class SettingsScreen extends StatelessWidget {
 
                       await Share.shareXFiles(
                         [XFile(filePath)],
-                        subject: AppLocalizations.of(context)!.backup_file_title,
+                        subject:
+                            AppLocalizations.of(context)!.backup_file_title,
                         text: AppLocalizations.of(context)!.backup_file_text,
                       );
 
-                      Toast.show(context, AppLocalizations.of(context)!.exportBackupStatement);
+                      Toast.show(context,
+                          AppLocalizations.of(context)!.exportBackupStatement);
                     } catch (e) {
                       MyLogger.write("BACKUP - EXPORT", e.toString());
-                      Toast.show(context, AppLocalizations.of(context)!.exportBackupError);
+                      Toast.show(context,
+                          AppLocalizations.of(context)!.exportBackupError);
                     }
                   },
                 ),

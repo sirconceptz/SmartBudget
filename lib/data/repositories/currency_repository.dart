@@ -6,9 +6,7 @@ import 'package:smart_budget/models/currency_rate.dart';
 import 'package:smart_budget/utils/my_logger.dart';
 
 class CurrencyRepository {
-  // final String _baseUrl = AppConfig.apiUrl;
-  // final String _apiKey = AppConfig.apiKey;
-  final String _sharedKey = 'last_currency_update';
+  final String _sharedKey = 'CURRENCY_UPDATE_DATE';
 
   Future<List<CurrencyRate>> fetchCurrencyRates() async {
     try {
@@ -23,7 +21,21 @@ class CurrencyRepository {
           throw Exception('Invalid data format received from API');
         }
 
-        final rates = data.entries.map((entry) {
+        final date = data['date'];
+        if (date is String) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('CURRENCY_UPDATE_DATE', date);
+          MyLogger.write("Currency - FETCH", "Saved update date: $date");
+        } else {
+          throw Exception('Invalid "date" field format');
+        }
+
+        final ratesData = data['rates'];
+        if (ratesData is! Map<String, dynamic>) {
+          throw Exception('Invalid "rates" field format');
+        }
+
+        final rates = ratesData.entries.map((entry) {
           final code = entry.key;
           final value = entry.value;
 

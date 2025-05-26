@@ -74,6 +74,14 @@
   "currency_cny": "Juan chiński",
   "currency_hkd": "Dolar hongkoński",
   "currency_nzd": "Dolar nowozelandzki",
+  "currencyUpdateDateLoading": "Pobieranie daty aktualizacji kursów walut...",
+  "currencyUpdateDateError": "Błąd podczas pobierania daty aktualizacji kursów walut",
+  "currencyUpdateDateValue": "Data aktualizacji kursów walut: {date}",
+  "currencyUpdateDateValue@date": {
+    "description": "Date of currency rates update",
+    "type": "String"
+  },
+  "currencyUpdateDateNone": "Brak zapisanej daty aktualizacji kursów walut",
   "currency": "Waluta",
   "daily": "Codziennie",
   "noTransactions": "Brak zapisanych transakcji",

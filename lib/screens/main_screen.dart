@@ -15,13 +15,20 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  final GlobalKey<SettingsScreenState> _settingsKey = GlobalKey<SettingsScreenState>();
+  late List<Widget> _screens;
 
-  final List<Widget> _screens = [
-    HomeScreen(),
-    TransactionsScreen(),
-    CategoryListScreen(),
-    SettingsScreen()
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    _screens = [
+      HomeScreen(),
+      TransactionsScreen(),
+      CategoryListScreen(),
+      SettingsScreen(key: _settingsKey),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +43,9 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
+          if (index == 3) {
+            _settingsKey.currentState?.loadUpdateDate();
+          }
           setState(() {
             _currentIndex = index;
           });
