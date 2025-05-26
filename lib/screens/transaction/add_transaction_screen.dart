@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../blocs/category/category_bloc.dart';
@@ -9,10 +10,8 @@ import '../../blocs/transaction/transaction_bloc.dart';
 import '../../blocs/transaction/transaction_event.dart';
 import '../../di/notifiers/currency_notifier.dart';
 import '../../models/category.dart';
-import '../../models/recurring_transaction.dart';
 import '../../models/transaction.dart';
 import '../../utils/enums/currency.dart';
-import '../../utils/enums/repeat_interval.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -30,8 +29,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
   Currency? _selectedCurrency;
-  bool isRecurringTransaction = false;
-  RepeatInterval? _repeatInterval;
+  //bool isRecurringTransaction = false;
+  //RepeatInterval? _repeatInterval;
 
   @override
   void initState() {
@@ -265,27 +264,28 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 //     ),
                 //   )
                 // ],
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(height: 20),
+                Table(
+                  columnWidths: {
+                    0: IntrinsicColumnWidth(),
+                    1: FlexColumnWidth(),
+                    2: IntrinsicColumnWidth(),
+                  },
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    TableRow(
                       children: [
-                        Text(
-                          '${AppLocalizations.of(context)!.date}: ${_selectedDate.toLocal()}'
-                              .split(' ')[0],
-                        ),
-                        Text(
-                          '${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}',
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
+                        Text('${AppLocalizations.of(context)!.date}: ', style: TextStyle(fontSize: 16)),
+                        Text(DateFormat.yMd("pl_PL").format(_selectedDate), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                         TextButton(
                           onPressed: _pickDate,
                           child: Text(AppLocalizations.of(context)!.chooseDate),
                         ),
+                      ],
+                    ),
+                    TableRow(
+                      children: [
+                        Text('${AppLocalizations.of(context)!.time}: ', style: TextStyle(fontSize: 16)),
+                        Text(_selectedTime.format(context), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         TextButton(
                           onPressed: _pickTime,
                           child: Text(AppLocalizations.of(context)!.chooseTime),
