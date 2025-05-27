@@ -93,4 +93,27 @@ class CurrencyConversionBloc
     final ratesJson = jsonEncode(rates);
     await prefs.setString('cached_currency_rates', ratesJson);
   }
+
+  Future<List<CurrencyRate>> ensureLatestCurrencyRates() async {
+    try {
+      final lastUpdated = await _getLastUpdatedTimestamp();
+      final currentTime = DateTime.now();
+
+      if (lastUpdated != null &&
+          currentTime.difference(lastUpdated).inHours < 24) {
+        final cachedRates = await _getCachedCurrencyRates();
+        if (cachedRates != null) {
+          return cachedRates;
+        }
+      }
+
+      final rates = await repository.fetchCurrencyRates();
+      await _cacheCurrencyRates(rates);
+      await _setLastUpdatedTimestamp(currentTime);
+      return rates;
+    } catch (error) {
+      throw Exception('Failed to fetch currency rates: $error');
+    }
+  }
+
 }

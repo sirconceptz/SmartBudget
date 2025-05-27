@@ -70,7 +70,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             if (transactions.isEmpty) {
               return Center(
                 child: Text(
-                  AppLocalizations.of(context)!.noTransactions, // Dodaj ten klucz do lokalizacji!
+                  AppLocalizations.of(context)!.noTransactions,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               );

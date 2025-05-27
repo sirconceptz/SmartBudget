@@ -24,7 +24,6 @@ class TransactionMapper {
     TransactionEntity entity,
     List<Category> categories,
   ) {
-    print(entity.categoryId);
     final category =
         categories.firstWhere((cat) => cat.id == entity.categoryId);
 

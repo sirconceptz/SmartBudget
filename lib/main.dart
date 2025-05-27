@@ -11,7 +11,7 @@ import 'package:smart_budget/screens/main_screen.dart';
 import 'package:smart_budget/screens/settings_screen.dart';
 import 'package:smart_budget/screens/transaction/add_transaction_screen.dart';
 import 'package:smart_budget/screens/transaction/edit_transaction_screen.dart';
-import 'package:smart_budget/utils/recurring_transaction_worker.dart';
+import 'package:smart_budget/utils/recurring_transaction_manager.dart';
 
 import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
@@ -36,8 +36,6 @@ void main() async {
   await initializeDateFormatting('pl_PL', null);
 
   final dbHelper = DatabaseHelper();
-
-  //RecurringTransactionWorker.initialize();
 
   runApp(
     MultiProvider(
@@ -122,13 +120,25 @@ class MyApp extends StatelessWidget {
       themeMode: themeNotifier.themeMode,
       initialRoute: '/',
       routes: {
-        '/': (context) => Builder(
-              builder: (context) {
-                final localizations = AppLocalizations.of(context);
-                if (localizations != null) {
-                  updateLocalizedCategoriesIfNeeded(context, localizations);
+        '/': (context) => FutureBuilder<void>(
+              future: _initializeRecurringTransactions(context),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                } else if (snapshot.hasError) {
+                  return Scaffold(
+                    body: Center(
+                        child: Text('Błąd inicjalizacji: ${snapshot.error}')),
+                  );
+                } else {
+                  final localizations = AppLocalizations.of(context);
+                  if (localizations != null) {
+                    updateLocalizedCategoriesIfNeeded(context, localizations);
+                  }
+                  return MainScreen();
                 }
-                return MainScreen();
               },
             ),
         '/addTransaction': (context) => AddTransactionScreen(),
@@ -143,6 +153,13 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => SettingsScreen(),
       },
     );
+  }
+
+  Future<void> _initializeRecurringTransactions(BuildContext context) async {
+    final currencyBloc = context.read<CurrencyConversionBloc>();
+
+    await RecurringTransactionManager()
+        .addMissingRecurringTransactions(currencyBloc);
   }
 
   Future<void> updateLocalizedCategoriesIfNeeded(
