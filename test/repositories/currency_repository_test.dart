@@ -38,7 +38,7 @@ void main() {
 
     final testDataJson = json.encode(testData);
     final testUrl =
-        "https://smart-budget.pl/data/rates.json";
+        "https://storage.googleapis.com/my-currency-data/rates.json";
     test('fetchCurrencyRates returns a list of CurrencyRate on successful API call', () async {
       when(() => mockHttpClient.get(Uri.parse(testUrl))).thenAnswer(
               (_) async => http.Response(testDataJson, 200));
