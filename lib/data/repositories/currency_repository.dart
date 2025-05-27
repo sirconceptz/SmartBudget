@@ -7,10 +7,15 @@ import 'package:smart_budget/utils/my_logger.dart';
 
 class CurrencyRepository {
   final String _sharedKey = 'CURRENCY_UPDATE_DATE';
+  final http.Client httpClient;
+  final SharedPreferences sharedPreferences;
+
+  CurrencyRepository({http.Client? client, required this.sharedPreferences})
+      : httpClient = client ?? http.Client();
 
   Future<List<CurrencyRate>> fetchCurrencyRates() async {
     try {
-      final response = await http.get(
+      final response = await httpClient.get(
         Uri.parse("https://storage.googleapis.com/my-currency-data/rates.json"),
       );
 
@@ -23,8 +28,8 @@ class CurrencyRepository {
 
         final date = data['date'];
         if (date is String) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('CURRENCY_UPDATE_DATE', date);
+          final prefs = sharedPreferences;
+          await prefs.setString(_sharedKey, date);
           MyLogger.write("Currency - FETCH", "Saved update date: $date");
         } else {
           throw Exception('Invalid "date" field format');
@@ -61,7 +66,7 @@ class CurrencyRepository {
 
   Future<bool> shouldRefreshRates() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = sharedPreferences;
       final lastUpdate = prefs.getString(_sharedKey);
       if (lastUpdate == null) {
         return true;
@@ -70,13 +75,14 @@ class CurrencyRepository {
       final now = DateTime.now();
       return now.difference(lastUpdateDate).inHours >= 24;
     } catch (e) {
-      throw Exception('Error checking last update date: $e');
+      MyLogger.write("Error checking last update date", e.toString());
+      return true;
     }
   }
 
   Future<void> saveLastUpdateDate() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = sharedPreferences;
       await prefs.setString(_sharedKey, DateTime.now().toIso8601String());
     } catch (e) {
       throw Exception('Error saving last update date: $e');

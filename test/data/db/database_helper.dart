@@ -1,47 +1,61 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_budget/data/db/database_helper.dart';
+import 'package:smart_budget/data/repositories/category_repository.dart';
+import 'package:smart_budget/models/category.dart';
+import 'package:smart_budget/utils/enums/currency.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:smart_budget/data/db/database_helper.dart';
 
 void main() {
   sqfliteFfiInit();
 
+  late CategoryRepository categoryRepository;
   late DatabaseHelper databaseHelper;
 
-  setUp(() {
-    databaseHelper = DatabaseHelper(factory: databaseFactoryFfi);
+  setUp(() async {
+    databaseHelper = DatabaseHelper(databaseFactory: databaseFactoryFfi);
+    final dbPath = await databaseFactoryFfi.getDatabasesPath();
+    await databaseFactoryFfi.deleteDatabase('$dbPath/budget_manager.db');
+
+    categoryRepository = CategoryRepository(databaseHelper);
   });
 
-  test('Database initializes successfully', () async {
-    final db = await databaseHelper.database;
-    expect(db.isOpen, true);
-  });
-
-  test('CRUD operations on categories', () async {
-    final db = await databaseHelper.database;
-
-    final id = await db.insert('categories', {
-      'name': 'Test Category',
-      'icon': null,
-      'description': 'A test category',
-      'budget_limit': 100.0,
-      'is_income': 1,
-    });
-    expect(id, isNotNull);
-
-    final result = await db.query('categories', where: 'id = ?', whereArgs: [id]);
-    expect(result.first['name'], 'Test Category');
-
-    await db.update(
-      'categories',
-      {'budget_limit': 200.0},
-      where: 'id = ?',
-      whereArgs: [id],
+  test('createOrReplaceCategory and getAllCategories', () async {
+    final category = Category(
+      id: null,
+      name: 'Test Category',
+      icon: 123,
+      description: 'Test Desc',
+      isIncome: false,
+      currency: Currency.usd,
     );
-    final updated = await db.query('categories', where: 'id = ?', whereArgs: [id]);
-    expect(updated.first['budget_limit'], 200.0);
 
-    await db.delete('categories', where: 'id = ?', whereArgs: [id]);
-    final finalResult = await db.query('categories', where: 'id = ?', whereArgs: [id]);
-    expect(finalResult.isEmpty, true);
+    await categoryRepository.createOrReplaceCategory(category);
+    final categories = await categoryRepository.getAllCategories();
+
+    expect(categories.length, 1);
+    expect(categories[0].name, 'Test Category');
+  });
+
+  test('update and delete Category', () async {
+    final category = Category(
+      id: null,
+      name: 'Test Category',
+      icon: 123,
+      description: 'Test Desc',
+      isIncome: false,
+      currency: Currency.usd,
+    );
+
+    await categoryRepository.createOrReplaceCategory(category);
+    var categories = await categoryRepository.getAllCategories();
+    final cat = categories.first;
+
+    await categoryRepository.updateCategory(cat.copyWith(budgetLimit: 200.0));
+    categories = await categoryRepository.getAllCategories();
+    expect(categories.first.budgetLimit, 200.0);
+
+    await categoryRepository.deleteCategory(categories.first.id!);
+    categories = await categoryRepository.getAllCategories();
+    expect(categories.isEmpty, true);
   });
 }

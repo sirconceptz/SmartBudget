@@ -11,6 +11,7 @@ import 'package:smart_budget/screens/settings_screen.dart';
 import 'package:smart_budget/screens/transaction/add_transaction_screen.dart';
 import 'package:smart_budget/screens/transaction/edit_transaction_screen.dart';
 import 'package:smart_budget/utils/recurring_transaction_manager.dart';
+import 'package:sqflite/sqflite.dart' hide Transaction;
 
 import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
@@ -35,7 +36,7 @@ void main() async {
   setupDependencies();
   await initializeDateFormatting('pl_PL', null);
 
-  final dbHelper = DatabaseHelper();
+  final dbHelper = DatabaseHelper(databaseFactory: databaseFactory);
 
   runApp(
     MultiProvider(

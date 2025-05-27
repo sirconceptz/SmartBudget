@@ -8,7 +8,10 @@ import 'package:path_provider/path_provider.dart';
 class MyLogger {
   MyLogger();
 
+  static bool isTestMode = false;
+
   static Future<void> write(String tag, String message) async {
+    if (isTestMode) return;
     var parsedDate = DateTime.now();
     final String filenamePrefix = "SMART_BUDGET_LOG";
     final String extension = ".txt";

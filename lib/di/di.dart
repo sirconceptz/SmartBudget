@@ -1,5 +1,7 @@
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_budget/data/repositories/recurring_transactions_repository.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../blocs/category/category_bloc.dart';
 import '../blocs/currency_conversion/currency_conversion_bloc.dart';
@@ -12,8 +14,10 @@ import 'notifiers/finance_notifier.dart';
 
 final getIt = GetIt.instance;
 
-void setupDependencies() {
-  getIt.registerSingleton<DatabaseHelper>(DatabaseHelper());
+Future<void> setupDependencies() async {
+  getIt.registerSingleton<DatabaseHelper>(
+    DatabaseHelper(databaseFactory: databaseFactory, inMemory: false),
+  );
 
   getIt.registerFactory<TransactionRepository>(
     () => TransactionRepository(getIt<DatabaseHelper>()),
@@ -27,8 +31,10 @@ void setupDependencies() {
     () => RecurringTransactionRepository(getIt<DatabaseHelper>()),
   );
 
+  final sharedPrefs = await SharedPreferences.getInstance();
+
   getIt.registerLazySingleton<CurrencyRepository>(
-    () => CurrencyRepository(),
+    () => CurrencyRepository(sharedPreferences: sharedPrefs),
   );
 
   getIt.registerSingleton<CurrencyNotifier>(CurrencyNotifier());

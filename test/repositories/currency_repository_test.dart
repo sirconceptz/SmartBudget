@@ -6,12 +6,15 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_budget/data/repositories/currency_repository.dart';
 import 'package:smart_budget/models/currency_rate.dart';
+import 'package:smart_budget/utils/my_logger.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late CurrencyRepository currencyRepository;
   late MockHttpClient mockHttpClient;
   late MockSharedPreferences mockSharedPreferences;
@@ -19,8 +22,14 @@ void main() {
   setUp(() {
     mockHttpClient = MockHttpClient();
     mockSharedPreferences = MockSharedPreferences();
-    currencyRepository = CurrencyRepository();
+    MyLogger.isTestMode = true;
+    currencyRepository = CurrencyRepository(
+      client: mockHttpClient,
+      sharedPreferences: mockSharedPreferences,
+    );
     SharedPreferences.setMockInitialValues({});
+    when(() => mockSharedPreferences.setString(any(), any()))
+        .thenAnswer((_) async => true);
   });
 
   group('CurrencyRepository', () {
@@ -30,9 +39,10 @@ void main() {
     ];
 
     final testData = {
-      'data': {
-        'EUR': {'value': 0.9},
-        'JPY': {'value': 110.0},
+      'date': DateTime.now().toIso8601String(),
+      'rates': {
+        'AUD': 0.9,
+        'CAD': 110.0,
       }
     };
 
@@ -45,7 +55,7 @@ void main() {
 
       final result = await currencyRepository.fetchCurrencyRates();
 
-      expect(result.length, 10);
+      expect(result.length, 2);
       expect(result[0].name, testRates[0].name);
       expect(result[0].code, testRates[0].code);
       expect(result[1].name, testRates[1].name);
@@ -63,7 +73,7 @@ void main() {
     test('shouldRefreshRates returns true when last update is older than 24 hours', () async {
       final lastUpdate = DateTime.now().subtract(const Duration(hours: 25)).toIso8601String();
       when(() => mockSharedPreferences.getString(any())).thenReturn(lastUpdate);
-      SharedPreferences.setMockInitialValues({'last_currency_update': lastUpdate});
+      SharedPreferences.setMockInitialValues({'CURRENCY_UPDATE_DATE': lastUpdate});
 
       final result = await currencyRepository.shouldRefreshRates();
 
@@ -73,7 +83,7 @@ void main() {
     test('shouldRefreshRates returns false when last update is within 24 hours', () async {
       final lastUpdate = DateTime.now().subtract(const Duration(hours: 23)).toIso8601String();
       when(() => mockSharedPreferences.getString(any())).thenReturn(lastUpdate);
-      SharedPreferences.setMockInitialValues({'last_currency_update': lastUpdate});
+      SharedPreferences.setMockInitialValues({'CURRENCY_UPDATE_DATE': lastUpdate});
 
       final result = await currencyRepository.shouldRefreshRates();
 
@@ -81,18 +91,15 @@ void main() {
     });
 
     test('saveLastUpdateDate saves the current date to SharedPreferences', () async {
-      final now = DateTime.now();
-
-      when(() => mockSharedPreferences.setString(any(), any())).thenAnswer((_) async => true);
+      when(() => mockSharedPreferences.setString(any(), any()))
+          .thenAnswer((_) async => true);
 
       await currencyRepository.saveLastUpdateDate();
-      final prefs = await SharedPreferences.getInstance();
 
-      final lastUpdate = prefs.getString('last_currency_update');
-      final lastUpdateDate = DateTime.parse(lastUpdate!);
-
-      final difference = now.difference(lastUpdateDate);
-      expect(difference.inMinutes.abs(), lessThanOrEqualTo(1));
+      verify(() => mockSharedPreferences.setString(
+        'CURRENCY_UPDATE_DATE',
+        any(that: isA<String>()),
+      )).called(1);
     });
   });
 }

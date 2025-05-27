@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_budget/blocs/category/category_bloc.dart';
 import 'package:smart_budget/blocs/category/category_event.dart';
 import 'package:smart_budget/utils/my_logger.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../blocs/transaction/transaction_bloc.dart';
 import '../blocs/transaction/transaction_event.dart';
@@ -19,7 +20,6 @@ import '../di/notifiers/finance_notifier.dart';
 import '../di/notifiers/locale_notifier.dart';
 import '../di/notifiers/theme_notifier.dart';
 import '../l10n/app_localizations.dart';
-import '../main.dart';
 import '../utils/app_settings.dart';
 import '../utils/enums/currency.dart';
 import '../utils/enums/supported_language.dart';
@@ -240,7 +240,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   ),
                   onTap: () async {
                     try {
-                      String filePath = await DatabaseHelper().exportDatabase();
+                      String filePath = await DatabaseHelper(databaseFactory: databaseFactory).exportDatabase();
 
                       await Share.shareXFiles(
                         [XFile(filePath)],
@@ -274,7 +274,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   ),
                   onTap: () async {
                     try {
-                      await DatabaseHelper().importDatabase();
+                      await DatabaseHelper(databaseFactory: databaseFactory).importDatabase();
                       context.read<TransactionBloc>().add(LoadTransactions());
 
                       final dateRange = DateTimeRange(

@@ -1,152 +1,132 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:smart_budget/data/mappers/transaction_mapper.dart';
+import 'package:smart_budget/data/db/database_helper.dart';
 import 'package:smart_budget/data/repositories/transaction_repository.dart';
 import 'package:smart_budget/models/category.dart';
 import 'package:smart_budget/models/transaction.dart' as t;
 import 'package:smart_budget/utils/enums/currency.dart';
-import 'package:sqflite/sqflite.dart';
-
-import '../screens/settings_screen_test.mocks.dart';
-
-class MockDatabase extends Mock implements Database {}
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
+  late DatabaseHelper databaseHelper;
   late TransactionRepository transactionRepository;
-  late MockDatabaseHelper mockDatabaseHelper;
-  late MockDatabase mockDatabase;
 
   final testCategory = Category(
-      id: 1,
-      name: 'Test',
-      icon: 123,
-      description: "test",
-      isIncome: false,
-      currency: Currency.usd
+    id: 1,
+    name: 'Test',
+    icon: 123,
+    description: "test",
+    isIncome: false,
+    currency: Currency.usd,
   );
 
   final testTransaction = t.Transaction(
-      id: 1,
-      date: DateTime(2023, 11, 20),
-      isExpense: 1,
-      originalAmount: 100,
-      convertedAmount: 100,
-      category: testCategory,
-      description: "test",
-      originalCurrency: Currency.usd
+    id: 1,
+    date: DateTime(2023, 11, 20),
+    isExpense: 1,
+    originalAmount: 100,
+    convertedAmount: 100,
+    category: testCategory,
+    description: "test",
+    originalCurrency: Currency.usd,
   );
 
-  final testTransactionJson = {
-    'id': 1,
-    'category_id': 1,
-    'amount': 100.0,
-    'isExpense': 1,
-    'date': '2023-11-20T00:00:00.000',
-    'currency': 'usd'
-  };
+  final testCategories = [testCategory];
 
-  final testCategories = [
-    Category(id: 1, name: 'Test', icon: 123, description: "test", isIncome: false, currency: Currency.usd)
-  ];
+  setUp(() async {
+    sqfliteFfiInit();
 
-  setUp(() {
-    mockDatabaseHelper = MockDatabaseHelper();
-    mockDatabase = MockDatabase();
-    transactionRepository = TransactionRepository(mockDatabaseHelper);
-    when(() => mockDatabaseHelper.database).thenAnswer((_) async => mockDatabase);
+    databaseHelper = DatabaseHelper(databaseFactory: databaseFactoryFfi, inMemory: true);
 
-    when(() => mockDatabase.query('categories')).thenAnswer((_) async => [
-      {
-        'id': 1,
-        'name': 'Test',
-        'icon': 123,
-        'description': 'test',
-        'isIncome': 0,
-        'currency': 'usd'
-      }
-    ]);
+    transactionRepository = TransactionRepository(databaseHelper);
 
-    when(() => mockDatabase.query('transactions')).thenAnswer((_) async => [testTransactionJson]);
+    await databaseHelper.database.then((db) async {
+      await db.insert('categories', {
+        'id': testCategory.id,
+        'name': testCategory.name,
+        'icon': testCategory.icon,
+        'description': testCategory.description,
+        'is_income': testCategory.isIncome ? 1 : 0,
+        'currency': testCategory.currency.name,
+      });
+    });
   });
 
-  group('TransactionRepository', () {
+  tearDown(() async {
+    final db = await databaseHelper.database;
+    await db.close();
+  });
+
+  group('TransactionRepository with real DB', () {
     test('createTransaction inserts a transaction into the database', () async {
-      when(() => mockDatabase.insert(any(), any(),
-          conflictAlgorithm: any(named: 'conflictAlgorithm'))).thenAnswer((_) async => 1);
+      final id = await transactionRepository.createTransaction(testTransaction);
+      expect(id, isNonZero);
 
-      final result = await transactionRepository.createTransaction(testTransaction);
-
-      expect(result, 1);
-      verify(() => mockDatabase.insert(
-        'transactions',
-        TransactionMapper.toEntity(testTransaction).toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      )).called(1);
+      final all = await transactionRepository.getAllTransactions(testCategories);
+      expect(all.length, 1);
+      expect(all.first.id, id);
+      expect(all.first.category!.name, testCategory.name);
     });
 
-    test('getAllTransactions returns a list of transactions', () async {
-      when(() => mockDatabase.query('transactions')).thenAnswer((_) async => [testTransactionJson]);
+    test('getAllTransactions returns all transactions', () async {
+      await transactionRepository.createTransaction(testTransaction);
 
-      final result = await transactionRepository.getAllTransactions(testCategories);
+      final transactions = await transactionRepository.getAllTransactions(testCategories);
 
-      expect(result.length, 1);
-      expect(result[0].id, testTransaction.id);
-      expect(result[0].category!.id, testTransaction.category!.id);
-      verify(() => mockDatabase.query('transactions')).called(1);
+      expect(transactions, isNotEmpty);
+      expect(transactions.first.id, isNotNull);
+      expect(transactions.first.category!.id, testCategory.id);
     });
 
-    test('updateTransaction updates a transaction in the database', () async {
-      when(() => mockDatabase.update(any(), any(), where: any(named: 'where'), whereArgs: any(named: 'whereArgs')))
-          .thenAnswer((_) async => 1);
+    test('updateTransaction updates an existing transaction', () async {
+      final id = await transactionRepository.createTransaction(testTransaction);
 
-      final result = await transactionRepository.updateTransaction(testTransaction);
+      final updatedTransaction = t.Transaction(
+        id: id,
+        date: DateTime(2023, 11, 21),
+        isExpense: 0,
+        originalAmount: 200,
+        convertedAmount: 200,
+        category: testCategory,
+        description: "updated",
+        originalCurrency: Currency.usd,
+      );
 
-      expect(result, 1);
-      verify(() => mockDatabase.update(
-        'transactions',
-        TransactionMapper.toEntity(testTransaction).toJson(),
-        where: 'id = ?',
-        whereArgs: [testTransaction.id],
-      )).called(1);
+      final updatedCount = await transactionRepository.updateTransaction(updatedTransaction);
+      expect(updatedCount, 1);
+
+      final transactions = await transactionRepository.getAllTransactions(testCategories);
+      final updated = transactions.firstWhere((t) => t.id == id);
+
+      expect(updated.description, 'updated');
+      expect(updated.originalAmount, 200);
+      expect(updated.isExpense, 0);
     });
 
-    test('deleteTransaction deletes a transaction from the database', () async {
-      when(() => mockDatabase.delete(any(), where: any(named: 'where'), whereArgs: any(named: 'whereArgs')))
-          .thenAnswer((_) async => 1);
+    test('deleteTransaction deletes a transaction by id', () async {
+      final id = await transactionRepository.createTransaction(testTransaction);
 
-      final result = await transactionRepository.deleteTransaction(testTransaction.id!);
+      final deletedCount = await transactionRepository.deleteTransaction(id);
+      expect(deletedCount, 1);
 
-      expect(result, 1);
-      verify(() => mockDatabase.delete(
-        'transactions',
-        where: 'id = ?',
-        whereArgs: [testTransaction.id],
-      )).called(1);
+      final transactions = await transactionRepository.getAllTransactions(testCategories);
+      expect(transactions.where((t) => t.id == id), isEmpty);
     });
 
-    test('getTransactionsByCustomMonth returns a list of transactions within a given month', () async {
+    test('getTransactionsByCustomMonth returns correct transactions', () async {
+      await transactionRepository.createTransaction(testTransaction);
+
       final selectedMonth = DateTime(2023, 11);
       final firstDayOfMonth = 1;
 
-      when(() => mockDatabase.query(any(), where: any(named: 'where'), whereArgs: any(named: 'whereArgs')))
-          .thenAnswer((_) async => [testTransactionJson]);
-
-      final result = await transactionRepository.getTransactionsByCustomMonth(
+      final results = await transactionRepository.getTransactionsByCustomMonth(
         selectedMonth,
         firstDayOfMonth,
         testCategories,
       );
 
-      expect(result.length, 1);
-      expect(result[0].id, testTransaction.id);
-      verifyNever(() => mockDatabase.query(
-        'transactions',
-        where: 'date >= ? AND date <= ?',
-        whereArgs: [
-          '2023-11-01T00:00:00.000',
-          '2023-11-30T23:59:59.999'
-        ],
-      ));
+      expect(results, isNotEmpty);
+      expect(results.first.id, isNotNull);
+      expect(results.first.date.month, 11);
     });
   });
 }

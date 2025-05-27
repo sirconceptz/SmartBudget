@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart' hide Transaction;
 import '../blocs/currency_conversion/currency_conversion_bloc.dart';
 import '../data/db/database_helper.dart';
 import '../data/repositories/category_repository.dart';
@@ -10,7 +11,7 @@ import '../models/transaction.dart';
 class RecurringTransactionManager {
   Future<void> addMissingRecurringTransactions(
       CurrencyConversionBloc currencyBloc) async {
-    final db = DatabaseHelper();
+    final db = DatabaseHelper(databaseFactory: databaseFactory);
     final recurringTransactionsRepository = RecurringTransactionRepository(db);
     final transactionsRepository = TransactionRepository(db);
     final categoryRepository = CategoryRepository(db);

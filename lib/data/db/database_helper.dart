@@ -6,19 +6,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
+  final bool inMemory;
+  final DatabaseFactory _databaseFactory;
+  Database? _database;
 
-  factory DatabaseHelper({DatabaseFactory? factory}) {
-    if (factory != null) {
-      _databaseFactory = factory;
-    }
-    return _instance;
-  }
-
-  static Database? _database;
-  static DatabaseFactory _databaseFactory = databaseFactory;
-
-  DatabaseHelper._internal();
+  DatabaseHelper({
+    required DatabaseFactory databaseFactory,
+    this.inMemory = false,
+  }) : _databaseFactory = databaseFactory;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -26,11 +21,21 @@ class DatabaseHelper {
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
-    final dbPath = await _databaseFactory.getDatabasesPath();
-    final path = join(dbPath, 'budget_manager.db');
+  Future<void> close() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+  }
 
-    //await _databaseFactory.deleteDatabase(path);
+  Future<Database> _initDatabase() async {
+    String path;
+    if (inMemory) {
+      path = inMemoryDatabasePath; // ':memory:'
+    } else {
+      final dbPath = await _databaseFactory.getDatabasesPath();
+      path = join(dbPath, 'budget_manager.db');
+    }
 
     return await _databaseFactory.openDatabase(
       path,

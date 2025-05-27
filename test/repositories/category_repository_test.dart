@@ -1,123 +1,114 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:smart_budget/data/mappers/category_mapper.dart';
 import 'package:smart_budget/data/repositories/category_repository.dart';
+import 'package:smart_budget/data/db/database_helper.dart';
 import 'package:smart_budget/models/category.dart';
 import 'package:smart_budget/utils/enums/currency.dart';
-import 'package:sqflite/sqflite.dart';
-
-import '../screens/settings_screen_test.mocks.dart';
-import 'transaction_repository_test.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
-  late CategoryRepository categoryRepository;
-  late MockDatabaseHelper mockDatabaseHelper;
-  late MockDatabase mockDatabase;
+  sqfliteFfiInit();
 
-  setUp(() {
-    mockDatabaseHelper = MockDatabaseHelper();
-    mockDatabase = MockDatabase();
-    categoryRepository = CategoryRepository(mockDatabaseHelper);
-    when(() => mockDatabaseHelper.database).thenAnswer((_) async => mockDatabase);
+  late CategoryRepository categoryRepository;
+  late DatabaseHelper databaseHelper;
+
+  setUp(() async {
+    databaseHelper = DatabaseHelper(databaseFactory: databaseFactoryFfi, inMemory: true);
+
+    categoryRepository = CategoryRepository(databaseHelper);
   });
 
-  group('CategoryRepository', () {
-    final testCategory = Category(
-        id: 1,
-        name: 'Test',
-        icon: 123,
-        description: "test",
-        isIncome: false,
-        currency: Currency.usd
+  tearDown(() async {
+    await databaseHelper.close();
+  });
+
+  test('createOrReplaceCategory and getAllCategories', () async {
+    final category = Category(
+      id: null,
+      name: 'Test Category',
+      icon: 123,
+      description: 'Test Desc',
+      isIncome: false,
+      currency: Currency.usd,
     );
-    final testCategoryJson = {
-      'id': 1,
-      'name': 'Test',
+
+    await categoryRepository.createOrReplaceCategory(category);
+
+    final categories = await categoryRepository.getAllCategories();
+    expect(categories.length, 1);
+    expect(categories[0].name, 'Test Category');
+    expect(categories[0].currency, Currency.usd);
+  });
+
+  test('updateCategory updates the category', () async {
+    final category = Category(
+      id: null,
+      name: 'Test Category',
+      icon: 123,
+      description: 'Test Desc',
+      isIncome: false,
+      currency: Currency.usd,
+    );
+
+    await categoryRepository.createOrReplaceCategory(category);
+    var categories = await categoryRepository.getAllCategories();
+    final cat = categories.first;
+
+    final updatedCategory = cat.copyWith(description: 'Updated', budgetLimit: 500.0);
+    final updateResult = await categoryRepository.updateCategory(updatedCategory);
+    expect(updateResult, 1);
+
+    categories = await categoryRepository.getAllCategories();
+    expect(categories.first.description, 'Updated');
+    expect(categories.first.budgetLimit, 500.0);
+  });
+
+  test('deleteCategory removes the category', () async {
+    final category = Category(
+      id: null,
+      name: 'Test Category',
+      icon: 123,
+      description: 'Test Desc',
+      isIncome: false,
+      currency: Currency.usd,
+    );
+
+    await categoryRepository.createOrReplaceCategory(category);
+    var categories = await categoryRepository.getAllCategories();
+    final catId = categories.first.id!;
+
+    final deleteResult = await categoryRepository.deleteCategory(catId);
+    expect(deleteResult, 1);
+
+    categories = await categoryRepository.getAllCategories();
+    expect(categories.isEmpty, true);
+  });
+
+  test('getCategoriesWithTransactions returns categories with transactions', () async {
+    final db = await databaseHelper.database;
+
+    // Insert category directly
+    final catId = await db.insert('categories', {
+      'name': 'Test Category',
       'icon': 123,
-      'description': "test",
-      'isIncome': 0,
-      'currency': 'usd'
-    };
+      'description': 'Test Desc',
+      'budget_limit': 1000.0,
+      'currency': 'usd',
+      'is_income': 0,
+    });
 
-    final testTransactionJson = {
-      'id': 1,
-      'categoryId': 1,
-      'isExpense': 1,
+    // Insert transaction linked to the category
+    await db.insert('transactions', {
       'amount': 100.0,
-      'date': '2023-11-20T00:00:00.000',
-      'currency': 'usd'
-    };
-
-    test('getAllCategories returns a list of categories', () async {
-      when(() => mockDatabase.query(any(), orderBy: any(named: 'orderBy')))
-          .thenAnswer((_) async => [testCategoryJson]);
-
-      final result = await categoryRepository.getAllCategories();
-
-      expect(result.length, 1);
-      expect(result[0].id, testCategory.id);
-      expect(result[0].name, testCategory.name);
-      verify(() => mockDatabase.query('categories', orderBy: 'name')).called(1);
+      'isExpense': 1,
+      'category_id': catId,
+      'currency': 'usd',
+      'description': 'Test Transaction',
+      'date': DateTime.now().toIso8601String(),
     });
 
-    test('updateCategory updates a category in the database', () async {
-      when(() => mockDatabase.update(any(), any(), where: any(named: 'where'), whereArgs: any(named: 'whereArgs')))
-          .thenAnswer((_) async => 1);
-
-      final result = await categoryRepository.updateCategory(testCategory);
-
-      expect(result, 1);
-      verify(() => mockDatabase.update(
-        'categories',
-        CategoryMapper.toEntity(testCategory).toJson(),
-        where: 'id = ?',
-        whereArgs: [testCategory.id],
-      )).called(1);
-    });
-
-    test('deleteCategory deletes a category from the database', () async {
-      when(() => mockDatabase.delete(any(), where: any(named: 'where'), whereArgs: any(named: 'whereArgs')))
-          .thenAnswer((_) async => 1);
-
-      final result = await categoryRepository.deleteCategory(testCategory.id!);
-
-      expect(result, 1);
-      verify(() => mockDatabase.delete(
-        'categories',
-        where: 'id = ?',
-        whereArgs: [testCategory.id],
-      )).called(1);
-    });
-
-    test('createOrReplaceCategory inserts a category into the database', () async {
-      when(() => mockDatabase.insert(any(), any(), conflictAlgorithm: any(named: 'conflictAlgorithm')))
-          .thenAnswer((_) async => 1);
-
-      await categoryRepository.createOrReplaceCategory(testCategory);
-
-      verify(() => mockDatabase.insert(
-        'categories',
-        CategoryMapper.toEntity(testCategory).toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      )).called(1);
-    });
-
-    test('getCategoriesWithTransactions returns a list of categories with their transactions', () async {
-      when(() => mockDatabase.query('categories')).thenAnswer((_) async => [testCategoryJson]);
-      when(() => mockDatabase.query('transactions', where: any(named: 'where'), whereArgs: any(named: 'whereArgs')))
-          .thenAnswer((_) async => [testTransactionJson]);
-
-      final result = await categoryRepository.getCategoriesWithTransactions();
-
-      expect(result.length, 1);
-      expect(result[0].id, testCategory.id);
-      expect(result[0].transactions.length, 1);
-      verify(() => mockDatabase.query('categories')).called(1);
-      verify(() => mockDatabase.query(
-        'transactions',
-        where: 'category_id = ?',
-        whereArgs: [testCategoryJson['id']],
-      )).called(1);
-    });
+    final categories = await categoryRepository.getCategoriesWithTransactions();
+    expect(categories.length, 1);
+    expect(categories.first.transactions.length, 1);
+    expect(categories.first.transactions.first.amount, 100.0);
   });
 }
