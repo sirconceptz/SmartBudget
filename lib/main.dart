@@ -33,7 +33,7 @@ import 'models/transaction.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  setupDependencies();
+  await setupDependencies();
   await initializeDateFormatting('pl_PL', null);
 
   final dbHelper = DatabaseHelper(databaseFactory: databaseFactory);

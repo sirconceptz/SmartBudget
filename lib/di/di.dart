@@ -19,22 +19,18 @@ Future<void> setupDependencies() async {
     DatabaseHelper(databaseFactory: databaseFactory, inMemory: false),
   );
 
+  getIt.registerLazySingleton<RecurringTransactionRepository>(
+        () => RecurringTransactionRepository(getIt<DatabaseHelper>()),
+  );
+
   getIt.registerFactory<TransactionRepository>(
     () => TransactionRepository(getIt<DatabaseHelper>()),
   );
 
-  getIt.registerLazySingleton<CategoryRepository>(
-    () => CategoryRepository(getIt<DatabaseHelper>()),
-  );
-
-  getIt.registerLazySingleton<RecurringTransactionRepository>(
-    () => RecurringTransactionRepository(getIt<DatabaseHelper>()),
-  );
-
   final sharedPrefs = await SharedPreferences.getInstance();
 
-  getIt.registerLazySingleton<CurrencyRepository>(
-    () => CurrencyRepository(sharedPreferences: sharedPrefs),
+  getIt.registerSingleton<CurrencyRepository>(
+    CurrencyRepository(sharedPreferences: sharedPrefs),
   );
 
   getIt.registerSingleton<CurrencyNotifier>(CurrencyNotifier());
@@ -44,6 +40,10 @@ Future<void> setupDependencies() async {
   );
 
   getIt.registerLazySingleton<FinanceNotifier>(() => FinanceNotifier());
+
+  getIt.registerLazySingleton<CategoryRepository>(
+        () => CategoryRepository(getIt<DatabaseHelper>()),
+  );
 
   getIt.registerSingleton<CategoryBloc>(
     CategoryBloc(
