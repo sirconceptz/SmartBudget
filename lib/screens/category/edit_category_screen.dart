@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../blocs/category/category_bloc.dart';
 import '../../blocs/category/category_event.dart';
+import '../../di/notifiers/currency_notifier.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
 import '../../utils/enums/currency.dart';
@@ -33,7 +34,13 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
     _icon = widget.category.icon;
     _isIncome = widget.category.isIncome;
     _budgetLimit = widget.category.budgetLimit;
-    _selectedCurrency = widget.category.currency;
+    final defaultCurrency = Provider.of<CurrencyNotifier>(context, listen: false).currency;
+
+    if (_budgetLimit == null || _budgetLimit == 0) {
+      _selectedCurrency = defaultCurrency;
+    } else {
+      _selectedCurrency = widget.category.currency;
+    }
   }
 
   void _saveCategory(Currency currency) {
