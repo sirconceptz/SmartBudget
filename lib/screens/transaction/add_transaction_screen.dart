@@ -276,8 +276,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   children: [
                     TableRow(
                       children: [
-                        Text('${AppLocalizations.of(context)!.date}: ', style: TextStyle(fontSize: 16)),
-                        Text(DateFormat.yMd("pl_PL").format(_selectedDate), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                        Text('${AppLocalizations.of(context)!.date}: ',
+                            style: TextStyle(fontSize: 16)),
+                        Text(
+                          DateFormat.yMd("pl_PL").format(_selectedDate),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                         TextButton(
                           onPressed: _pickDate,
                           child: Text(AppLocalizations.of(context)!.chooseDate),
@@ -286,8 +291,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     ),
                     TableRow(
                       children: [
-                        Text('${AppLocalizations.of(context)!.time}: ', style: TextStyle(fontSize: 16)),
-                        Text(_selectedTime.format(context), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text('${AppLocalizations.of(context)!.time}: ',
+                            style: TextStyle(fontSize: 16)),
+                        Text(_selectedTime.format(context),
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                         TextButton(
                           onPressed: _pickTime,
                           child: Text(AppLocalizations.of(context)!.chooseTime),

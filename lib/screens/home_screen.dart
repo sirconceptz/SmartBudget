@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.arrow_drop_down),
                 items: _availableMonths.map((monthDate) {
                   final formattedMonth =
-                  DateFormat.yMMMM('pl_PL').format(monthDate);
+                      DateFormat.yMMMM('pl_PL').format(monthDate);
                   return DropdownMenuItem<DateTime>(
                     value: monthDate,
                     child: Text(formattedMonth),

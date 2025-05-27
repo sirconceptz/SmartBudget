@@ -8,7 +8,8 @@ import '../models/currency_rate.dart';
 import '../models/transaction.dart';
 
 class RecurringTransactionManager {
-  Future<void> addMissingRecurringTransactions(CurrencyConversionBloc currencyBloc) async {
+  Future<void> addMissingRecurringTransactions(
+      CurrencyConversionBloc currencyBloc) async {
     final db = DatabaseHelper();
     final recurringTransactionsRepository = RecurringTransactionRepository(db);
     final transactionsRepository = TransactionRepository(db);
@@ -24,14 +25,18 @@ class RecurringTransactionManager {
     }
 
     final userCurrency = prefs.getString('user_currency') ?? 'USD';
-    final ratesMap = { for (var rate in rates) rate.code.toUpperCase(): rate.rate };
+    final ratesMap = {
+      for (var rate in rates) rate.code.toUpperCase(): rate.rate
+    };
     final defaultRate = 1.0;
     final usdToUser = ratesMap[userCurrency.toUpperCase()] ?? defaultRate;
 
     final now = DateTime.now();
-    final recurringTransactions = await recurringTransactionsRepository.getAllRecurringTransactions();
+    final recurringTransactions =
+        await recurringTransactionsRepository.getAllRecurringTransactions();
     final allCategories = await categoryRepository.getAllCategories();
-    final allTransactions = await transactionsRepository.getAllTransactions(allCategories);
+    final allTransactions =
+        await transactionsRepository.getAllTransactions(allCategories);
 
     for (var recurring in recurringTransactions) {
       DateTime nextDate = recurring.startDate;
@@ -39,17 +44,18 @@ class RecurringTransactionManager {
 
       while (!nextDate.isAfter(now)) {
         final alreadyExists = allTransactions.any((t) =>
-        t.category != null &&
+            t.category != null &&
             t.category!.id == recurring.categoryId &&
             _isSameDate(t.date, nextDate) &&
             t.originalAmount == recurring.amount &&
-            t.originalCurrency == recurring.currency
-        );
+            t.originalCurrency == recurring.currency);
 
         if (!alreadyExists) {
-          final category = allCategories.firstWhere((c) => c.id == recurring.categoryId);
+          final category =
+              allCategories.firstWhere((c) => c.id == recurring.categoryId);
 
-          final baseToUsd = ratesMap[recurring.currency.name.toUpperCase()] ?? defaultRate;
+          final baseToUsd =
+              ratesMap[recurring.currency.name.toUpperCase()] ?? defaultRate;
           final conversionRate = usdToUser / baseToUsd;
           final convertedAmount = recurring.amount * conversionRate;
 
@@ -80,8 +86,10 @@ class RecurringTransactionManager {
             nextDate = now.add(Duration(days: 1));
         }
 
-        if (recurring.repeatCount != null && addedCount >= recurring.repeatCount!) {
-          await recurringTransactionsRepository.deleteRecurringTransaction(recurring.id!);
+        if (recurring.repeatCount != null &&
+            addedCount >= recurring.repeatCount!) {
+          await recurringTransactionsRepository
+              .deleteRecurringTransaction(recurring.id!);
           break;
         }
       }

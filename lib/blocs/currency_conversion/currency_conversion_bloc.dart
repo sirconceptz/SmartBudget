@@ -115,5 +115,4 @@ class CurrencyConversionBloc
       throw Exception('Failed to fetch currency rates: $error');
     }
   }
-
 }

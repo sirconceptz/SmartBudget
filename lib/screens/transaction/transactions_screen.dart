@@ -71,7 +71,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               return Center(
                 child: Text(
                   AppLocalizations.of(context)!.noTransactions,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               );
             }
@@ -85,41 +86,45 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   elevation: 5,
-                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   child: ListTile(
                     enableFeedback: true,
                     leading: CircleAvatar(
                       backgroundColor: Colors.white,
                       child: transaction.category?.icon != null
                           ? Icon(
-                        IconData(
-                          transaction.category!.icon!,
-                          fontFamily: 'MaterialIcons',
-                        ),
-                        color: transaction.isExpense == 1
-                            ? Colors.green.shade800
-                            : Colors.red.shade800,
-                      )
+                              IconData(
+                                transaction.category!.icon!,
+                                fontFamily: 'MaterialIcons',
+                              ),
+                              color: transaction.isExpense == 1
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
+                            )
                           : Icon(
-                        Icons.category,
-                        color: transaction.isExpense == 1
-                            ? Colors.green.shade800
-                            : Colors.red.shade800,
-                      ),
+                              Icons.category,
+                              color: transaction.isExpense == 1
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
+                            ),
                     ),
                     title: Text(
                       transaction.description ?? '',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      DateFormat.yMMMMd('pl_PL').add_jm().format(transaction.date),
+                      DateFormat.yMMMMd('pl_PL')
+                          .add_jm()
+                          .format(transaction.date),
                       style: const TextStyle(fontSize: 10),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          currentCurrency.formatAmount(transaction.convertedAmount) ??
+                          currentCurrency
+                                  .formatAmount(transaction.convertedAmount) ??
                               "",
                           style: TextStyle(
                             color: transaction.isExpense == 1
@@ -130,7 +135,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        if (transaction.originalAmount != transaction.convertedAmount)
+                        if (transaction.originalAmount !=
+                            transaction.convertedAmount)
                           Text(
                             "(${transaction.originalCurrency.formatAmount(transaction.originalAmount)})",
                             style: TextStyle(

@@ -201,8 +201,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                     DateFormat.yMd(Localizations.localeOf(context).toString())
                         .format(DateTime.parse(snapshot.data!));
                 return Text(
-                    loc.currencyUpdateDateValue(dateFormatted),
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  loc.currencyUpdateDateValue(dateFormatted),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                   textAlign: TextAlign.center,
                 );
               } else {

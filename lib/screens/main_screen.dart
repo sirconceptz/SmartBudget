@@ -15,7 +15,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
-  final GlobalKey<SettingsScreenState> _settingsKey = GlobalKey<SettingsScreenState>();
+  final GlobalKey<SettingsScreenState> _settingsKey =
+      GlobalKey<SettingsScreenState>();
   late List<Widget> _screens;
 
   @override
