@@ -1,7 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_budget/utils/custom_date_time_range.dart';
@@ -11,6 +10,7 @@ import '../blocs/category/category_event.dart';
 import '../blocs/category/category_state.dart';
 import '../di/notifiers/currency_notifier.dart';
 import '../di/notifiers/finance_notifier.dart';
+import '../l10n/app_localizations.dart';
 import '../models/category.dart';
 import '../models/monthly_spent.dart';
 import '../utils/enums/currency.dart';

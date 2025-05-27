@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../blocs/category/category_bloc.dart';
 import '../../blocs/category/category_state.dart';
 import '../../blocs/transaction/transaction_bloc.dart';
 import '../../blocs/transaction/transaction_event.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
 import '../../models/transaction.dart';
 import '../../utils/enums/currency.dart';

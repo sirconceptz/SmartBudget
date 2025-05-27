@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../blocs/category/category_bloc.dart';
 import '../../blocs/category/category_event.dart';
 import '../../di/notifiers/currency_notifier.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
 import '../../utils/enums/currency.dart';
 import '../../widgets/icon_picker_dialog.dart';

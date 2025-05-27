@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,6 +26,7 @@ import 'di/notifiers/currency_notifier.dart';
 import 'di/notifiers/finance_notifier.dart';
 import 'di/notifiers/locale_notifier.dart';
 import 'di/notifiers/theme_notifier.dart';
+import 'l10n/app_localizations.dart';
 import 'models/category.dart';
 import 'models/transaction.dart';
 

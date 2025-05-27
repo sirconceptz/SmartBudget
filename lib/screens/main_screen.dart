@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:smart_budget/screens/transaction/transactions_screen.dart';
 
+import '../l10n/app_localizations.dart';
 import './settings_screen.dart';
 import 'category/category_list_screen.dart';
 import 'home_screen.dart';
