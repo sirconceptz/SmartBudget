@@ -31,4 +31,32 @@ class CustomDateTimeRange {
     final mm = month.toString().padLeft(2, '0');
     return '$yy-$mm';
   }
+
+  static DateTimeRange getExactOneMonthRange({
+    int? selectedFirstDay,
+    DateTime? minDate,
+  }) {
+    final now = DateTime.now();
+    final referenceDate = minDate ?? now;
+
+    if (selectedFirstDay != null) {
+      final year = referenceDate.year;
+      final month = referenceDate.month;
+
+      final startDay =
+          selectedFirstDay.clamp(1, DateTime(year, month + 1, 0).day);
+      final startDate = DateTime(year, month, startDay);
+
+      final nextMonth = DateTime(year, month + 1, 1);
+      final endDay = selectedFirstDay.clamp(
+          1, DateTime(nextMonth.year, nextMonth.month + 1, 0).day);
+      final endDate = DateTime(nextMonth.year, nextMonth.month, endDay);
+
+      return DateTimeRange(start: startDate, end: endDate);
+    }
+
+    final defaultStart = DateTime(
+        referenceDate.year, referenceDate.month - 1, referenceDate.day);
+    return DateTimeRange(start: defaultStart, end: referenceDate);
+  }
 }

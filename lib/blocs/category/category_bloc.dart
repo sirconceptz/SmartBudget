@@ -45,7 +45,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     try {
       emit(CategoriesLoading());
 
-      final categories = await categoryRepository.getCategoriesWithTransactions();
+      final categories =
+          await categoryRepository.getCategoriesWithTransactions();
 
       final firstDayOfMonth = financeNotifier.firstDayOfMonth;
 
@@ -171,11 +172,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onAddCategory(
       AddCategory event, Emitter<CategoryState> emit) async {
     try {
+      final firstDayOfMonth = financeNotifier.firstDayOfMonth;
+
       await categoryRepository.createOrReplaceCategory(event.category);
-      final dateRange = DateTimeRange(
-        start: DateTime.now().subtract(const Duration(days: 30)),
-        end: DateTime.now(),
-      );
+      final dateRange = CustomDateTimeRange.getExactOneMonthRange(
+          selectedFirstDay: firstDayOfMonth, minDate: DateTime.now());
       add(LoadCategoriesWithSpentAmounts(dateRange));
     } catch (e) {
       emit(CategoryError('Failed to add category'));
@@ -185,11 +186,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onUpdateCategory(
       UpdateCategory event, Emitter<CategoryState> emit) async {
     try {
+      final firstDayOfMonth = financeNotifier.firstDayOfMonth;
       await categoryRepository.updateCategory(event.category);
-      final dateRange = DateTimeRange(
-        start: DateTime.now().subtract(const Duration(days: 30)),
-        end: DateTime.now(),
-      );
+      final dateRange = CustomDateTimeRange.getExactOneMonthRange(
+          selectedFirstDay: firstDayOfMonth, minDate: DateTime.now());
       add(LoadCategoriesWithSpentAmounts(dateRange));
     } catch (e) {
       emit(CategoryError('Failed to update category'));
@@ -199,11 +199,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   Future<void> _onDeleteCategory(
       DeleteCategory event, Emitter<CategoryState> emit) async {
     try {
+      final firstDayOfMonth = financeNotifier.firstDayOfMonth;
+
       await categoryRepository.deleteCategory(event.id);
-      final dateRange = DateTimeRange(
-        start: DateTime.now().subtract(const Duration(days: 30)),
-        end: DateTime.now(),
-      );
+      final dateRange = CustomDateTimeRange.getExactOneMonthRange(
+          selectedFirstDay: firstDayOfMonth, minDate: DateTime.now());
       add(LoadCategoriesWithSpentAmounts(dateRange));
     } catch (e) {
       emit(CategoryError('Failed to delete category'));
@@ -263,11 +263,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         );
         await categoryRepository.createOrReplaceCategory(category);
       }
+      final firstDayOfMonth = financeNotifier.firstDayOfMonth;
 
-      final dateRange = DateTimeRange(
-        start: DateTime.now().subtract(const Duration(days: 30)),
-        end: DateTime.now(),
-      );
+      final dateRange = CustomDateTimeRange.getExactOneMonthRange(
+          selectedFirstDay: firstDayOfMonth, minDate: DateTime.now());
       add(LoadCategoriesWithSpentAmounts(dateRange));
     } catch (e) {
       emit(CategoryError('Failed to update localized categories'));
