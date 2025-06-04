@@ -10,6 +10,7 @@ import 'package:smart_budget/screens/main_screen.dart';
 import 'package:smart_budget/screens/settings_screen.dart';
 import 'package:smart_budget/screens/transaction/add_transaction_screen.dart';
 import 'package:smart_budget/screens/transaction/edit_transaction_screen.dart';
+import 'package:smart_budget/screens/transaction/transactions_screen.dart';
 import 'package:smart_budget/utils/recurring_transaction_manager.dart';
 import 'package:sqflite/sqflite.dart' hide Transaction;
 
@@ -17,10 +18,10 @@ import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
 import 'blocs/currency_conversion/currency_conversion_bloc.dart';
 import 'blocs/currency_conversion/currency_conversion_event.dart';
+import 'blocs/currency_conversion/currency_conversion_state.dart';
 import 'blocs/transaction/transaction_bloc.dart';
 import 'data/db/database_helper.dart';
 import 'data/repositories/category_repository.dart';
-import 'data/repositories/currency_repository.dart';
 import 'data/repositories/transaction_repository.dart';
 import 'di/di.dart';
 import 'di/notifiers/currency_notifier.dart';
@@ -48,37 +49,28 @@ void main() async {
       ],
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(
-            create: (context) {
-              final bloc = CurrencyConversionBloc(
-                getIt<CurrencyRepository>(),
-              );
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                bloc.add(LoadCurrencyRates());
-              });
-              return bloc;
-            },
+          BlocProvider<CurrencyConversionBloc>(
+            create: (_) => getIt<CurrencyConversionBloc>(),
           ),
-          BlocProvider(
-            create: (context) => CategoryBloc(
-              getIt<CategoryRepository>(),
-              context.read<CurrencyConversionBloc>(),
-              context.read<CurrencyNotifier>(),
-              context.read<FinanceNotifier>(),
-            ),
+          BlocProvider<CategoryBloc>(
+            create: (_) => getIt<CategoryBloc>(),
           ),
-          BlocProvider(
+          BlocProvider<TransactionBloc>(
             create: (context) => TransactionBloc(
               getIt<TransactionRepository>(),
               getIt<RecurringTransactionRepository>(),
-              BlocProvider.of<CategoryBloc>(context),
+              context.read<CategoryBloc>(),
               getIt<CategoryRepository>(),
               context.read<CurrencyConversionBloc>(),
-              context.read<CurrencyNotifier>(),
+              getIt<CurrencyNotifier>(),
             ),
           ),
         ],
-        child: MyApp(dbHelper: dbHelper),
+        child: Builder(
+          builder: (context) {
+            return MyApp(dbHelper: dbHelper);
+          },
+        ),
       ),
     ),
   );
@@ -119,46 +111,44 @@ class MyApp extends StatelessWidget {
         ),
       ),
       themeMode: themeNotifier.themeMode,
-      initialRoute: '/',
+
       routes: {
         '/': (context) => FutureBuilder<void>(
-              future: _initializeRecurringTransactions(context),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                } else if (snapshot.hasError) {
-                  return Scaffold(
-                    body: Center(
-                        child: Text('Błąd inicjalizacji: ${snapshot.error}')),
-                  );
-                } else {
-                  final localizations = AppLocalizations.of(context);
-                  if (localizations != null) {
-                    updateLocalizedCategoriesIfNeeded(context, localizations);
-                  }
-                  return MainScreen();
-                }
-              },
-            ),
+          future: _initializeRecurringTransactions(context),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            } else if (snapshot.hasError) {
+              return Scaffold(
+                body: Center(child: Text('Błąd inicjalizacji: ${snapshot.error}')),
+              );
+            } else {
+              final localizations = AppLocalizations.of(context);
+              if (localizations != null) {
+                updateLocalizedCategoriesIfNeeded(context, localizations);
+              }
+              return MainScreen();
+            }
+          },
+        ),
         '/addTransaction': (context) => AddTransactionScreen(),
         '/addCategory': (context) => AddCategoryScreen(),
         '/editTransaction': (context) => EditTransactionScreen(
-              transaction:
-                  ModalRoute.of(context)!.settings.arguments as Transaction,
-            ),
+          transaction: ModalRoute.of(context)!.settings.arguments as Transaction,
+        ),
         '/editCategory': (context) => EditCategoryScreen(
-              category: ModalRoute.of(context)!.settings.arguments as Category,
-            ),
+          category: ModalRoute.of(context)!.settings.arguments as Category,
+        ),
         '/settings': (context) => SettingsScreen(),
+        '/transactions': (context) => TransactionsScreen(),
       },
     );
   }
 
   Future<void> _initializeRecurringTransactions(BuildContext context) async {
     final currencyBloc = context.read<CurrencyConversionBloc>();
-
     await RecurringTransactionManager()
         .addMissingRecurringTransactions(currencyBloc);
   }

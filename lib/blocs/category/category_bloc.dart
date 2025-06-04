@@ -36,6 +36,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     };
     currencyNotifier.addListener(_currencyChangeListener!);
   }
+  int retryCount = 0;
 
   Future<void> _onLoadCategoriesWithSpentAmounts(
     LoadCategoriesWithSpentAmounts event,
@@ -44,13 +45,18 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     try {
       emit(CategoriesLoading());
 
-      final categories =
-          await categoryRepository.getCategoriesWithTransactions();
+      final categories = await categoryRepository.getCategoriesWithTransactions();
 
       final firstDayOfMonth = financeNotifier.firstDayOfMonth;
 
       final currentState = currencyConversionBloc.state;
+
       if (currentState is! CurrencyRatesLoaded) {
+        if (retryCount >= 3) {
+          emit(CategoryError('Currency rates not loaded after retries'));
+          return;
+        }
+        retryCount++;
         await Future.delayed(const Duration(seconds: 2));
         add(event);
         return;
@@ -131,7 +137,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         budgetIncomes: budgetIncomes,
         budgetExpenses: budgetExpenses,
       ));
-    } catch (e) {
+    } catch (e, stackTrace) {
       emit(CategoryError('Failed to load categories with spent amounts: $e'));
     }
   }

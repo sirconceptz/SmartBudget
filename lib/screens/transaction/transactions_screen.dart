@@ -30,6 +30,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   int? _filterCategoryId;
 
   @override
+  void initState() {
+    super.initState();
+    context.read<TransactionBloc>().add(LoadTransactions());
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     final currencyNotifier = Provider.of<CurrencyNotifier>(context);
     final currentCurrency = currencyNotifier.currency;

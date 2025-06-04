@@ -24,7 +24,7 @@ class TransactionRepository {
   Future<List<t.Transaction>> getAllTransactions(
       List<Category> categories) async {
     final db = await _databaseHelper.database;
-    final result = await db.query('transactions');
+    final result = await db.query('transactions', orderBy: 'date ASC');
     return result
         .map((json) => TransactionMapper.mapFromEntity(
             TransactionEntity.fromJson(json), categories))
@@ -67,6 +67,7 @@ class TransactionRepository {
       'transactions',
       where: 'date >= ? AND date <= ?',
       whereArgs: [startIso, endIso],
+      orderBy: 'date DESC',
     );
 
     return result

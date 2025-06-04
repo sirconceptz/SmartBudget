@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +20,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -78,106 +79,115 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: BlocBuilder<CategoryBloc, CategoryState>(
-          buildWhen: (previous, current) {
-            return true;
-          },
+    return BlocListener<CategoryBloc, CategoryState>(
+      listener: (context, state) {
+        if (state is CategoriesForMonthLoaded) {
+          final newAvailableMonths = _getAvailableMonthsFromCategories(
+            state.incomeCategories,
+            state.expenseCategories,
+          );
+
+          if (!listEquals(_availableMonths, newAvailableMonths)) {
+            setState(() {
+              _availableMonths = newAvailableMonths;
+            });
+          }
+
+          if (!_availableMonths.contains(selectedMonth) &&
+              _availableMonths.isNotEmpty) {
+            setState(() {
+              selectedMonth = _availableMonths.first;
+            });
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: _buildMonthDropdown(),
+        ),
+        body: BlocBuilder<CategoryBloc, CategoryState>(
           builder: (context, state) {
-            if (state is CategoriesForMonthLoaded) {
-              _availableMonths = _getAvailableMonthsFromCategories(
-                state.incomeCategories,
-                state.expenseCategories,
+            if (state is CategoriesLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is CategoriesForMonthLoaded) {
+              final incomeCategories = state.incomeCategories;
+              final expenseCategories = state.expenseCategories;
+
+              final budgetIncomes = state.budgetIncomes;
+              final budgetExpenses = state.budgetExpenses;
+
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    if (incomeCategories.isNotEmpty)
+                      _buildChartSection(
+                        key: ValueKey(DateTime.now().millisecondsSinceEpoch),
+                        title: AppLocalizations.of(context)!.incomes,
+                        categories: incomeCategories,
+                        totalSpent: state.totalIncomes,
+                        totalBudget: budgetIncomes,
+                      ),
+                    if (expenseCategories.isNotEmpty)
+                      _buildChartSection(
+                        key: ValueKey(DateTime.now().millisecondsSinceEpoch + 2),
+                        title: AppLocalizations.of(context)!.expenses,
+                        categories: expenseCategories,
+                        totalSpent: state.totalExpenses,
+                        totalBudget: budgetExpenses,
+                      ),
+                    if (incomeCategories.isEmpty && expenseCategories.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          AppLocalizations.of(context)!.noChartsToDisplay,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               );
-
-              if (_availableMonths.isEmpty) {
-                return const SizedBox();
-              }
-
-              if (!_availableMonths.contains(selectedMonth)) {
-                selectedMonth = _availableMonths.first;
-              }
-
-              return DropdownButton<DateTime>(
-                value: selectedMonth,
-                icon: const Icon(Icons.arrow_drop_down),
-                items: _availableMonths.map((monthDate) {
-                  final formattedMonth =
-                      DateFormat.yMMMM('pl_PL').format(monthDate);
-                  return DropdownMenuItem<DateTime>(
-                    value: monthDate,
-                    child: Text(formattedMonth),
-                  );
-                }).toList(),
-                onChanged: (newMonth) {
-                  if (newMonth != null) {
-                    setState(() {
-                      selectedMonth = newMonth;
-                    });
-                    _loadCategoriesForSelectedMonth();
-                  }
-                },
-              );
+            } else if (state is CategoryError) {
+              return Center(child: Text(state.message));
             } else {
-              return Text(AppLocalizations.of(context)!.incomes);
+              return Center(
+                child: Text(
+                  AppLocalizations.of(context)!.noChartsToDisplay,
+                ),
+              );
             }
           },
         ),
       ),
-      body: BlocBuilder<CategoryBloc, CategoryState>(
-        builder: (context, state) {
-          if (state is CategoriesLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is CategoriesForMonthLoaded) {
-            final incomeCategories = state.incomeCategories;
-            final expenseCategories = state.expenseCategories;
+    );
+  }
 
-            final budgetIncomes = state.budgetIncomes;
-            final budgetExpenses = state.budgetExpenses;
+  Widget _buildMonthDropdown() {
+    if (_availableMonths.isEmpty) {
+      return Text(AppLocalizations.of(context)!.incomes);
+    }
 
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  if (incomeCategories.isNotEmpty)
-                    _buildChartSection(
-                      title: AppLocalizations.of(context)!.incomes,
-                      categories: incomeCategories,
-                      totalSpent: state.totalIncomes,
-                      totalBudget: budgetIncomes,
-                    ),
-                  if (expenseCategories.isNotEmpty)
-                    _buildChartSection(
-                      title: AppLocalizations.of(context)!.expenses,
-                      categories: expenseCategories,
-                      totalSpent: state.totalExpenses,
-                      totalBudget: budgetExpenses,
-                    ),
-                  if (incomeCategories.isEmpty && expenseCategories.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        AppLocalizations.of(context)!.noChartsToDisplay,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            );
-          } else if (state is CategoryError) {
-            return Center(child: Text(state.message));
-          } else {
-            return Center(
-              child: Text(
-                AppLocalizations.of(context)!.noChartsToDisplay,
-              ),
-            );
-          }
-        },
-      ),
+    return DropdownButton<DateTime>(
+      value: selectedMonth,
+      icon: const Icon(Icons.arrow_drop_down),
+      items: _availableMonths.map((monthDate) {
+        final formattedMonth =
+        DateFormat.yMMMM('pl_PL').format(monthDate);
+        return DropdownMenuItem<DateTime>(
+          value: monthDate,
+          child: Text(formattedMonth),
+        );
+      }).toList(),
+      onChanged: (newMonth) {
+        if (newMonth != null) {
+          setState(() {
+            selectedMonth = newMonth;
+          });
+          _loadCategoriesForSelectedMonth();
+        }
+      },
     );
   }
 
@@ -185,8 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
     required String title,
     required List<Category> categories,
     required double totalSpent,
-    required double totalBudget,
+    required double totalBudget, required Key key,
   }) {
+
     if (categories.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -204,6 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     return Column(
+      key: key,
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
@@ -262,14 +274,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBudgetPieChart(List<Category> categories, double totalBudget) {
     final currency =
-        Provider.of<CurrencyNotifier>(context, listen: false).currency;
+        Provider.of<CurrencyNotifier>(context, listen: true).currency;
 
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
         PieChartData(
           sections: categories.map((cat) {
-            final catBudget = cat.budgetLimit ?? 0;
+            final catBudget = cat.convertedBudgetLimit ?? 0;
             final budgetShare =
                 (catBudget / (totalBudget == 0 ? 1 : totalBudget)) * 100;
 
@@ -296,32 +308,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildUsagePieChart(List<Category> categories) {
     final currency =
-        Provider.of<CurrencyNotifier>(context, listen: false).currency;
+        Provider.of<CurrencyNotifier>(context, listen: true).currency;
+
+    final pieChartData = PieChartData(
+      sections: categories.map((cat) {
+        final spent =
+        _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
+        final budget = cat.convertedBudgetLimit ?? 0;
+        final usagePercentage = (spent / (budget == 0 ? 1 : budget)) * 100;
+
+        final spentFormatted = _formatWithCurrency(spent, currency);
+
+        return PieChartSectionData(
+          value: usagePercentage,
+          title: '$spentFormatted\n(${usagePercentage.toStringAsFixed(2)}%)',
+          color: Colors.primaries[categories.indexOf(cat) % Colors.primaries.length],
+          radius: 60,
+        );
+      }).toList(),
+      centerSpaceRadius: 40,
+      sectionsSpace: 2,
+    );
 
     return AspectRatio(
       aspectRatio: 1.5,
       child: PieChart(
-        PieChartData(
-          sections: categories.map((cat) {
-            final spent =
-                _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
-            final budget = cat.budgetLimit ?? 0;
-            final usagePercentage = (spent / (budget == 0 ? 1 : budget)) * 100;
-
-            final spentFormatted = _formatWithCurrency(spent, currency);
-
-            return PieChartSectionData(
-              value: usagePercentage,
-              title:
-                  '$spentFormatted\n(${usagePercentage.toStringAsFixed(2)}%)',
-              color: Colors
-                  .primaries[categories.indexOf(cat) % Colors.primaries.length],
-              radius: 60,
-            );
-          }).toList(),
-          centerSpaceRadius: 40,
-          sectionsSpace: 2,
-        ),
+        key: ValueKey(DateTime.now().millisecondsSinceEpoch),
+        pieChartData,
       ),
     );
   }
@@ -339,7 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   .primaries[categories.indexOf(cat) % Colors.primaries.length];
 
               if (isBudget) {
-                final budget = cat.budgetLimit ?? 0;
+                final budget = cat.convertedBudgetLimit ?? 0;
                 final formattedBudget = _formatWithCurrency(budget, currency);
 
                 return _buildLegendRow(color, cat.name, formattedBudget);
@@ -351,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
                 final spentFormatted = _formatWithCurrency(spent, currency);
 
-                final budget = cat.budgetLimit ?? 0;
+                final budget = cat.convertedBudgetLimit ?? 0;
                 final usagePct = (spent / (budget == 0 ? 1 : budget)) * 100;
                 final usageText = '${usagePct.toStringAsFixed(1)}%';
 

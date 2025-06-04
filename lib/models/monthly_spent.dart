@@ -30,4 +30,9 @@ class MonthlySpent {
       'spentAmount': spentAmount,
     };
   }
+
+  @override
+  String toString() {
+    return 'MonthlySpent(monthKey: $monthKey, spentAmount: $spentAmount)';
+  }
 }

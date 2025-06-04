@@ -27,9 +27,9 @@ class CurrencyConversionBloc
   }
 
   Future<void> _onLoadCurrencyRates(
-    LoadCurrencyRates event,
-    Emitter<CurrencyConversionState> emit,
-  ) async {
+      LoadCurrencyRates event,
+      Emitter<CurrencyConversionState> emit,
+      ) async {
     try {
       emit(CurrencyRatesLoading());
 
@@ -52,7 +52,7 @@ class CurrencyConversionBloc
 
       emit(CurrencyRatesLoaded(rates));
       _triggerCallbacks();
-    } catch (error) {
+    } catch (error, stack) {
       emit(CurrencyRatesError(error.toString()));
     }
   }

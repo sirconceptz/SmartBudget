@@ -43,4 +43,9 @@ class Transaction {
       category: category ?? this.category,
     );
   }
+
+  @override
+  String toString() {
+    return 'Transaction(id: $id, isExpense: $isExpense, originalAmount: $originalAmount, convertedAmount: $convertedAmount, date: $date, description: $description, originalCurrency: ${originalCurrency.value}, category: ${category?.name})';
+  }
 }

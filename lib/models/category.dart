@@ -108,4 +108,9 @@ class Category {
       convertedBudgetLimit: newConvertedBudgetLimit,
     );
   }
+
+  @override
+  String toString() {
+    return 'Category(id: $id, name: $name, description: $description, icon: $icon, budgetLimit: $budgetLimit, convertedBudgetLimit: $convertedBudgetLimit, isIncome: $isIncome, currency: ${currency.value}, transactions: $transactions, monthlySpent: $monthlySpent)';
+  }
 }

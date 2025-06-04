@@ -42,4 +42,9 @@ class TransactionEntity {
       'currency': currency.value,
     };
   }
+
+  @override
+  String toString() {
+    return 'TransactionEntity(id: $id, isExpense: $isExpense, amount: $amount, categoryId: $categoryId, date: $date, description: $description, currency: ${currency.value})';
+  }
 }

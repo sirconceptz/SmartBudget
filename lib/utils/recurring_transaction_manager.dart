@@ -21,7 +21,6 @@ class RecurringTransactionManager {
     try {
       rates = await currencyBloc.ensureLatestCurrencyRates();
     } catch (e) {
-      print('Błąd pobrania kursów walut: $e');
       return;
     }
 
