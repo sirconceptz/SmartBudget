@@ -72,12 +72,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteTransaction => 'Transaktion löschen';
 
   @override
-  String get deleteCategoryConfirmation =>
-      'Möchten Sie diese Kategorie wirklich löschen?';
+  String get deleteCategoryConfirmation => 'Möchten Sie diese Kategorie wirklich löschen?';
 
   @override
-  String get deleteTransactionConfirmation =>
-      'Möchten Sie diese Transaktion wirklich löschen?';
+  String get deleteTransactionConfirmation => 'Möchten Sie diese Transaktion wirklich löschen?';
 
   @override
   String get cancel => 'Abbrechen';
@@ -98,8 +96,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get budgetUsage => 'Budgetnutzung';
 
   @override
-  String get unbudgetedCategoriesNotice =>
-      'Einige Kategorien haben kein festgelegtes Budget';
+  String get unbudgetedCategoriesNotice => 'Einige Kategorien haben kein festgelegtes Budget';
 
   @override
   String get incomes => 'Einnahmen';
@@ -150,8 +147,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get errorWhileLoadingCategories => 'Fehler beim Laden der Kategorien';
 
   @override
-  String get errorWhileLoadingTransactions =>
-      'Fehler beim Laden der Transaktionen';
+  String get errorWhileLoadingTransactions => 'Fehler beim Laden der Transaktionen';
 
   @override
   String get chooseCategory => 'Kategorie auswählen';
@@ -166,22 +162,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get categoryFood => 'Essen';
 
   @override
-  String get categoryFoodDescription =>
-      'Ausgaben für Lebensmittel und Restaurants';
+  String get categoryFoodDescription => 'Ausgaben für Lebensmittel und Restaurants';
 
   @override
   String get categoryEntertainment => 'Unterhaltung';
 
   @override
-  String get categoryEntertainmentDescription =>
-      'Kosten für Freizeit und Spaßaktivitäten';
+  String get categoryEntertainmentDescription => 'Kosten für Freizeit und Spaßaktivitäten';
 
   @override
   String get categorySalary => 'Gehalt';
 
   @override
-  String get categorySalaryDescription =>
-      'Ihr monatliches oder regelmäßiges Einkommen';
+  String get categorySalaryDescription => 'Ihr monatliches oder regelmäßiges Einkommen';
 
   @override
   String get categoryTravel => 'Reisen';
@@ -193,8 +186,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get categoryHealth => 'Gesundheit';
 
   @override
-  String get categoryHealthDescription =>
-      'Gesundheitsbezogene Ausgaben und Dienstleistungen';
+  String get categoryHealthDescription => 'Gesundheitsbezogene Ausgaben und Dienstleistungen';
 
   @override
   String get financeSection => 'Finanzen';
@@ -293,12 +285,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get monthly => 'Monatlich';
 
   @override
-  String get currencyUpdateDateLoading =>
-      'Lade Datum der Aktualisierung der Wechselkurse...';
+  String get currencyUpdateDateLoading => 'Lade Datum der Aktualisierung der Wechselkurse...';
 
   @override
-  String get currencyUpdateDateError =>
-      'Fehler beim Abrufen des Datums der Wechselkursaktualisierung';
+  String get currencyUpdateDateError => 'Fehler beim Abrufen des Datums der Wechselkursaktualisierung';
 
   @override
   String currencyUpdateDateValue(Object date) {
@@ -306,8 +296,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get currencyUpdateDateNone =>
-      'Kein gespeichertes Datum der Wechselkursaktualisierung';
+  String get currencyUpdateDateNone => 'Kein gespeichertes Datum der Wechselkursaktualisierung';
 
   @override
   String get noTransactions => 'Keine gespeicherten Transaktionen';
@@ -319,8 +308,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pleaseAddCategoriesFirst => 'Bitte zuerst Kategorien hinzufügen';
 
   @override
-  String get pleaseWaitLoadingCategories =>
-      'Bitte warten, Kategorien werden geladen...';
+  String get pleaseWaitLoadingCategories => 'Bitte warten, Kategorien werden geladen...';
 
   @override
   String get noDataToSend => 'Keine Daten zum Senden';

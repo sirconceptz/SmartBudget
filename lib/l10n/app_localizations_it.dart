@@ -72,12 +72,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get deleteTransaction => 'Elimina transazione';
 
   @override
-  String get deleteCategoryConfirmation =>
-      'Sei sicuro di voler eliminare questa categoria?';
+  String get deleteCategoryConfirmation => 'Sei sicuro di voler eliminare questa categoria?';
 
   @override
-  String get deleteTransactionConfirmation =>
-      'Sei sicuro di voler eliminare questa transazione?';
+  String get deleteTransactionConfirmation => 'Sei sicuro di voler eliminare questa transazione?';
 
   @override
   String get cancel => 'Annulla';
@@ -98,8 +96,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get budgetUsage => 'Utilizzo del Budget';
 
   @override
-  String get unbudgetedCategoriesNotice =>
-      'Alcune categorie non hanno un budget impostato';
+  String get unbudgetedCategoriesNotice => 'Alcune categorie non hanno un budget impostato';
 
   @override
   String get incomes => 'Entrate';
@@ -147,12 +144,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get giveCorrectAmount => 'Inserisci un importo corretto';
 
   @override
-  String get errorWhileLoadingCategories =>
-      'Errore durante il caricamento delle categorie';
+  String get errorWhileLoadingCategories => 'Errore durante il caricamento delle categorie';
 
   @override
-  String get errorWhileLoadingTransactions =>
-      'Errore durante il caricamento delle transazioni';
+  String get errorWhileLoadingTransactions => 'Errore durante il caricamento delle transazioni';
 
   @override
   String get chooseCategory => 'Scegli la categoria';
@@ -173,8 +168,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get categoryEntertainment => 'Intrattenimento';
 
   @override
-  String get categoryEntertainmentDescription =>
-      'Costi per attività ricreative e di svago';
+  String get categoryEntertainmentDescription => 'Costi per attività ricreative e di svago';
 
   @override
   String get categorySalary => 'Stipendio';
@@ -255,12 +249,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get importBackupStatement => 'Backup importato con successo.';
 
   @override
-  String get exportBackupError =>
-      'Problema durante l\'esportazione del backup.';
+  String get exportBackupError => 'Problema durante l\'esportazione del backup.';
 
   @override
-  String get importBackupError =>
-      'Problema durante l\'importazione del backup.';
+  String get importBackupError => 'Problema durante l\'importazione del backup.';
 
   @override
   String get sendApplicationLog => 'Invia registri dell\'applicazione';
@@ -293,12 +285,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get monthly => 'Mensile';
 
   @override
-  String get currencyUpdateDateLoading =>
-      'Caricamento data aggiornamento tassi di cambio...';
+  String get currencyUpdateDateLoading => 'Caricamento data aggiornamento tassi di cambio...';
 
   @override
-  String get currencyUpdateDateError =>
-      'Errore durante il recupero della data di aggiornamento dei tassi di cambio';
+  String get currencyUpdateDateError => 'Errore durante il recupero della data di aggiornamento dei tassi di cambio';
 
   @override
   String currencyUpdateDateValue(Object date) {
@@ -306,8 +296,7 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String get currencyUpdateDateNone =>
-      'Nessuna data di aggiornamento tassi di cambio salvata';
+  String get currencyUpdateDateNone => 'Nessuna data di aggiornamento tassi di cambio salvata';
 
   @override
   String get noTransactions => 'Nessuna transazione salvata';
@@ -316,12 +305,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get repeatInterval => 'Intervallo di ripetizione';
 
   @override
-  String get pleaseAddCategoriesFirst =>
-      'Si prega di aggiungere prima le categorie';
+  String get pleaseAddCategoriesFirst => 'Si prega di aggiungere prima le categorie';
 
   @override
-  String get pleaseWaitLoadingCategories =>
-      'Attendere, caricamento delle categorie...';
+  String get pleaseWaitLoadingCategories => 'Attendere, caricamento delle categorie...';
 
   @override
   String get noDataToSend => 'Nessun dato da inviare';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_budget/models/transaction.dart';
 import 'package:smart_budget/utils/enums/currency.dart';
 
 import '../../blocs/category/category_bloc.dart';
@@ -154,6 +155,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               fontSize: 8,
                             ),
                           ),
+                        IconButton(
+                          icon: Icon(Icons.chevron_right, color: Colors.white),
+                          onPressed: () async {
+                            await goToEditTransaction(context, transaction);
+                          },
+                        )
                       ],
                     ),
                   ),
@@ -364,5 +371,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     } else {
       fn();
     }
+  }
+
+  Future<void> goToEditTransaction(BuildContext context, Transaction transaction) async {
+    await Navigator.pushNamed(
+      context,
+      '/editTransaction',
+      arguments: transaction,
+    );
   }
 }

@@ -36,8 +36,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get backup_file_title => 'Archivo de copia de seguridad';
 
   @override
-  String get backup_file_text =>
-      'Aquí está mi archivo de copia de seguridad de Smart Budget.';
+  String get backup_file_text => 'Aquí está mi archivo de copia de seguridad de Smart Budget.';
 
   @override
   String get home => 'Inicio';
@@ -73,12 +72,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deleteTransaction => 'Eliminar transacción';
 
   @override
-  String get deleteCategoryConfirmation =>
-      '¿Estás seguro de que deseas eliminar esta categoría?';
+  String get deleteCategoryConfirmation => '¿Estás seguro de que deseas eliminar esta categoría?';
 
   @override
-  String get deleteTransactionConfirmation =>
-      '¿Estás seguro de que deseas eliminar esta transacción?';
+  String get deleteTransactionConfirmation => '¿Estás seguro de que deseas eliminar esta transacción?';
 
   @override
   String get cancel => 'Cancelar';
@@ -99,8 +96,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get budgetUsage => 'Uso del Presupuesto';
 
   @override
-  String get unbudgetedCategoriesNotice =>
-      'Algunas categorías no tienen presupuesto asignado';
+  String get unbudgetedCategoriesNotice => 'Algunas categorías no tienen presupuesto asignado';
 
   @override
   String get incomes => 'Ingresos';
@@ -166,15 +162,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get categoryFood => 'Comida';
 
   @override
-  String get categoryFoodDescription =>
-      'Gastos relacionados con alimentos y restaurantes';
+  String get categoryFoodDescription => 'Gastos relacionados con alimentos y restaurantes';
 
   @override
   String get categoryEntertainment => 'Entretenimiento';
 
   @override
-  String get categoryEntertainmentDescription =>
-      'Costos de ocio y actividades divertidas';
+  String get categoryEntertainmentDescription => 'Costos de ocio y actividades divertidas';
 
   @override
   String get categorySalary => 'Salario';
@@ -192,8 +186,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get categoryHealth => 'Salud';
 
   @override
-  String get categoryHealthDescription =>
-      'Gastos relacionados con la salud y servicios médicos';
+  String get categoryHealthDescription => 'Gastos relacionados con la salud y servicios médicos';
 
   @override
   String get financeSection => 'Finanzas';
@@ -250,8 +243,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importBackup => 'Importar copia de seguridad';
 
   @override
-  String get exportBackupStatement =>
-      'Copia de seguridad exportada al archivo.';
+  String get exportBackupStatement => 'Copia de seguridad exportada al archivo.';
 
   @override
   String get importBackupStatement => 'Copia de seguridad importada con éxito.';
@@ -293,12 +285,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get monthly => 'Mensual';
 
   @override
-  String get currencyUpdateDateLoading =>
-      'Cargando la fecha de actualización de las tasas de cambio...';
+  String get currencyUpdateDateLoading => 'Cargando la fecha de actualización de las tasas de cambio...';
 
   @override
-  String get currencyUpdateDateError =>
-      'Error al obtener la fecha de actualización de las tasas de cambio';
+  String get currencyUpdateDateError => 'Error al obtener la fecha de actualización de las tasas de cambio';
 
   @override
   String currencyUpdateDateValue(Object date) {
@@ -306,8 +296,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get currencyUpdateDateNone =>
-      'No hay fecha guardada de actualización de las tasas de cambio';
+  String get currencyUpdateDateNone => 'No hay fecha guardada de actualización de las tasas de cambio';
 
   @override
   String get noTransactions => 'No hay transacciones guardadas';
@@ -316,12 +305,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get repeatInterval => 'Intervalo de repetición';
 
   @override
-  String get pleaseAddCategoriesFirst =>
-      'Por favor, agregue categorías primero';
+  String get pleaseAddCategoriesFirst => 'Por favor, agregue categorías primero';
 
   @override
-  String get pleaseWaitLoadingCategories =>
-      'Por favor espere, cargando categorías...';
+  String get pleaseWaitLoadingCategories => 'Por favor espere, cargando categorías...';
 
   @override
   String get noDataToSend => 'No hay datos para enviar';

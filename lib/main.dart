@@ -17,8 +17,6 @@ import 'package:sqflite/sqflite.dart' hide Transaction;
 import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
 import 'blocs/currency_conversion/currency_conversion_bloc.dart';
-import 'blocs/currency_conversion/currency_conversion_event.dart';
-import 'blocs/currency_conversion/currency_conversion_state.dart';
 import 'blocs/transaction/transaction_bloc.dart';
 import 'data/db/database_helper.dart';
 import 'data/repositories/category_repository.dart';

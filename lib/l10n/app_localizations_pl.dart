@@ -72,12 +72,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get deleteTransaction => 'Usuń transakcję';
 
   @override
-  String get deleteCategoryConfirmation =>
-      'Czy na pewno chcesz usunąć tę kategorię?';
+  String get deleteCategoryConfirmation => 'Czy na pewno chcesz usunąć tę kategorię?';
 
   @override
-  String get deleteTransactionConfirmation =>
-      'Czy na pewno chcesz usunąć tę trsansakcję?';
+  String get deleteTransactionConfirmation => 'Czy na pewno chcesz usunąć tę trsansakcję?';
 
   @override
   String get cancel => 'Anuluj';
@@ -98,8 +96,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get budgetUsage => 'Wykorzystanie Budżetu';
 
   @override
-  String get unbudgetedCategoriesNotice =>
-      'Niektóre kategorie nie mają ustawionego budżetu';
+  String get unbudgetedCategoriesNotice => 'Niektóre kategorie nie mają ustawionego budżetu';
 
   @override
   String get incomes => 'Przychody';
@@ -150,8 +147,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get errorWhileLoadingCategories => 'Błąd podczas ładowania kategorii';
 
   @override
-  String get errorWhileLoadingTransactions =>
-      'Błąd podczas ładowania transakcji';
+  String get errorWhileLoadingTransactions => 'Błąd podczas ładowania transakcji';
 
   @override
   String get chooseCategory => 'Wybierz kategorię';
@@ -166,22 +162,19 @@ class AppLocalizationsPl extends AppLocalizations {
   String get categoryFood => 'Jedzenie';
 
   @override
-  String get categoryFoodDescription =>
-      'Wydatki związane z jedzeniem i posiłkami';
+  String get categoryFoodDescription => 'Wydatki związane z jedzeniem i posiłkami';
 
   @override
   String get categoryEntertainment => 'Rozrywka';
 
   @override
-  String get categoryEntertainmentDescription =>
-      'Koszty związane z czasem wolnym i zabawą';
+  String get categoryEntertainmentDescription => 'Koszty związane z czasem wolnym i zabawą';
 
   @override
   String get categorySalary => 'Wynagrodzenie';
 
   @override
-  String get categorySalaryDescription =>
-      'Twoje miesięczne lub okresowe dochody';
+  String get categorySalaryDescription => 'Twoje miesięczne lub okresowe dochody';
 
   @override
   String get categoryTravel => 'Podróże';
@@ -193,8 +186,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get categoryHealth => 'Zdrowie';
 
   @override
-  String get categoryHealthDescription =>
-      'Wydatki związane ze zdrowiem i usługami medycznymi';
+  String get categoryHealthDescription => 'Wydatki związane ze zdrowiem i usługami medycznymi';
 
   @override
   String get financeSection => 'Finanse';
@@ -251,12 +243,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get importBackup => 'Import kopii zapasowej';
 
   @override
-  String get exportBackupStatement =>
-      'Kopia zapasowa została utworzona pomyślnie';
+  String get exportBackupStatement => 'Kopia zapasowa została utworzona pomyślnie';
 
   @override
-  String get importBackupStatement =>
-      'Kopia zapasowa została zaimportowana pomyślnie';
+  String get importBackupStatement => 'Kopia zapasowa została zaimportowana pomyślnie';
 
   @override
   String get exportBackupError => 'Problem z eksportem kopii zapasowej';
@@ -295,12 +285,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get monthly => 'Co miesiąc';
 
   @override
-  String get currencyUpdateDateLoading =>
-      'Pobieranie daty aktualizacji kursów walut...';
+  String get currencyUpdateDateLoading => 'Pobieranie daty aktualizacji kursów walut...';
 
   @override
-  String get currencyUpdateDateError =>
-      'Błąd podczas pobierania daty aktualizacji kursów walut';
+  String get currencyUpdateDateError => 'Błąd podczas pobierania daty aktualizacji kursów walut';
 
   @override
   String currencyUpdateDateValue(Object date) {
@@ -308,8 +296,7 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get currencyUpdateDateNone =>
-      'Brak zapisanej daty aktualizacji kursów walut';
+  String get currencyUpdateDateNone => 'Brak zapisanej daty aktualizacji kursów walut';
 
   @override
   String get noTransactions => 'Brak zapisanych transakcji';
@@ -321,8 +308,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get pleaseAddCategoriesFirst => 'Proszę najpierw dodać kategorie';
 
   @override
-  String get pleaseWaitLoadingCategories =>
-      'Proszę zaczekać, trwa wczytywanie kategorii...';
+  String get pleaseWaitLoadingCategories => 'Proszę zaczekać, trwa wczytywanie kategorii...';
 
   @override
   String get noDataToSend => 'Brak danych do wysłania';

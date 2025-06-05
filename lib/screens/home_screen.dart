@@ -129,7 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     if (expenseCategories.isNotEmpty)
                       _buildChartSection(
-                        key: ValueKey(DateTime.now().millisecondsSinceEpoch + 2),
+                        key:
+                            ValueKey(DateTime.now().millisecondsSinceEpoch + 2),
                         title: AppLocalizations.of(context)!.expenses,
                         categories: expenseCategories,
                         totalSpent: state.totalExpenses,
@@ -173,8 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
       value: selectedMonth,
       icon: const Icon(Icons.arrow_drop_down),
       items: _availableMonths.map((monthDate) {
-        final formattedMonth =
-        DateFormat.yMMMM('pl_PL').format(monthDate);
+        final formattedMonth = DateFormat.yMMMM('pl_PL').format(monthDate);
         return DropdownMenuItem<DateTime>(
           value: monthDate,
           child: Text(formattedMonth),
@@ -195,9 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
     required String title,
     required List<Category> categories,
     required double totalSpent,
-    required double totalBudget, required Key key,
+    required double totalBudget,
+    required Key key,
   }) {
-
     if (categories.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -237,14 +237,22 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (ctx, currencyNotifier, _) {
               final currency = currencyNotifier.currency;
 
+              // Poprawione liczenie totalBudget
+              final totalBudget = categories.fold<double>(0.0, (sum, cat) {
+                final spent =
+                    _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
+                final budget = cat.convertedBudgetLimit;
+                return sum + (budget != null && budget > 0 ? budget : spent);
+              });
+
               final spentFormatted =
                   _formatWithCurrency(totalSpentThisMonth, currency);
               final budgetFormatted =
                   _formatWithCurrency(totalBudget, currency);
 
-              final percentage =
-                  (totalSpentThisMonth / (totalBudget == 0 ? 1 : totalBudget)) *
-                      100;
+              final percentage = totalBudget == 0
+                  ? 0.0
+                  : (totalSpentThisMonth / totalBudget) * 100.0;
 
               return Text(
                 '${AppLocalizations.of(context)!.total} $title: '
@@ -254,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-        ),
+        )
       ],
     );
   }
@@ -310,19 +318,25 @@ class _HomeScreenState extends State<HomeScreen> {
     final currency =
         Provider.of<CurrencyNotifier>(context, listen: true).currency;
 
+    final totalSpent = categories.fold<double>(0.0, (sum, cat) {
+      final spent = _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
+      return sum + spent;
+    });
+
     final pieChartData = PieChartData(
       sections: categories.map((cat) {
         final spent =
-        _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
-        final budget = cat.convertedBudgetLimit ?? 0;
-        final usagePercentage = (spent / (budget == 0 ? 1 : budget)) * 100;
+            _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
+        final percentageOfTotal =
+            totalSpent == 0 ? 0.0 : (spent / totalSpent) * 100.0;
 
         final spentFormatted = _formatWithCurrency(spent, currency);
 
         return PieChartSectionData(
-          value: usagePercentage,
-          title: '$spentFormatted\n(${usagePercentage.toStringAsFixed(2)}%)',
-          color: Colors.primaries[categories.indexOf(cat) % Colors.primaries.length],
+          value: percentageOfTotal.toDouble(),
+          title: '$spentFormatted\n(${percentageOfTotal.toStringAsFixed(1)}%)',
+          color: Colors
+              .primaries[categories.indexOf(cat) % Colors.primaries.length],
           radius: 60,
         );
       }).toList(),
@@ -343,6 +357,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return Consumer<CurrencyNotifier>(
       builder: (context, currencyNotifier, child) {
         final currency = currencyNotifier.currency;
+
+        final totalSpent = categories.fold<double>(0.0, (sum, cat) {
+          final spent =
+              _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
+          return sum + spent;
+        });
+
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
@@ -352,21 +373,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   .primaries[categories.indexOf(cat) % Colors.primaries.length];
 
               if (isBudget) {
-                final budget = cat.convertedBudgetLimit ?? 0;
+                final budget = cat.convertedBudgetLimit ?? 0.0;
                 final formattedBudget = _formatWithCurrency(budget, currency);
-
                 return _buildLegendRow(color, cat.name, formattedBudget);
               } else {
-                final spent = _spentInSelectedMonth(
-                  cat,
-                  selectedMonth,
-                  firstDayOfMonth,
-                );
+                final spent =
+                    _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
                 final spentFormatted = _formatWithCurrency(spent, currency);
 
-                final budget = cat.convertedBudgetLimit ?? 0;
-                final usagePct = (spent / (budget == 0 ? 1 : budget)) * 100;
-                final usageText = '${usagePct.toStringAsFixed(1)}%';
+                final percentageOfTotal =
+                    totalSpent == 0.0 ? 0.0 : (spent / totalSpent) * 100.0;
+                final usageText = '${percentageOfTotal.toStringAsFixed(1)}%';
 
                 final legendValue = '$spentFormatted ($usageText)';
 

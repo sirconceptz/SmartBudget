@@ -52,7 +52,7 @@ class CurrencyConversionBloc
 
       emit(CurrencyRatesLoaded(rates));
       _triggerCallbacks();
-    } catch (error, stack) {
+    } catch (error) {
       emit(CurrencyRatesError(error.toString()));
     }
   }

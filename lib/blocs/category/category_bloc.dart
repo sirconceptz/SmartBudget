@@ -138,7 +138,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         budgetIncomes: budgetIncomes,
         budgetExpenses: budgetExpenses,
       ));
-    } catch (e, stackTrace) {
+    } catch (e) {
       emit(CategoryError('Failed to load categories with spent amounts: $e'));
     }
   }

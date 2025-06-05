@@ -41,6 +41,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       hour: widget.transaction.date.hour,
       minute: widget.transaction.date.minute,
     );
+    _selectedCategory = widget.transaction.category;
     _selectedCurrency = widget.transaction.originalCurrency;
   }
 
