@@ -72,10 +72,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteTransaction => 'Delete transaction';
 
   @override
-  String get deleteCategoryConfirmation => 'Are you sure you want to delete this category?';
+  String get deleteCategoryConfirmation =>
+      'Are you sure you want to delete this category?';
 
   @override
-  String get deleteTransactionConfirmation => 'Are you sure you want to delete this transaction?';
+  String get deleteTransactionConfirmation =>
+      'Are you sure you want to delete this transaction?';
 
   @override
   String get cancel => 'Cancel';
@@ -147,7 +149,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorWhileLoadingCategories => 'Error while loading categories';
 
   @override
-  String get errorWhileLoadingTransactions => 'Error while loading transactions';
+  String get errorWhileLoadingTransactions =>
+      'Error while loading transactions';
 
   @override
   String get chooseCategory => 'Choose category';
@@ -168,7 +171,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryEntertainment => 'Entertainment';
 
   @override
-  String get categoryEntertainmentDescription => 'Costs for leisure and fun activities';
+  String get categoryEntertainmentDescription =>
+      'Costs for leisure and fun activities';
 
   @override
   String get categorySalary => 'Salary';
@@ -186,7 +190,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryHealth => 'Health';
 
   @override
-  String get categoryHealthDescription => 'Health-related expenses and services';
+  String get categoryHealthDescription =>
+      'Health-related expenses and services';
 
   @override
   String get financeSection => 'Finances';
@@ -285,10 +290,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monthly => 'Monthly';
 
   @override
-  String get currencyUpdateDateLoading => 'Loading currency rates update date...';
+  String get currencyUpdateDateLoading =>
+      'Loading currency rates update date...';
 
   @override
-  String get currencyUpdateDateError => 'Error while fetching currency rates update date';
+  String get currencyUpdateDateError =>
+      'Error while fetching currency rates update date';
 
   @override
   String currencyUpdateDateValue(Object date) {
@@ -308,7 +315,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseAddCategoriesFirst => 'Please add categories first';
 
   @override
-  String get pleaseWaitLoadingCategories => 'Please wait, loading categories...';
+  String get pleaseWaitLoadingCategories =>
+      'Please wait, loading categories...';
 
   @override
   String get noDataToSend => 'No data to send';

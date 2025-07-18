@@ -16,7 +16,7 @@ class CurrencyRepository {
   Future<List<CurrencyRate>> fetchCurrencyRates() async {
     try {
       final response = await httpClient.get(
-        Uri.parse("https://storage.googleapis.com/my-currency-data/rates.json"),
+        Uri.parse("http://57.128.214.106:3100/api/rates"),
       );
 
       if (response.statusCode == 200) {
