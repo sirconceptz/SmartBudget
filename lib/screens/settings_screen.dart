@@ -66,6 +66,9 @@ class SettingsScreenState extends State<SettingsScreen> {
     final financeNotifier = Provider.of<FinanceNotifier>(context);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.settings),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -240,7 +243,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                   ),
                   onTap: () async {
                     try {
-                      String filePath = await DatabaseHelper(databaseFactory: databaseFactory).exportDatabase();
+                      String filePath =
+                          await DatabaseHelper(databaseFactory: databaseFactory)
+                              .exportDatabase();
 
                       await Share.shareXFiles(
                         [XFile(filePath)],
@@ -274,7 +279,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                   ),
                   onTap: () async {
                     try {
-                      await DatabaseHelper(databaseFactory: databaseFactory).importDatabase();
+                      await DatabaseHelper(databaseFactory: databaseFactory)
+                          .importDatabase();
                       context.read<TransactionBloc>().add(LoadTransactions());
 
                       final dateRange = DateTimeRange(

@@ -113,6 +113,29 @@ class _HomeScreenState extends State<HomeScreen> {
               final incomeCategories = state.incomeCategories;
               final expenseCategories = state.expenseCategories;
 
+              // Całkowita suma wydana w tym miesiącu (dochody + wydatki)
+              double totalSpentThisMonth = 0.0;
+              for (final cat in [...incomeCategories, ...expenseCategories]) {
+                totalSpentThisMonth += _spentInSelectedMonth(
+                    cat, selectedMonth, firstDayOfMonth);
+              }
+
+              final bool hasNoCharts = totalSpentThisMonth == 0.0;
+
+              if (hasNoCharts) {
+                return Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.noChartsToDisplay,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }
+
+              // Są dane – pokazujemy scroll i wykresy
               final budgetIncomes = state.budgetIncomes;
               final budgetExpenses = state.budgetExpenses;
 
@@ -129,23 +152,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     if (expenseCategories.isNotEmpty)
                       _buildChartSection(
-                        key:
-                            ValueKey(DateTime.now().millisecondsSinceEpoch + 2),
+                        key: ValueKey(DateTime.now().millisecondsSinceEpoch + 2),
                         title: AppLocalizations.of(context)!.expenses,
                         categories: expenseCategories,
                         totalSpent: state.totalExpenses,
                         totalBudget: budgetExpenses,
-                      ),
-                    if (incomeCategories.isEmpty && expenseCategories.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          AppLocalizations.of(context)!.noChartsToDisplay,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
                       ),
                   ],
                 ),
@@ -153,9 +164,15 @@ class _HomeScreenState extends State<HomeScreen> {
             } else if (state is CategoryError) {
               return Center(child: Text(state.message));
             } else {
+              // fallback
               return Center(
                 child: Text(
                   AppLocalizations.of(context)!.noChartsToDisplay,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               );
             }
@@ -165,9 +182,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
   Widget _buildMonthDropdown() {
     if (_availableMonths.isEmpty) {
-      return Text(AppLocalizations.of(context)!.incomes);
+      return SizedBox();
     }
 
     return DropdownButton<DateTime>(
@@ -237,7 +255,6 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (ctx, currencyNotifier, _) {
               final currency = currencyNotifier.currency;
 
-              // Poprawione liczenie totalBudget
               final totalBudget = categories.fold<double>(0.0, (sum, cat) {
                 final spent =
                     _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);

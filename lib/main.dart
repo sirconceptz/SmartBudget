@@ -13,7 +13,7 @@ import 'package:smart_budget/screens/transaction/edit_transaction_screen.dart';
 import 'package:smart_budget/screens/transaction/transactions_screen.dart';
 import 'package:smart_budget/utils/recurring_transaction_manager.dart';
 import 'package:sqflite/sqflite.dart' hide Transaction;
-
+import 'utils/app_colors.dart';
 import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
 import 'blocs/currency_conversion/currency_conversion_bloc.dart';
@@ -29,6 +29,7 @@ import 'di/notifiers/theme_notifier.dart';
 import 'l10n/app_localizations.dart';
 import 'models/category.dart';
 import 'models/transaction.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,7 +78,148 @@ void main() async {
 class MyApp extends StatelessWidget {
   final DatabaseHelper dbHelper;
 
-  const MyApp({required this.dbHelper, super.key});
+  MyApp({required this.dbHelper, super.key});
+
+
+
+  final lightTheme = ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme(
+      brightness: Brightness.light,
+      primary: primaryColor,
+      onPrimary: Colors.white,
+      secondary: accentColor,
+      onSecondary: Colors.black,
+      background: backgroundColor,
+      onBackground: Colors.black,
+      surface: surfaceColor,
+      onSurface: Colors.black,
+      error: Colors.red,
+      onError: Colors.white,
+    ),
+    scaffoldBackgroundColor: backgroundColor,
+    cardColor: cardColor,
+    appBarTheme: AppBarTheme(
+      backgroundColor: primaryColor,
+      elevation: 0,
+      titleTextStyle: GoogleFonts.inter(
+        fontWeight: FontWeight.bold,
+        fontSize: 20,
+        color: Colors.white,
+        letterSpacing: 0.2,
+      ),
+      iconTheme: IconThemeData(color: Colors.white),
+    ),
+    cardTheme: CardThemeData(
+      color: cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      elevation: 4,
+      margin: EdgeInsets.all(8),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: surfaceColor,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: primaryColor,
+      unselectedItemColor: Colors.grey,
+      showUnselectedLabels: true,
+      backgroundColor: Colors.white,
+      elevation: 12,
+      type: BottomNavigationBarType.fixed,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: accentColor,
+      foregroundColor: Colors.black,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    textTheme: GoogleFonts.interTextTheme(), // nowoczesna czcionka!
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: primaryColor,
+      contentTextStyle: TextStyle(color: Colors.white),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      behavior: SnackBarBehavior.floating,
+    ),
+  );
+
+  final darkTheme = ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme(
+      brightness: Brightness.dark,
+      primary: darkPrimaryColor,
+      onPrimary: Colors.white,
+      secondary: darkAccentColor,
+      onSecondary: Colors.black,
+      background: darkBackgroundColor,
+      onBackground: Colors.white,
+      surface: darkSurfaceColor,
+      onSurface: Colors.white,
+      error: Colors.red,
+      onError: Colors.white,
+    ),
+    scaffoldBackgroundColor: darkBackgroundColor,
+    cardColor: darkCardColor,
+    appBarTheme: AppBarTheme(
+      backgroundColor: darkPrimaryColor,
+      elevation: 0,
+      titleTextStyle: GoogleFonts.inter(
+        fontWeight: FontWeight.bold,
+        fontSize: 20,
+        color: Colors.white,
+        letterSpacing: 0.2,
+      ),
+      iconTheme: IconThemeData(color: Colors.white),
+    ),
+    cardTheme: CardThemeData(
+      color: darkCardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      elevation: 4,
+      margin: EdgeInsets.all(8),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: darkSurfaceColor,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: darkAccentColor,
+      unselectedItemColor: Colors.grey,
+      showUnselectedLabels: true,
+      backgroundColor: darkCardColor,
+      elevation: 12,
+      type: BottomNavigationBarType.fixed,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: darkAccentColor,
+      foregroundColor: Colors.black,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: darkPrimaryColor,
+      contentTextStyle: TextStyle(color: Colors.white),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      behavior: SnackBarBehavior.floating,
+    ),
+  );
+
 
   @override
   Widget build(BuildContext context) {
@@ -90,24 +232,8 @@ class MyApp extends StatelessWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,
       locale: localeNotifier.locale,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.green.shade800, brightness: Brightness.light),
-        useMaterial3: true,
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          selectedItemColor: Colors.green.shade800,
-          unselectedItemColor: Colors.grey,
-        ),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.green.shade800, brightness: Brightness.dark),
-        useMaterial3: true,
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          selectedItemColor: Colors.green.shade800,
-          unselectedItemColor: Colors.grey,
-        ),
-      ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
       themeMode: themeNotifier.themeMode,
 
       routes: {

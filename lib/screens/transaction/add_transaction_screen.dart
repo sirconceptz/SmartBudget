@@ -154,6 +154,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   },
                   decoration: InputDecoration(labelText: 'Typ transakcji'),
                 ),
+                SizedBox(height: 16),
                 BlocBuilder<CategoryBloc, CategoryState>(
                   builder: (context, state) {
                     if (state is CategoriesLoading) {
@@ -193,6 +194,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     }
                   },
                 ),
+                SizedBox(height: 16),
                 TextFormField(
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
@@ -209,6 +211,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     _amount = double.parse(value!);
                   },
                 ),
+                SizedBox(height: 16),
                 TextFormField(
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.description,
@@ -217,6 +220,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     _description = value;
                   },
                 ),
+                SizedBox(height: 16),
                 DropdownButtonFormField<Currency>(
                   value: _selectedCurrency,
                   items: Currency.values.map((currency) {

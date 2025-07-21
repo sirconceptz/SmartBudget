@@ -18,6 +18,8 @@ class CategoryListScreen extends StatelessWidget {
     final currentCurrency = currencyNotifier.currency;
 
     return Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.categories)),
       body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
           if (state is CategoriesLoading) {

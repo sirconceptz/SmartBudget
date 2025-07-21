@@ -171,6 +171,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                 },
                 decoration: InputDecoration(labelText: 'Typ transakcji'),
               ),
+              SizedBox(height: 16),
               BlocBuilder<CategoryBloc, CategoryState>(
                 builder: (context, state) {
                   if (state is CategoriesLoading) {
@@ -214,6 +215,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                   }
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
                 initialValue: _amount.toString(),
                 keyboardType: TextInputType.number,
@@ -231,6 +233,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                   _amount = double.parse(value!);
                 },
               ),
+              SizedBox(height: 16),
               DropdownButtonFormField<Currency>(
                 value: _selectedCurrency,
                 items: Currency.values.map((currency) {
@@ -249,6 +252,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                   labelText: AppLocalizations.of(context)!.currency,
                 ),
               ),
+              SizedBox(height: 16),
               TextFormField(
                 initialValue: _description,
                 decoration: InputDecoration(
@@ -266,9 +270,9 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
                     children: [
                       Text(
                           '${AppLocalizations.of(context)!.date}: ${_selectedDate.toLocal()}'
-                              .split(' ')[0]),
+                              .split(' ')[0], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
                       Text(
-                          '${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}'),
+                          '${AppLocalizations.of(context)!.time}: ${_selectedTime.format(context)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     ],
                   ),
                   Column(

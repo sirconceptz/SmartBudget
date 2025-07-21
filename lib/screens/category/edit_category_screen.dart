@@ -145,6 +145,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                   _budgetLimit = double.tryParse(value!);
                 },
               ),
+              SizedBox(height: 16),
               DropdownButtonFormField<Currency>(
                 value: _selectedCurrency,
                 items: Currency.values.map((currency) {
