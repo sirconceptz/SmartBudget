@@ -34,7 +34,8 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
     _icon = widget.category.icon;
     _isIncome = widget.category.isIncome;
     _budgetLimit = widget.category.budgetLimit;
-    final defaultCurrency = Provider.of<CurrencyNotifier>(context, listen: false).currency;
+    final defaultCurrency =
+        Provider.of<CurrencyNotifier>(context, listen: false).currency;
 
     if (_budgetLimit == null || _budgetLimit == 0) {
       _selectedCurrency = defaultCurrency;
@@ -95,115 +96,130 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.editCategory),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.editCategory),
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Card(
+              elevation: 6,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24)),
+              color: Theme.of(context).colorScheme.surface,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
+                child: Form(
+                  key: _formKey,
+                  child: _buildFormContent(context),
+                ),
+              ),
+            ),
+          ),
+        ));
+  }
+
+  Widget _buildFormContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        TextFormField(
+          initialValue: _name,
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.name,
+            border: OutlineInputBorder(),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return AppLocalizations.of(context)!.giveCategoryName;
+            }
+            return null;
+          },
+          onSaved: (value) {
+            _name = value!;
+          },
+        ),
+        SizedBox(height: 16),
+        TextFormField(
+          initialValue: _description,
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.description,
+            border: OutlineInputBorder(),
+          ),
+          onSaved: (value) {
+            _description = value!;
+          },
+        ),
+        SizedBox(height: 16),
+        TextFormField(
+          initialValue: _budgetLimit?.toStringAsFixed(2),
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.budgetLimit,
+            border: OutlineInputBorder(),
+            suffixText: _selectedCurrency.sign,
+          ),
+          onSaved: (value) {
+            _budgetLimit = double.tryParse(value!);
+          },
+        ),
+        SizedBox(height: 16),
+        DropdownButtonFormField<Currency>(
+          value: _selectedCurrency,
+          items: Currency.values.map((currency) {
+            return DropdownMenuItem(
+              value: currency,
+              child:
+                  Text(currency.localizedName(AppLocalizations.of(context)!)),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedCurrency = value!;
+            });
+          },
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.currency,
+          ),
+        ),
+        SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(AppLocalizations.of(context)!.expenses),
+            Switch(
+              value: _isIncome,
+              onChanged: (value) {
+                setState(() {
+                  _isIncome = value;
+                });
+              },
+            ),
+            Text(AppLocalizations.of(context)!.incomes),
+          ],
+        ),
+        SizedBox(height: 24),
+        Center(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              TextFormField(
-                initialValue: _name,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.name,
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.giveCategoryName;
-                  }
-                  return null;
+              ElevatedButton.icon(
+                onPressed: () {
+                  _saveCategory(_selectedCurrency);
                 },
-                onSaved: (value) {
-                  _name = value!;
-                },
+                icon: Icon(Icons.save),
+                label: Text(AppLocalizations.of(context)!.saveChanges),
               ),
               SizedBox(height: 16),
-              TextFormField(
-                initialValue: _description,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.description,
-                  border: OutlineInputBorder(),
-                ),
-                onSaved: (value) {
-                  _description = value!;
-                },
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                initialValue: _budgetLimit?.toStringAsFixed(2),
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.budgetLimit,
-                  border: OutlineInputBorder(),
-                  suffixText: _selectedCurrency.sign,
-                ),
-                onSaved: (value) {
-                  _budgetLimit = double.tryParse(value!);
-                },
-              ),
-              SizedBox(height: 16),
-              DropdownButtonFormField<Currency>(
-                value: _selectedCurrency,
-                items: Currency.values.map((currency) {
-                  return DropdownMenuItem(
-                    value: currency,
-                    child: Text(
-                        currency.localizedName(AppLocalizations.of(context)!)),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCurrency = value!;
-                  });
-                },
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.currency,
-                ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(AppLocalizations.of(context)!.expenses),
-                  Switch(
-                    value: _isIncome,
-                    onChanged: (value) {
-                      setState(() {
-                        _isIncome = value;
-                      });
-                    },
-                  ),
-                  Text(AppLocalizations.of(context)!.incomes),
-                ],
-              ),
-              SizedBox(height: 24),
-              Center(
-                child: Column(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _saveCategory(_selectedCurrency);
-                      },
-                      icon: Icon(Icons.save),
-                      label: Text(AppLocalizations.of(context)!.saveChanges),
-                    ),
-                    SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: _deleteCategory,
-                      icon: Icon(Icons.delete),
-                      label: Text(AppLocalizations.of(context)!.deleteCategory),
-                    ),
-                  ],
-                ),
+              ElevatedButton.icon(
+                onPressed: _deleteCategory,
+                icon: Icon(Icons.delete),
+                label: Text(AppLocalizations.of(context)!.deleteCategory),
               ),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

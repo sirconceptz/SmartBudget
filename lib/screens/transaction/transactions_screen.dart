@@ -36,7 +36,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     context.read<TransactionBloc>().add(LoadTransactions());
   }
 
-
   @override
   Widget build(BuildContext context) {
     final currencyNotifier = Provider.of<CurrencyNotifier>(context);
@@ -89,79 +88,120 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               itemCount: transactions.length,
               itemBuilder: (context, index) {
                 final transaction = transactions[index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 5,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  child: ListTile(
-                    enableFeedback: true,
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      child: transaction.category?.icon != null
-                          ? Icon(
-                              IconData(
-                                transaction.category!.icon!,
-                                fontFamily: 'MaterialIcons',
+                final isExpense = transaction.isExpense == 1;
+                final mainColor = isExpense
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary;
+                final iconBg = mainColor.withOpacity(0.09);
+                final iconColor = mainColor;
+
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    color: Theme.of(context).colorScheme.surface,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(22),
+                      onTap: () async {
+                        await goToEditTransaction(context, transaction);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Ikona kategorii (kolorowy avatar)
+                            CircleAvatar(
+                              backgroundColor: iconBg,
+                              radius: 25,
+                              child: transaction.category?.icon != null
+                                  ? Icon(
+                                      IconData(
+                                        transaction.category!.icon!,
+                                        fontFamily: 'MaterialIcons',
+                                      ),
+                                      color: iconColor,
+                                      size: 28,
+                                    )
+                                  : Icon(
+                                      Icons.category,
+                                      color: iconColor,
+                                      size: 28,
+                                    ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Opis, data
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    transaction.description ?? '',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 17,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  if (transaction.category != null)
+                                    Text(
+                                      transaction.category!.name,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    DateFormat.yMMMMd('pl_PL')
+                                        .add_jm()
+                                        .format(transaction.date),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[500],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              color: transaction.isExpense == 1
-                                  ? Colors.green.shade800
-                                  : Colors.red.shade800,
-                            )
-                          : Icon(
-                              Icons.category,
-                              color: transaction.isExpense == 1
-                                  ? Colors.green.shade800
-                                  : Colors.red.shade800,
                             ),
-                    ),
-                    title: Text(
-                      transaction.description ?? '',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      DateFormat.yMMMMd('pl_PL')
-                          .add_jm()
-                          .format(transaction.date),
-                      style: const TextStyle(fontSize: 10),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          currentCurrency
-                                  .formatAmount(transaction.convertedAmount) ??
-                              "",
-                          style: TextStyle(
-                            color: transaction.isExpense == 1
-                                ? Colors.green.shade800
-                                : Colors.red.shade800,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
+                            // Kwota i strzałka
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  currentCurrency.formatAmount(
+                                          transaction.convertedAmount) ??
+                                      "",
+                                  style: TextStyle(
+                                    color: mainColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                if (transaction.originalAmount !=
+                                    transaction.convertedAmount)
+                                  Text(
+                                    "(${transaction.originalCurrency.formatAmount(transaction.originalAmount)})",
+                                    style: TextStyle(
+                                      color: Colors.grey[500],
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                Icon(Icons.chevron_right,
+                                    color: Colors.grey[400], size: 26),
+                              ],
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 4),
-                        if (transaction.originalAmount !=
-                            transaction.convertedAmount)
-                          Text(
-                            "(${transaction.originalCurrency.formatAmount(transaction.originalAmount)})",
-                            style: TextStyle(
-                              color: transaction.isExpense == 1
-                                  ? Colors.green.shade800
-                                  : Colors.red.shade800,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 8,
-                            ),
-                          ),
-                        IconButton(
-                          icon: Icon(Icons.chevron_right, color: Colors.white),
-                          onPressed: () async {
-                            await goToEditTransaction(context, transaction);
-                          },
-                        )
-                      ],
+                      ),
                     ),
                   ),
                 );
@@ -373,7 +413,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
   }
 
-  Future<void> goToEditTransaction(BuildContext context, Transaction transaction) async {
+  Future<void> goToEditTransaction(
+      BuildContext context, Transaction transaction) async {
     await Navigator.pushNamed(
       context,
       '/editTransaction',

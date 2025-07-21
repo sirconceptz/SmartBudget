@@ -113,29 +113,46 @@ class _HomeScreenState extends State<HomeScreen> {
               final incomeCategories = state.incomeCategories;
               final expenseCategories = state.expenseCategories;
 
-              // Całkowita suma wydana w tym miesiącu (dochody + wydatki)
               double totalSpentThisMonth = 0.0;
               for (final cat in [...incomeCategories, ...expenseCategories]) {
-                totalSpentThisMonth += _spentInSelectedMonth(
-                    cat, selectedMonth, firstDayOfMonth);
+                totalSpentThisMonth +=
+                    _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
               }
 
               final bool hasNoCharts = totalSpentThisMonth == 0.0;
 
               if (hasNoCharts) {
                 return Center(
-                  child: Text(
-                    AppLocalizations.of(context)!.noChartsToDisplay,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24)),
+                    color: Theme.of(context).colorScheme.surface,
+                    elevation: 6,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 28.0, vertical: 28),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.insert_chart_outlined_rounded,
+                              size: 40, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          Text(
+                            AppLocalizations.of(context)!.noChartsToDisplay,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 );
               }
 
-              // Są dane – pokazujemy scroll i wykresy
               final budgetIncomes = state.budgetIncomes;
               final budgetExpenses = state.budgetExpenses;
 
@@ -152,7 +169,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     if (expenseCategories.isNotEmpty)
                       _buildChartSection(
-                        key: ValueKey(DateTime.now().millisecondsSinceEpoch + 2),
+                        key:
+                            ValueKey(DateTime.now().millisecondsSinceEpoch + 2),
                         title: AppLocalizations.of(context)!.expenses,
                         categories: expenseCategories,
                         totalSpent: state.totalExpenses,
@@ -182,30 +200,38 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
   Widget _buildMonthDropdown() {
-    if (_availableMonths.isEmpty) {
-      return SizedBox();
-    }
+    if (_availableMonths.isEmpty) return const SizedBox();
 
-    return DropdownButton<DateTime>(
-      value: selectedMonth,
-      icon: const Icon(Icons.arrow_drop_down),
-      items: _availableMonths.map((monthDate) {
-        final formattedMonth = DateFormat.yMMMM('pl_PL').format(monthDate);
-        return DropdownMenuItem<DateTime>(
-          value: monthDate,
-          child: Text(formattedMonth),
-        );
-      }).toList(),
-      onChanged: (newMonth) {
-        if (newMonth != null) {
-          setState(() {
-            selectedMonth = newMonth;
-          });
-          _loadCategoriesForSelectedMonth();
-        }
-      },
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<DateTime>(
+          value: selectedMonth,
+          icon: const Icon(Icons.arrow_drop_down),
+          borderRadius: BorderRadius.circular(16),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          items: _availableMonths.map((monthDate) {
+            final formattedMonth = DateFormat.yMMMM('pl_PL').format(monthDate);
+            return DropdownMenuItem<DateTime>(
+              value: monthDate,
+              child: Text(formattedMonth),
+            );
+          }).toList(),
+          onChanged: (newMonth) {
+            if (newMonth != null) {
+              setState(() {
+                selectedMonth = newMonth;
+              });
+              _loadCategoriesForSelectedMonth();
+            }
+          },
+        ),
+      ),
     );
   }
 
@@ -232,55 +258,74 @@ class _HomeScreenState extends State<HomeScreen> {
           sum + _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth),
     );
 
-    return Column(
-      key: key,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 6,
+        color: Theme.of(context).colorScheme.surface,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
+          child: Column(
+            key: key,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    title == AppLocalizations.of(context)!.incomes
+                        ? Icons.trending_up_rounded
+                        : Icons.trending_down_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              _buildChartTitle(
+                  AppLocalizations.of(context)!.budgetDistribution),
+              _buildBudgetPieChart(categories, totalBudget),
+              _buildLegend(categories, isBudget: true),
+              const SizedBox(height: 16),
+              _buildChartTitle(AppLocalizations.of(context)!.budgetUsage),
+              _buildUsagePieChart(categories),
+              _buildLegend(categories, isBudget: false),
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: Consumer<CurrencyNotifier>(
+                  builder: (ctx, currencyNotifier, _) {
+                    final currency = currencyNotifier.currency;
+                    final spentFormatted =
+                        _formatWithCurrency(totalSpentThisMonth, currency);
+                    final budgetFormatted =
+                        _formatWithCurrency(totalBudget, currency);
+                    final percentage = totalBudget == 0
+                        ? 0.0
+                        : (totalSpentThisMonth / totalBudget) * 100.0;
+
+                    return Text(
+                      '${AppLocalizations.of(context)!.total} $title: '
+                      '$spentFormatted / $budgetFormatted '
+                      '(${percentage.toStringAsFixed(1)}%)',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    );
+                  },
+                ),
+              )
+            ],
           ),
         ),
-        _buildChartTitle(AppLocalizations.of(context)!.budgetDistribution),
-        _buildBudgetPieChart(categories, totalBudget),
-        _buildLegend(categories, isBudget: true),
-        const SizedBox(height: 16),
-        _buildChartTitle(AppLocalizations.of(context)!.budgetUsage),
-        _buildUsagePieChart(categories),
-        _buildLegend(categories, isBudget: false),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Consumer<CurrencyNotifier>(
-            builder: (ctx, currencyNotifier, _) {
-              final currency = currencyNotifier.currency;
-
-              final totalBudget = categories.fold<double>(0.0, (sum, cat) {
-                final spent =
-                    _spentInSelectedMonth(cat, selectedMonth, firstDayOfMonth);
-                final budget = cat.convertedBudgetLimit;
-                return sum + (budget != null && budget > 0 ? budget : spent);
-              });
-
-              final spentFormatted =
-                  _formatWithCurrency(totalSpentThisMonth, currency);
-              final budgetFormatted =
-                  _formatWithCurrency(totalBudget, currency);
-
-              final percentage = totalBudget == 0
-                  ? 0.0
-                  : (totalSpentThisMonth / totalBudget) * 100.0;
-
-              return Text(
-                '${AppLocalizations.of(context)!.total} $title: '
-                '$spentFormatted / $budgetFormatted '
-                '(${percentage.toStringAsFixed(1)}%)',
-                style: const TextStyle(fontSize: 16),
-              );
-            },
-          ),
-        )
-      ],
+      ),
     );
   }
 

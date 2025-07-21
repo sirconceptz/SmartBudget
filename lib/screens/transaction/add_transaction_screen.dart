@@ -130,191 +130,206 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                DropdownButtonFormField<String>(
-                  enableFeedback: true,
-                  value: _type,
-                  items: [
-                    AppLocalizations.of(context)!.income,
-                    AppLocalizations.of(context)!.expense
-                  ].map((type) {
-                    return DropdownMenuItem(
-                      value: type,
-                      child: Text(type),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _type = value!;
-                      _selectedCategory = null;
-                    });
-                  },
-                  decoration: InputDecoration(labelText: 'Typ transakcji'),
-                ),
-                SizedBox(height: 16),
-                BlocBuilder<CategoryBloc, CategoryState>(
-                  builder: (context, state) {
-                    if (state is CategoriesLoading) {
-                      return const CircularProgressIndicator();
-                    } else if (state is CategoriesWithSpentAmountsLoaded) {
-                      final categories = state.allCategories
-                          .where((category) =>
-                              (_type == AppLocalizations.of(context)!.income
-                                  ? category.isIncome
-                                  : !category.isIncome))
-                          .toList();
+          child: Card(
+            elevation: 6,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            color: Theme.of(context).colorScheme.surface,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      enableFeedback: true,
+                      value: _type,
+                      items: [
+                        AppLocalizations.of(context)!.income,
+                        AppLocalizations.of(context)!.expense
+                      ].map((type) {
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Text(type),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _type = value!;
+                          _selectedCategory = null;
+                        });
+                      },
+                      decoration: InputDecoration(labelText: 'Typ transakcji'),
+                    ),
+                    SizedBox(height: 16),
+                    BlocBuilder<CategoryBloc, CategoryState>(
+                      builder: (context, state) {
+                        if (state is CategoriesLoading) {
+                          return const CircularProgressIndicator();
+                        } else if (state is CategoriesWithSpentAmountsLoaded) {
+                          final categories = state.allCategories
+                              .where((category) =>
+                                  (_type == AppLocalizations.of(context)!.income
+                                      ? category.isIncome
+                                      : !category.isIncome))
+                              .toList();
 
-                      return DropdownButtonFormField<Category>(
-                        enableFeedback: true,
-                        value: _selectedCategory,
-                        items: categories.map((category) {
+                          return DropdownButtonFormField<Category>(
+                            enableFeedback: true,
+                            value: _selectedCategory,
+                            items: categories.map((category) {
+                              return DropdownMenuItem(
+                                value: category,
+                                child: Text(category.name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedCategory = value!;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)!.category,
+                            ),
+                            validator: (value) => value == null
+                                ? AppLocalizations.of(context)!.chooseCategory
+                                : null,
+                          );
+                        } else {
+                          return Text(AppLocalizations.of(context)!
+                              .errorWhileLoadingCategories);
+                        }
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    TextFormField(
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.amount,
+                        suffixText: currentCurrency.name,
+                      ),
+                      validator: (value) {
+                        if (value == null || double.tryParse(value) == null) {
+                          return AppLocalizations.of(context)!
+                              .giveCorrectAmount;
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _amount = double.parse(value!);
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.description,
+                      ),
+                      onSaved: (value) {
+                        _description = value;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    DropdownButtonFormField<Currency>(
+                      value: _selectedCurrency,
+                      items: Currency.values.map((currency) {
+                        return DropdownMenuItem(
+                          value: currency,
+                          child: Text(
+                            currency.localizedName(
+                              AppLocalizations.of(context)!,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCurrency = value!;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.currency,
+                      ),
+                    ),
+                    CheckboxListTile(
+                        value: isRecurringTransaction,
+                        onChanged: (newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              isRecurringTransaction = newValue;
+                            });
+                          }
+                        }),
+                    if (isRecurringTransaction) ...[
+                      DropdownButtonFormField<RepeatInterval>(
+                        value: _repeatInterval,
+                        items: RepeatInterval.values.map((interval) {
                           return DropdownMenuItem(
-                            value: category,
-                            child: Text(category.name),
+                            value: interval,
+                            child: Text(interval.localizedName(context)),
                           );
                         }).toList(),
                         onChanged: (value) {
                           setState(() {
-                            _selectedCategory = value!;
+                            _repeatInterval = value!;
                           });
                         },
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.category,
+                          labelText:
+                              AppLocalizations.of(context)!.repeatInterval,
                         ),
-                        validator: (value) => value == null
-                            ? AppLocalizations.of(context)!.chooseCategory
-                            : null,
-                      );
-                    } else {
-                      return Text(AppLocalizations.of(context)!
-                          .errorWhileLoadingCategories);
-                    }
-                  },
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.amount,
-                    suffixText: currentCurrency.name,
-                  ),
-                  validator: (value) {
-                    if (value == null || double.tryParse(value) == null) {
-                      return AppLocalizations.of(context)!.giveCorrectAmount;
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _amount = double.parse(value!);
-                  },
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.description,
-                  ),
-                  onSaved: (value) {
-                    _description = value;
-                  },
-                ),
-                SizedBox(height: 16),
-                DropdownButtonFormField<Currency>(
-                  value: _selectedCurrency,
-                  items: Currency.values.map((currency) {
-                    return DropdownMenuItem(
-                      value: currency,
-                      child: Text(
-                        currency.localizedName(
-                          AppLocalizations.of(context)!,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCurrency = value!;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.currency,
-                  ),
-                ),
-                CheckboxListTile(
-                    value: isRecurringTransaction,
-                    onChanged: (newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          isRecurringTransaction = newValue;
-                        });
-                      }
-                    }),
-                if (isRecurringTransaction) ...[
-                  DropdownButtonFormField<RepeatInterval>(
-                    value: _repeatInterval,
-                    items: RepeatInterval.values.map((interval) {
-                      return DropdownMenuItem(
-                        value: interval,
-                        child: Text(interval.localizedName(context)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _repeatInterval = value!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.repeatInterval,
-                    ),
-                  )
-                ],
-                const SizedBox(height: 20),
-                Table(
-                  columnWidths: {
-                    0: IntrinsicColumnWidth(),
-                    1: FlexColumnWidth(),
-                    2: IntrinsicColumnWidth(),
-                  },
-                  children: [
-                    TableRow(
+                      )
+                    ],
+                    const SizedBox(height: 20),
+                    Table(
+                      columnWidths: {
+                        0: IntrinsicColumnWidth(),
+                        1: FlexColumnWidth(),
+                        2: IntrinsicColumnWidth(),
+                      },
                       children: [
-                        Text('${AppLocalizations.of(context)!.date}: ',
-                            style: TextStyle(fontSize: 16)),
-                        Text(
-                          DateFormat.yMd("pl_PL").format(_selectedDate),
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                        TableRow(
+                          children: [
+                            Text('${AppLocalizations.of(context)!.date}: ',
+                                style: TextStyle(fontSize: 16)),
+                            Text(
+                              DateFormat.yMd("pl_PL").format(_selectedDate),
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            TextButton(
+                              onPressed: _pickDate,
+                              child: Text(
+                                  AppLocalizations.of(context)!.chooseDate),
+                            ),
+                          ],
                         ),
-                        TextButton(
-                          onPressed: _pickDate,
-                          child: Text(AppLocalizations.of(context)!.chooseDate),
+                        TableRow(
+                          children: [
+                            Text('${AppLocalizations.of(context)!.time}: ',
+                                style: TextStyle(fontSize: 16)),
+                            Text(_selectedTime.format(context),
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
+                            TextButton(
+                              onPressed: _pickTime,
+                              child: Text(
+                                  AppLocalizations.of(context)!.chooseTime),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    TableRow(
-                      children: [
-                        Text('${AppLocalizations.of(context)!.time}: ',
-                            style: TextStyle(fontSize: 16)),
-                        Text(_selectedTime.format(context),
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                        TextButton(
-                          onPressed: _pickTime,
-                          child: Text(AppLocalizations.of(context)!.chooseTime),
-                        ),
-                      ],
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed:
+                          _selectedCurrency != null ? _saveTransaction : null,
+                      child:
+                          Text(AppLocalizations.of(context)!.saveTransaction),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed:
-                      _selectedCurrency != null ? _saveTransaction : null,
-                  child: Text(AppLocalizations.of(context)!.saveTransaction),
-                ),
-              ],
+              ),
             ),
           ),
         ),

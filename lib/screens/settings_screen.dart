@@ -72,12 +72,14 @@ class SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.appSection,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+          Row(
+            children: [
+              Icon(Icons.settings,
+                  color: Theme.of(context).colorScheme.primary),
+              SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.appSection,
+                  style: Theme.of(context).textTheme.headlineSmall),
+            ],
           ),
           SettingRow<Currency>(
             icon: Icons.attach_money,
@@ -138,32 +140,29 @@ class SettingsScreenState extends State<SettingsScreen> {
               }
             },
           ),
-          ListTile(
-            title: Text(
-              AppLocalizations.of(context)!.sendApplicationLog,
-              softWrap: true,
-              maxLines: 3,
-              textAlign: TextAlign.start,
-            ),
-            onTap: () async {
-              String? uri = await MyLogger().getFileUri();
-              if (uri != null) {
-                sendLogs(context, uri);
-              } else {
-                if (context.mounted) {
-                  Toast.show(
-                      context, AppLocalizations.of(context)!.noDataToSend);
+          FilledButton.icon(
+              icon: Icon(Icons.send, color: Colors.green),
+              label: Text(AppLocalizations.of(context)!.sendApplicationLog),
+              onPressed: () async {
+                String? uri = await MyLogger().getFileUri();
+                if (uri != null) {
+                  sendLogs(context, uri);
+                } else {
+                  if (context.mounted) {
+                    Toast.show(
+                        context, AppLocalizations.of(context)!.noDataToSend);
+                  }
                 }
-              }
-            },
-          ),
+              }),
           const Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.financeSection,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+          Row(
+            children: [
+              Icon(Icons.attach_money,
+                  color: Theme.of(context).colorScheme.primary),
+              SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.financeSection,
+                  style: Theme.of(context).textTheme.headlineSmall),
+            ],
           ),
           SettingRow<int>(
             icon: Icons.calendar_today,
@@ -220,90 +219,84 @@ class SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.backupSection,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 16.0),
-                InkWell(
-                  child: Row(
-                    children: [
-                      Icon(Icons.download),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          AppLocalizations.of(context)!.exportBackup,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                    ],
-                  ),
-                  onTap: () async {
-                    try {
-                      String filePath =
-                          await DatabaseHelper(databaseFactory: databaseFactory)
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18)),
+              elevation: 3,
+              color: Theme.of(context).colorScheme.surface,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.backupSection,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16.0),
+                    FilledButton.icon(
+                      icon: Icon(Icons.download, color: Colors.green),
+                      label: Text(AppLocalizations.of(context)!.exportBackup),
+                      onPressed: () async {
+                        try {
+                          String filePath = await DatabaseHelper(
+                                  databaseFactory: databaseFactory)
                               .exportDatabase();
 
-                      await Share.shareXFiles(
-                        [XFile(filePath)],
-                        subject:
-                            AppLocalizations.of(context)!.backup_file_title,
-                        text: AppLocalizations.of(context)!.backup_file_text,
-                      );
+                          await Share.shareXFiles(
+                            [XFile(filePath)],
+                            subject:
+                                AppLocalizations.of(context)!.backup_file_title,
+                            text:
+                                AppLocalizations.of(context)!.backup_file_text,
+                          );
 
-                      Toast.show(context,
-                          AppLocalizations.of(context)!.exportBackupStatement);
-                    } catch (e) {
-                      MyLogger.write("BACKUP - EXPORT", e.toString());
-                      Toast.show(context,
-                          AppLocalizations.of(context)!.exportBackupError);
-                    }
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                InkWell(
-                  child: Row(
-                    children: [
-                      Icon(Icons.upload),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          AppLocalizations.of(context)!.importBackup,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                    ],
-                  ),
-                  onTap: () async {
-                    try {
-                      await DatabaseHelper(databaseFactory: databaseFactory)
-                          .importDatabase();
-                      context.read<TransactionBloc>().add(LoadTransactions());
+                          Toast.show(
+                              context,
+                              AppLocalizations.of(context)!
+                                  .exportBackupStatement);
+                        } catch (e) {
+                          MyLogger.write("BACKUP - EXPORT", e.toString());
+                          Toast.show(context,
+                              AppLocalizations.of(context)!.exportBackupError);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      icon: Icon(Icons.upload, color: Colors.blue),
+                      label: Text(AppLocalizations.of(context)!.importBackup),
+                      onPressed: () async {
+                        try {
+                          await DatabaseHelper(databaseFactory: databaseFactory)
+                              .importDatabase();
+                          context
+                              .read<TransactionBloc>()
+                              .add(LoadTransactions());
 
-                      final dateRange = DateTimeRange(
-                        start: DateTime.now().subtract(Duration(days: 30)),
-                        end: DateTime.now(),
-                      );
-                      context
-                          .read<CategoryBloc>()
-                          .add(LoadCategoriesWithSpentAmounts(dateRange));
-                      ScaffoldMessenger.of(context).clearSnackBars();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text(AppLocalizations.of(context)!
-                                .importBackupStatement)),
-                      );
-                    } catch (E) {
-                      MyLogger.write("BACKUP - IMPORT", E.toString());
-                      Toast.show(context,
-                          AppLocalizations.of(context)!.importBackupError);
-                    }
-                  },
+                          final dateRange = DateTimeRange(
+                            start: DateTime.now().subtract(Duration(days: 30)),
+                            end: DateTime.now(),
+                          );
+                          context
+                              .read<CategoryBloc>()
+                              .add(LoadCategoriesWithSpentAmounts(dateRange));
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .importBackupStatement)),
+                          );
+                        } catch (E) {
+                          MyLogger.write("BACKUP - IMPORT", E.toString());
+                          Toast.show(context,
+                              AppLocalizations.of(context)!.importBackupError);
+                        }
+                      },
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ],
