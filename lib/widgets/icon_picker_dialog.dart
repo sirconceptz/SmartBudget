@@ -1,24 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../utils/available_icons.dart';
 
 class IconPickerDialog extends StatelessWidget {
-  final List<IconData> availableIcons = [
-    Icons.shopping_cart,
-    Icons.fastfood,
-    Icons.house,
-    Icons.car_rental,
-    Icons.baby_changing_station,
-    Icons.health_and_safety,
-    Icons.fitness_center,
-    Icons.flight,
-    Icons.music_note,
-    Icons.movie,
-    Icons.school,
-    Icons.attach_money,
-  ];
-
-  IconPickerDialog({super.key});
+  const IconPickerDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +25,7 @@ class IconPickerDialog extends StatelessWidget {
             return IconButton(
               icon: Icon(icon),
               onPressed: () {
-                Navigator.of(context).pop(icon);
+                Navigator.of(context).pop(index); // <- zwraca index
               },
             );
           },

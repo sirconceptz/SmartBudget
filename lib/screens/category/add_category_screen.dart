@@ -8,6 +8,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
 import '../../utils/enums/currency.dart';
 import '../../widgets/icon_picker_dialog.dart';
+import '../../utils/available_icons.dart'; // <- dodaj import!
 
 class AddCategoryScreen extends StatefulWidget {
   const AddCategoryScreen({super.key});
@@ -22,7 +23,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   String _description = '';
   double? _budgetLimit;
   bool _isIncome = false;
-  IconData? _selectedIcon;
+  int? _selectedIconIndex;
   Currency? _selectedCurrency;
 
   @override
@@ -33,13 +34,13 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   }
 
   void _selectIcon() async {
-    final selectedIcon = await showDialog<IconData>(
+    final selectedIconIndex = await showDialog<int>(
       context: context,
-      builder: (context) => IconPickerDialog(),
+      builder: (context) => const IconPickerDialog(),
     );
-    if (selectedIcon != null) {
+    if (selectedIconIndex != null) {
       setState(() {
-        _selectedIcon = selectedIcon;
+        _selectedIconIndex = selectedIconIndex;
       });
     }
   }
@@ -51,13 +52,12 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       final newCategory = Category(
         name: _name,
         description: _description,
-        icon: _selectedIcon?.codePoint,
+        icon: _selectedIconIndex, // <-- zapisujesz index!
         isIncome: _isIncome,
         budgetLimit: _budgetLimit,
         currency: _selectedCurrency!,
       );
       context.read<CategoryBloc>().add(AddCategory(newCategory));
-
       Navigator.pop(context, true);
     }
   }
@@ -78,7 +78,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               color: Theme.of(context).colorScheme.surface,
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
                 child: Form(
                   key: _formKey,
                   child: _buildFormContent(context),
@@ -94,7 +94,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       children: [
         TextFormField(
           decoration:
-              InputDecoration(labelText: AppLocalizations.of(context)!.name),
+          InputDecoration(labelText: AppLocalizations.of(context)!.name),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return AppLocalizations.of(context)!.giveCategoryName;
@@ -128,7 +128,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             return DropdownMenuItem(
               value: currency,
               child:
-                  Text(currency.localizedName(AppLocalizations.of(context)!)),
+              Text(currency.localizedName(AppLocalizations.of(context)!)),
             );
           }).toList(),
           onChanged: (value) {
@@ -140,9 +140,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             labelText: AppLocalizations.of(context)!.currency,
           ),
         ),
-        const SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
         InkWell(
             onTap: _selectIcon,
             child: Row(
@@ -152,14 +150,12 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   AppLocalizations.of(context)!.chooseIcon,
                   style: TextStyle(fontSize: 16),
                 ),
-                _selectedIcon != null
-                    ? Icon(_selectedIcon)
+                _selectedIconIndex != null
+                    ? Icon(availableIcons[_selectedIconIndex!])
                     : Icon(Icons.category),
               ],
             )),
-        const SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

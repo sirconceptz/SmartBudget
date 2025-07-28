@@ -7,6 +7,8 @@ import '../../di/notifiers/currency_notifier.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
 import '../../utils/enums/currency.dart';
+import '../../utils/available_icons.dart'; // <-- Dodaj ten import!
+import '../../widgets/icon_picker_dialog.dart';
 
 class EditCategoryScreen extends StatefulWidget {
   final Category category;
@@ -59,7 +61,6 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
       );
 
       context.read<CategoryBloc>().add(UpdateCategory(updatedCategory));
-
       Navigator.pop(context, true);
     }
   }
@@ -93,31 +94,44 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
     }
   }
 
+  Future<void> _pickIcon() async {
+    final selectedIconIndex = await showDialog<int>(
+      context: context,
+      builder: (context) => const IconPickerDialog(),
+    );
+    if (selectedIconIndex != null) {
+      setState(() {
+        _icon = selectedIconIndex;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.editCategory),
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24)),
-              color: Theme.of(context).colorScheme.surface,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
-                child: Form(
-                  key: _formKey,
-                  child: _buildFormContent(context),
-                ),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.editCategory),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 6,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24)),
+            color: Theme.of(context).colorScheme.surface,
+            child: Padding(
+              padding:
+              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
+              child: Form(
+                key: _formKey,
+                child: _buildFormContent(context),
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget _buildFormContent(BuildContext context) {
@@ -171,7 +185,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
             return DropdownMenuItem(
               value: currency,
               child:
-                  Text(currency.localizedName(AppLocalizations.of(context)!)),
+              Text(currency.localizedName(AppLocalizations.of(context)!)),
             );
           }).toList(),
           onChanged: (value) {
@@ -198,6 +212,23 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
             ),
             Text(AppLocalizations.of(context)!.incomes),
           ],
+        ),
+        SizedBox(height: 16),
+        // Wybór ikony:
+        InkWell(
+          onTap: _pickIcon,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.chooseIcon,
+                style: TextStyle(fontSize: 16),
+              ),
+              _icon != null
+                  ? Icon(availableIcons[_icon!])
+                  : Icon(Icons.category),
+            ],
+          ),
         ),
         SizedBox(height: 24),
         Center(

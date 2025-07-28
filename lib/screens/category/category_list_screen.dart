@@ -8,6 +8,7 @@ import '../../blocs/category/category_state.dart';
 import '../../di/notifiers/currency_notifier.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
+import '../../utils/available_icons.dart';
 
 class CategoryListScreen extends StatelessWidget {
   const CategoryListScreen({super.key});
@@ -56,16 +57,13 @@ class CategoryListScreen extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Kolorowy akcent/ikona
                             CircleAvatar(
                               backgroundColor: iconBg,
                               radius: 26,
-                              child: category.icon != null
+                              child: category.icon != null &&
+                                      category.icon! < availableIcons.length
                                   ? Icon(
-                                      IconData(
-                                        category.icon!,
-                                        fontFamily: 'MaterialIcons',
-                                      ),
+                                      availableIcons[category.icon!],
                                       color: iconColor,
                                       size: 28,
                                     )
@@ -73,7 +71,6 @@ class CategoryListScreen extends StatelessWidget {
                                       color: iconColor, size: 28),
                             ),
                             const SizedBox(width: 14),
-                            // Nazwa i opis
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

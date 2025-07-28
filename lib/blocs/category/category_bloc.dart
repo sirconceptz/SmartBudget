@@ -7,6 +7,7 @@ import '../../blocs/currency_conversion/currency_conversion_bloc.dart';
 import '../../di/notifiers/currency_notifier.dart';
 import '../../models/category.dart';
 import '../../models/monthly_spent.dart';
+import '../../utils/available_icons.dart';
 import '../../utils/custom_date_time_range.dart';
 import '../currency_conversion/currency_conversion_state.dart';
 import 'category_event.dart';
@@ -219,39 +220,40 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         {
           'id': 1,
           'name': event.localizations.categoryFood,
-          'icon': Icons.fastfood.codePoint,
+          'icon': availableIcons.indexOf(Icons.fastfood),
           'description': event.localizations.categoryFoodDescription,
           'is_income': 0,
         },
         {
           'id': 2,
           'name': event.localizations.categoryEntertainment,
-          'icon': Icons.movie.codePoint,
+          'icon': availableIcons.indexOf(Icons.movie),
           'description': event.localizations.categoryEntertainmentDescription,
           'is_income': 0,
         },
         {
           'id': 3,
           'name': event.localizations.categorySalary,
-          'icon': Icons.attach_money.codePoint,
+          'icon': availableIcons.indexOf(Icons.attach_money),
           'description': event.localizations.categorySalaryDescription,
           'is_income': 1,
         },
         {
           'id': 4,
           'name': event.localizations.categoryHealth,
-          'icon': Icons.health_and_safety.codePoint,
+          'icon': availableIcons.indexOf(Icons.health_and_safety),
           'description': event.localizations.categoryHealthDescription,
           'is_income': 0,
         },
         {
           'id': 5,
           'name': event.localizations.categoryTravel,
-          'icon': Icons.flight.codePoint,
+          'icon': availableIcons.indexOf(Icons.flight),
           'description': event.localizations.categoryTravelDescription,
           'is_income': 0,
         },
       ];
+
       for (final categoryData in predefinedCategories) {
         final category = Category(
           id: categoryData['id'] as int,

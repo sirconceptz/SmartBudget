@@ -13,6 +13,7 @@ import '../../blocs/transaction/transaction_state.dart';
 import '../../di/notifiers/currency_notifier.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
+import '../../utils/available_icons.dart';
 import '../../utils/toast.dart';
 
 class TransactionsScreen extends StatefulWidget {
@@ -115,27 +116,20 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Ikona kategorii (kolorowy avatar)
                             CircleAvatar(
                               backgroundColor: iconBg,
-                              radius: 25,
-                              child: transaction.category?.icon != null
+                              radius: 26,
+                              child: transaction.category?.icon != null &&
+                                  transaction.category!.icon! < availableIcons.length
                                   ? Icon(
-                                      IconData(
-                                        transaction.category!.icon!,
-                                        fontFamily: 'MaterialIcons',
-                                      ),
-                                      color: iconColor,
-                                      size: 28,
-                                    )
-                                  : Icon(
-                                      Icons.category,
-                                      color: iconColor,
-                                      size: 28,
-                                    ),
+                                availableIcons[transaction.category!.icon!],
+                                color: iconColor,
+                                size: 28,
+                              )
+                                  : Icon(Icons.category,
+                                  color: iconColor, size: 28),
                             ),
                             const SizedBox(width: 16),
-                            // Opis, data
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +165,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                 ],
                               ),
                             ),
-                            // Kwota i strzałka
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
