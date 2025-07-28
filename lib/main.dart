@@ -52,7 +52,12 @@ void main() async {
             create: (_) => getIt<CurrencyConversionBloc>(),
           ),
           BlocProvider<CategoryBloc>(
-            create: (_) => getIt<CategoryBloc>(),
+            create: (context) => CategoryBloc(
+              getIt<CategoryRepository>(),
+              context.read<CurrencyConversionBloc>(),
+              context.read<CurrencyNotifier>(),
+              context.read<FinanceNotifier>(),
+            ),
           ),
           BlocProvider<TransactionBloc>(
             create: (context) => TransactionBloc(
@@ -61,7 +66,7 @@ void main() async {
               context.read<CategoryBloc>(),
               getIt<CategoryRepository>(),
               context.read<CurrencyConversionBloc>(),
-              getIt<CurrencyNotifier>(),
+              context.read<CurrencyNotifier>(),
             ),
           ),
         ],
@@ -79,8 +84,6 @@ class MyApp extends StatelessWidget {
   final DatabaseHelper dbHelper;
 
   MyApp({required this.dbHelper, super.key});
-
-
 
   final lightTheme = ThemeData(
     useMaterial3: true,
@@ -142,7 +145,7 @@ class MyApp extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
     ),
-    textTheme: GoogleFonts.interTextTheme(), // nowoczesna czcionka!
+    textTheme: GoogleFonts.interTextTheme(),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: primaryColor,
       contentTextStyle: TextStyle(color: Colors.white),
