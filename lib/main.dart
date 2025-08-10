@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +14,7 @@ import 'package:smart_budget/screens/transaction/edit_transaction_screen.dart';
 import 'package:smart_budget/screens/transaction/transactions_screen.dart';
 import 'package:smart_budget/utils/recurring_transaction_manager.dart';
 import 'package:sqflite/sqflite.dart' hide Transaction;
-import 'utils/app_colors.dart';
+
 import 'blocs/category/category_bloc.dart';
 import 'blocs/category/category_event.dart';
 import 'blocs/currency_conversion/currency_conversion_bloc.dart';
@@ -29,7 +30,7 @@ import 'di/notifiers/theme_notifier.dart';
 import 'l10n/app_localizations.dart';
 import 'models/category.dart';
 import 'models/transaction.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'utils/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -223,7 +224,6 @@ class MyApp extends StatelessWidget {
     ),
   );
 
-
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
@@ -238,36 +238,37 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeNotifier.themeMode,
-
       routes: {
         '/': (context) => FutureBuilder<void>(
-          future: _initializeRecurringTransactions(context),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            } else if (snapshot.hasError) {
-              return Scaffold(
-                body: Center(child: Text('Błąd inicjalizacji: ${snapshot.error}')),
-              );
-            } else {
-              final localizations = AppLocalizations.of(context);
-              if (localizations != null) {
-                updateLocalizedCategoriesIfNeeded(context, localizations);
-              }
-              return MainScreen();
-            }
-          },
-        ),
+              future: _initializeRecurringTransactions(context),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                } else if (snapshot.hasError) {
+                  return Scaffold(
+                    body: Center(
+                        child: Text('Błąd inicjalizacji: ${snapshot.error}')),
+                  );
+                } else {
+                  final localizations = AppLocalizations.of(context);
+                  if (localizations != null) {
+                    updateLocalizedCategoriesIfNeeded(context, localizations);
+                  }
+                  return MainScreen();
+                }
+              },
+            ),
         '/addTransaction': (context) => AddTransactionScreen(),
         '/addCategory': (context) => AddCategoryScreen(),
         '/editTransaction': (context) => EditTransactionScreen(
-          transaction: ModalRoute.of(context)!.settings.arguments as Transaction,
-        ),
+              transaction:
+                  ModalRoute.of(context)!.settings.arguments as Transaction,
+            ),
         '/editCategory': (context) => EditCategoryScreen(
-          category: ModalRoute.of(context)!.settings.arguments as Category,
-        ),
+              category: ModalRoute.of(context)!.settings.arguments as Category,
+            ),
         '/settings': (context) => SettingsScreen(),
         '/transactions': (context) => TransactionsScreen(),
       },

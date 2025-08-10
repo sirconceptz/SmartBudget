@@ -10,18 +10,21 @@ class CurrencyRatesLoading extends CurrencyConversionState {}
 
 class CurrencyRatesLoaded extends CurrencyConversionState {
   final List<CurrencyRate> rates;
+  final bool fromCache;
+  final bool isStale;
 
-  CurrencyRatesLoaded(this.rates);
+  CurrencyRatesLoaded(this.rates,
+      {this.fromCache = false, this.isStale = false});
 
   @override
   List<Object?> get props => [rates];
 }
 
 class CurrencyRatesError extends CurrencyConversionState {
-  final String error;
+  final String message;
 
-  CurrencyRatesError(this.error);
+  CurrencyRatesError(this.message);
 
   @override
-  List<Object?> get props => [error];
+  List<Object?> get props => [message];
 }

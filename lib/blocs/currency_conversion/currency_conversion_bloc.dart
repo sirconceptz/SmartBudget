@@ -16,6 +16,7 @@ class CurrencyConversionBloc
 
   CurrencyConversionBloc(this.repository) : super(CurrencyRatesLoading()) {
     on<LoadCurrencyRates>(_onLoadCurrencyRates);
+    on<BackgroundRefreshCurrencyRates>(_onBackgroundRefreshCurrencyRates);
   }
 
   void registerOnCurrencyRatesLoadedCallback(VoidCallback callback) {
@@ -27,33 +28,71 @@ class CurrencyConversionBloc
   }
 
   Future<void> _onLoadCurrencyRates(
-      LoadCurrencyRates event,
-      Emitter<CurrencyConversionState> emit,
-      ) async {
+    LoadCurrencyRates event,
+    Emitter<CurrencyConversionState> emit,
+  ) async {
     try {
       emit(CurrencyRatesLoading());
 
       final lastUpdated = await _getLastUpdatedTimestamp();
-      final currentTime = DateTime.now();
+      final now = DateTime.now();
+      final isFresh =
+          lastUpdated != null && now.difference(lastUpdated).inHours < 24;
 
-      if (lastUpdated != null &&
-          currentTime.difference(lastUpdated).inHours < 24) {
-        final cachedRates = await _getCachedCurrencyRates();
-        if (cachedRates != null) {
-          emit(CurrencyRatesLoaded(cachedRates));
-          _triggerCallbacks();
-          return;
-        }
+      final cached = await _getCachedCurrencyRates();
+      if (cached != null) {
+        emit(CurrencyRatesLoaded(cached, fromCache: true, isStale: !isFresh));
+        _triggerCallbacks();
+
+        add(BackgroundRefreshCurrencyRates(attempts: 2));
+        return;
       }
 
-      final rates = await repository.fetchCurrencyRates();
-      await _cacheCurrencyRates(rates);
-      await _setLastUpdatedTimestamp(currentTime);
-
-      emit(CurrencyRatesLoaded(rates));
+      final fresh = await _fetchWithRetry(maxAttempts: 3);
+      await _cacheCurrencyRates(fresh);
+      await _setLastUpdatedTimestamp(now);
+      emit(CurrencyRatesLoaded(fresh));
       _triggerCallbacks();
     } catch (error) {
       emit(CurrencyRatesError(error.toString()));
+    }
+  }
+
+  Future<void> _onBackgroundRefreshCurrencyRates(
+    BackgroundRefreshCurrencyRates event,
+    Emitter<CurrencyConversionState> emit,
+  ) async {
+    try {
+      final rates = await _fetchWithRetry(maxAttempts: event.attempts);
+      final now = DateTime.now();
+      await _cacheCurrencyRates(rates);
+      await _setLastUpdatedTimestamp(now);
+
+      emit(CurrencyRatesLoaded(rates, fromCache: false, isStale: false));
+      _triggerCallbacks();
+    } catch (_) {}
+  }
+
+  Future<List<CurrencyRate>> _fetchWithRetry({
+    int maxAttempts = 3,
+    Duration initialDelay = const Duration(seconds: 2),
+    Duration perAttemptTimeout = const Duration(seconds: 5),
+  }) async {
+    assert(maxAttempts > 0);
+    var attempt = 0;
+    var delay = initialDelay;
+
+    while (true) {
+      attempt++;
+      try {
+        final data =
+            await repository.fetchCurrencyRates().timeout(perAttemptTimeout);
+        return data;
+      } catch (e) {
+        if (attempt >= maxAttempts) rethrow;
+        await Future.delayed(delay);
+        delay *= 2;
+      }
     }
   }
 

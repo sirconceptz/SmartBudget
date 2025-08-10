@@ -37,6 +37,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     };
     currencyNotifier.addListener(_currencyChangeListener!);
   }
+
   int retryCount = 0;
 
   Future<void> _onLoadCategoriesWithSpentAmounts(
