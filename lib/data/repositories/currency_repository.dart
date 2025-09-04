@@ -16,7 +16,7 @@ class CurrencyRepository {
   Future<List<CurrencyRate>> fetchCurrencyRates() async {
     try {
       final response = await httpClient.get(
-        Uri.parse("http://57.128.225.173:3100/api/rates"),
+        Uri.parse("http://57.128.225.173:3101/api/rates"),
       );
 
       if (response.statusCode == 200) {
