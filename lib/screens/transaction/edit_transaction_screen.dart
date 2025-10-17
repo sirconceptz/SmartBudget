@@ -240,9 +240,14 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
             labelText: AppLocalizations.of(context)!.amount,
             suffixText: _selectedCurrency.sign,
           ),
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: (value) {
             if (value == null || double.tryParse(value) == null) {
               return AppLocalizations.of(context)!.giveCorrectAmount;
+            }
+            final parsed = double.parse(value);
+            if (parsed <= 0) {
+              return "Must be greater than zero";
             }
             return null;
           },
@@ -275,8 +280,15 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
           decoration: InputDecoration(
             labelText: AppLocalizations.of(context)!.description,
           ),
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return AppLocalizations.of(context)!.description;
+            }
+            return null;
+          },
           onSaved: (value) {
-            _description = value;
+            _description = value!.trim();
           },
         ),
         Row(

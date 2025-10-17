@@ -211,8 +211,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       ),
                       validator: (value) {
                         if (value == null || double.tryParse(value) == null) {
-                          return AppLocalizations.of(context)!
-                              .giveCorrectAmount;
+                          return AppLocalizations.of(context)!.giveCorrectAmount;
+                        }
+                        final parsedValue = double.parse(value);
+                        if (parsedValue <= 0) {
+                          return "Must be greater than zero";
                         }
                         return null;
                       },

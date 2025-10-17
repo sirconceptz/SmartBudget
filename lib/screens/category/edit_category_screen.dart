@@ -117,12 +117,12 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Card(
             elevation: 6,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             color: Theme.of(context).colorScheme.surface,
             child: Padding(
               padding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
               child: Form(
                 key: _formKey,
                 child: _buildFormContent(context),
@@ -167,15 +167,30 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
         ),
         SizedBox(height: 16),
         TextFormField(
-          initialValue: _budgetLimit?.toStringAsFixed(2),
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             labelText: AppLocalizations.of(context)!.budgetLimit,
-            border: OutlineInputBorder(),
             suffixText: _selectedCurrency.sign,
           ),
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return AppLocalizations.of(context)!.giveCorrectAmount;
+            }
+
+            final parsed = double.tryParse(value);
+            if (parsed == null) {
+              return AppLocalizations.of(context)!.giveCorrectAmount;
+            }
+
+            if (parsed <= 0) {
+              return "Must be greater than zero";
+            }
+
+            return null;
+          },
           onSaved: (value) {
-            _budgetLimit = double.tryParse(value!);
+            _budgetLimit = double.parse(value!);
           },
         ),
         SizedBox(height: 16),
@@ -185,7 +200,7 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
             return DropdownMenuItem(
               value: currency,
               child:
-              Text(currency.localizedName(AppLocalizations.of(context)!)),
+                  Text(currency.localizedName(AppLocalizations.of(context)!)),
             );
           }).toList(),
           onChanged: (value) {

@@ -78,7 +78,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               color: Theme.of(context).colorScheme.surface,
               child: Padding(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
                 child: Form(
                   key: _formKey,
                   child: _buildFormContent(context),
@@ -94,7 +94,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       children: [
         TextFormField(
           decoration:
-          InputDecoration(labelText: AppLocalizations.of(context)!.name),
+              InputDecoration(labelText: AppLocalizations.of(context)!.name),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return AppLocalizations.of(context)!.giveCategoryName;
@@ -118,8 +118,25 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             labelText: AppLocalizations.of(context)!.budgetLimit,
             suffixText: _selectedCurrency?.sign,
           ),
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return AppLocalizations.of(context)!.giveCorrectAmount;
+            }
+
+            final parsed = double.tryParse(value);
+            if (parsed == null) {
+              return AppLocalizations.of(context)!.giveCorrectAmount;
+            }
+
+            if (parsed <= 0) {
+              return "Must be greater than zero";
+            }
+
+            return null;
+          },
           onSaved: (value) {
-            _budgetLimit = double.tryParse(value!);
+            _budgetLimit = double.parse(value!);
           },
         ),
         DropdownButtonFormField<Currency>(
@@ -128,7 +145,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             return DropdownMenuItem(
               value: currency,
               child:
-              Text(currency.localizedName(AppLocalizations.of(context)!)),
+                  Text(currency.localizedName(AppLocalizations.of(context)!)),
             );
           }).toList(),
           onChanged: (value) {
