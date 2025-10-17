@@ -225,8 +225,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context)!.description,
                       ),
+                      textInputAction: TextInputAction.done,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return AppLocalizations.of(context)!.description;
+                        }
+                        return null;
+                      },
                       onSaved: (value) {
-                        _description = value;
+                        _description = value!.trim();
                       },
                     ),
                     SizedBox(height: 16),
